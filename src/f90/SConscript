@@ -5,7 +5,11 @@ bn = os.path.basename
 
 Import( "env" )
 
-lib_env = env.Clone()
+lib_env = env.Clone(F90PATH='#/build-scons/src/f90',
+                    FORTRAN='gfortran', LINK='gfortran',
+                    FORTRANMODDIR = '${TARGET.dir}',
+
+                    )
 
 #lib_env.EnableQt4Modules(['QtCore','QtOpenGL', 'QtGui'])
 
@@ -20,12 +24,28 @@ if lib_env['compiler'] == 'mingw':
 #includes= lib_env.ALEAGlob('*.h')
 sources = lib_env.ALEAGlob('*.f90')
 
+objs = env.Object(sources)
 
 
 # Add defines to export symbols on Windows
 #lib_env.AppendUnique(CPPDEFINES=['MESSAGE'])
 #lib_env.AppendUnique(LIBS=[''])
 
-lib = lib_env.ALEALibrary( 'pyratp', sources )
+lib = lib_env.ALEALibrary( 'pyratp', objs )
 
 #exe = lib_env.ALEAProgram('pyratp', 'main.cpp', LIBS='pyratp')
+
+#
+# Add an action to move any module files
+#
+
+
+def moveModFiles(target=None, source=None, env=None):
+    import glob, os, os.path
+    targetdir = target[0].dir
+    for t in target:
+        if t.name[-4:] == '.mod':
+            os.rename(t.name,os.path.join(str(targetdir),t.name))
+
+env.AddPostAction(objs, moveModFiles)
+
