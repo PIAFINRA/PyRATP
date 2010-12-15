@@ -11,7 +11,7 @@ pj = os.path.join
 SConsignFile()
 
 options = Variables(['../options.py', 'options.py'], ARGUMENTS)
-tools = ['']
+tools = ['f2py']
 
 env = ALEASolution(options, tools)
 

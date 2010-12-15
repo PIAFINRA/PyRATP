@@ -1,7 +1,9 @@
 # -*-python-*-
 
 import os
+import subprocess
 bn = os.path.basename
+abspath = os.path.abspath
 
 Import( "env" )
 
@@ -11,21 +13,54 @@ lib_env = env.Clone(F90PATH='#/build-scons/src/f90',
                     ENV={'PATH' : os.environ['PATH']},
                     )
 
-sources = lib_env.ALEAGlob('*.f90')
+sources = Split("""
+pyratp.pyf
+mod_Cocnstant_ValuesF2PY.f90 
+mod_Grid3DF2PY.f90 
+mod_SkyvaultF2PY.f90 
+mod_Vegetation_TypesF2PY.f90 
+mod_Dir_InterceptionF2PY.f90 
+mod_Hemi_InterceptionF2PY.f90 
+mod_MicrometeoF2PY.f90 
+mod_Shortwave_BalanceF2PY.f90 
+mod_Energy_BalanceF2PY.f90 
+mod_PhotosynthesisF2PY.f90 
+mod_MinerPhenoF2PY.f90 
+prog_RATP.f90
+""")
 
-objs = env.Object(sources)
-
-
-
-lib = lib_env.ALEALibrary( 'pyratp', objs )
-
+#objs = env.Object(sources)
+#wrapper_src = env.F2py('pyRATP_module.c', sources)
+#lib = lib_env.ALEAWrapper( 'pyratp', sources+wrapper_src )
 #exe = lib_env.ALEAProgram('pyratp', 'main.cpp', LIBS='pyratp')
+
+
+def f2py_builder(target=None, source=None, env=None):
+    my_sources = [abspath(str(f)) for f in source]
+    mydir = os.getcwd()
+    os.chdir(str(target[0].dir))
+    f2py_cmd = ['f2py', '-c', '--fcompiler=%s'%(lib_env['FORTRAN'])]+my_sources
+    p = subprocess.Popen(" ".join(f2py_cmd), shell = True, 
+                          stdout = subprocess.PIPE)
+    for i in p.stdout.readlines():
+        print i.rstrip('\n')
+    print target[0].dir
+    os.chdir(mydir)
+    _dir='#/src/alinea/pyratp'
+    print str(_dir)
+    Alias('build',lib_env.Install(_dir,str(target[0].dir)+'/pyratp.so'))
+    return p.wait()
+
+
+bld = Builder(action= f2py_builder)
+lib_env.Append(BUILDERS={'MyF2py':bld})
+
+Alias('build',lib_env.MyF2py('pyratp',sources))
 
 #
 # Add an action to move any module files
 #
-
-
+"""
 def moveModFiles(target=None, source=None, env=None):
     import glob, os, os.path
     targetdir = target[0].dir
@@ -34,4 +69,4 @@ def moveModFiles(target=None, source=None, env=None):
             os.rename(t.name,os.path.join(str(targetdir),t.name))
 
 env.AddPostAction(objs, moveModFiles)
-
+"""
