@@ -6,7 +6,7 @@
 """
 
 ##from alinea.pyratp import pyratp
-import options.py
+import pyRATP
 import numpy as np
 
 class Grid(object):
