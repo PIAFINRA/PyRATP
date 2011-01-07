@@ -5,7 +5,8 @@
 
 """
 
-from alinea.pyratp import pyratp
+##from alinea.pyratp import pyratp
+import options.py
 import numpy as np
 
 class Grid(object):
@@ -16,7 +17,7 @@ class Grid(object):
 
         """
         pass
-    
+
 
     @staticmethod
     def read(filename):
@@ -35,7 +36,7 @@ class Grid(object):
         # voxel size according to X- Y- and Z- axis
         # TEST
         _read(f, grid3d.dx, grid3d.dy, *grid3d.dz[:-1])
-    
+
         # 3D grid origin
         _read(f, grid3d.xorig, grid3d.yorig, grid3d.zorig)
 
@@ -91,10 +92,10 @@ class Grid(object):
         grid3d.leafareadensity= np.zeros(nent*nvegmax).reshape(nent, nvegmax)
         grid3d.n_detailed = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
         grid3d.nume = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
-        
+
         # Leaf area (m^2) per voxel and vegetation type
         grid3d.S_vt_vx =  np.zeros(nent*nvegmax).reshape(nent, nvegmax)
-        # Leaf area (m^2) per voxel 
+        # Leaf area (m^2) per voxel
         grid3d.s_vx = np.zeros(nvegmax)
         # Leaf area (m^2) per vegetation type
         grid3d.s_vt = np.zeros(nent)
@@ -137,7 +138,7 @@ class Grid(object):
 
         if zz.min() < 0.:
             raise ValueError('Some elements have a negative Z value.')
-        
+
         nft = entity.len()
         grid3d.n_canopy = (n*s).sum()
         grid3d.s_canopy = s.sum()
@@ -145,7 +146,7 @@ class Grid(object):
         # sum the surface of each element of the same entity
         for i in range(grid3d.nent):
             grid3d.s_vt[i] = s[entity==i].sum()
-        
+
         dx, dy = grid3d.dx, grid3d.dy
         # Compute the coord of each element in the grid.
         # modulo is used to build a toric scene.
@@ -158,7 +159,7 @@ class Grid(object):
             mask = zzz[i]<= z < zzz[i+1]
             jz[mask] = i
         # TO CONTINUE (line 318)
-        
+
 
 def vegestar(filename): pass
 
