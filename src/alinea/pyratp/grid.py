@@ -5,8 +5,8 @@
 
 """
 
-##from alinea.pyratp import pyratp
-import pyRATP
+from alinea.pyratp import pyratp
+#import pyRATP
 import numpy as np
 
 class Grid(object):
