@@ -38,39 +38,31 @@ prog_RATP.f90
 def f2py_builder(target=None, source=None, env=None):
     global sources
     my_sources = [abspath(str(f)) for f in source]
-    mydir = os.getcwd()
+    mydir = abspath(os.getcwd())
     os.chdir(str(target[0].dir))
-    print 'mydir ', mydir
     f2py_str = 'f2py.py' if os.name == 'nt' else 'f2py'
     if os.name == 'nt':
-      f2py_cmd = [f2py_str, '-c', '--compiler=%s'%('mingw'), '--fcompiler=gnu95']+sources
+      f2py_cmd = [f2py_str, '-c','--build-dir .', '--compiler=%s'%('mingw32',), '--fcompiler=gnu95']+sources
     else:
       f2py_cmd = [f2py_str, '-c', '--fcompiler=%s'%(lib_env['FORTRAN'])]+sources
-    print 'BEFORE F2PY'
-    print " ".join(f2py_cmd)
-    fi = open('f2py.txt', 'w')
-    fi.write(" ".join(f2py_cmd))
-    fi.close()
+    
     p = subprocess.Popen(" ".join(f2py_cmd), shell = True, 
                           stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     for i in p.stdout.readlines():
-        print 'F2PY: ', i.rstrip('\n')
+        print "F2PY: ", i.rstrip("\n")
     for i in p.stderr.readlines():
-        print 'F2PY: ', i.rstrip('\n')
-
-    print str(target[0].dir), str(target[0])
+        print "F2PY: ", i.rstrip("\n")
+    
     os.chdir(mydir)
-    _dir='#/src/alinea/pyratp'
-    print str(_dir)
-    ext='pyd' if os.name == 'nt' else 'so'
-    Alias('build',lib_env.Install(_dir,str(target[0].dir)+'/pyratp.%s'%ext))
-    return p.wait()
+    
 
-
-bld = Builder(action= f2py_builder)
+ext='pyd' if os.name == 'nt' else 'so'
+bld = Builder(action= f2py_builder, suffix=ext)
 lib_env.Append(BUILDERS={'MyF2py':bld})
 
-Alias('build',lib_env.MyF2py('pyratp',sources))
+bld = lib_env.MyF2py('pyratp',sources)
+Alias('build', bld)
+Alias('build',lib_env.Install('#/src/alinea/pyratp',bld))
 
 #
 # Add an action to move any module files
