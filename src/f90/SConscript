@@ -36,15 +36,16 @@ prog_RATP.f90
 
 
 def f2py_builder(target=None, source=None, env=None):
+    global sources
     my_sources = [abspath(str(f)) for f in source]
     mydir = os.getcwd()
     os.chdir(str(target[0].dir))
     print 'mydir ', mydir
     f2py_str = 'f2py.py' if os.name == 'nt' else 'f2py'
     if os.name == 'nt':
-      f2py_cmd = [f2py_str, '-c', '--compiler=%s'%('mingw'), '--fcompiler=gnu95']+my_sources
+      f2py_cmd = [f2py_str, '-c', '--compiler=%s'%('mingw'), '--fcompiler=gnu95']+sources
     else:
-      f2py_cmd = [f2py_str, '-c', '--fcompiler=%s'%(lib_env['FORTRAN'])]+my_sources
+      f2py_cmd = [f2py_str, '-c', '--fcompiler=%s'%(lib_env['FORTRAN'])]+sources
     print 'BEFORE F2PY'
     print " ".join(f2py_cmd)
     fi = open('f2py.txt', 'w')
@@ -61,7 +62,8 @@ def f2py_builder(target=None, source=None, env=None):
     os.chdir(mydir)
     _dir='#/src/alinea/pyratp'
     print str(_dir)
-    Alias('build',lib_env.Install(_dir,str(target[0].dir)+'/pyratp.so'))
+    ext='pyd' if os.name == 'nt' else 'so'
+    Alias('build',lib_env.Install(_dir,str(target[0].dir)+'/pyratp.%s'%ext))
     return p.wait()
 
 
