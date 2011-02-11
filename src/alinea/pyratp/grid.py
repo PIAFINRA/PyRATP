@@ -8,7 +8,7 @@
 from alinea.pyratp import pyratp
 #import pyRATP
 import numpy as np
-
+import vege3D
 class Grid(object):
     """
     """
@@ -103,9 +103,21 @@ class Grid(object):
         grid3d.volume_canopy = np.zeros(nent+1)
         grid3d.voxel_canopy = np.zeros(nent)
 
-    def fill(self, entity, x, y, z, s, n):
+    @staticmethod
+    def readVgx(filename):
         """ Filling the 3D Grid with points, area and nitrogen content.
 
+        :Parameters:
+            - `x`: an array of abscisse.
+            - .
+        """
+        tv,tx,ty,tz,ts,tn = vege3D.Vege3D.readVGX(filename)
+        print ty[5]
+
+    @staticmethod
+    def fill(entity, x, y, z, s, n):
+        """ Filling the 3D Grid with points, area and nitrogen content.
+        lkjfkjrzelkrjzelrkjzer
         :Parameters:
             - `x`: an array of abscisse.
             - .
@@ -132,36 +144,76 @@ class Grid(object):
 
         nft, k = 0, 0
 
-        xx -= grid3d.xorigin
-        yy -= grid3d.yorigin
-        zz -= grid3d.zorigin
-
-        if zz.min() < 0.:
-            raise ValueError('Some elements have a negative Z value.')
-
-        nft = entity.len()
+        nft = np.alen(entity)
         grid3d.n_canopy = (n*s).sum()
         grid3d.s_canopy = s.sum()
-
-        # sum the surface of each element of the same entity
+         # sum the surface of each element of the same entity
         for i in range(grid3d.nent):
             grid3d.s_vt[i] = s[entity==i].sum()
 
         dx, dy = grid3d.dx, grid3d.dy
-        # Compute the coord of each element in the grid.
-        # modulo is used to build a toric scene.
-        jx = np.array(x/dx, dtype=np.int)%njx
-        jy = np.array(y/dy, dtype=np.int)%njy
-        jz = np.zeros_like(z,dtype=np.int)
         zzz = grid3d.dz.cumsum()
-        jz = zzz.len()-1
-        for i in range(zzz.len()-1):
-            mask = zzz[i]<= z < zzz[i+1]
-            jz[mask] = i
-        # TO CONTINUE (line 318)
+
+        #dh: tableau des hauteurs z
+        dh = np.array(0)
+        for i in range(np.alen(dz)):
+            dh=np.append(dh,dz[:i].sum())
+        nb.delete(dh,0)
+
+        for i in range(np.alen(x)):
+            x[i] = x[i]/100 - grid3d.xorigin
+            y[i] = y[i]/100 - grid3d.yorigin
+            z[i] = -z[i]/100 + grid3d.zorigin
+
+            if z[i].min() < 0.:
+                raise ValueError('Some elements have a negative Z value.')
 
 
-def vegestar(filename): pass
+            # Compute the coord of each element in the grid.
+            # modulo is used to build a toric scene.
+            #------------------------------------------ Attention au decalage de 1--------------------------------
+            jx = int((x[i]/dx)%njx)+1
+            jy = int((y[i]/dy)%njy)+1
+            jz = np.alen(np.where(dh<z[i])[0])-1
+            jz = grid3d.njz-jz+1
+
+            # TO CONTINUE (line 318)
+         #Cas ou il n'y avait encore rien dans la cellule (jx,jy,jz)
+##            if grid3d.kxyz(jx,jy,jz)==0 :
+##                 k=k+1
+##                 grid3d.kxyz(jx,jy,jz)=k
+##                 grid3d.numx(k)=jx
+##                 grid3d.numy(k)=jy
+##                 grid3d.numz(k)=jz
+##                 grid3d.nje(k)=1
+##                 grid3d.nume(1,k)=jent
+##                 grid3d.leafareadensity(1,k)=s/(dx*dy*dz(jz))
+##                 grid3d.S_vt_vx(1,k)=s
+##                 grid3d.S_vx(k)=s
+##                 grid3d.N_detailed(1,k)=azot
+##            else:
+##              #    Cas ou il y avait deja quelque chose dans la cellule (jx,jy,jz)
+##              pass
+##                 kk=grid3d.kxyz(jx,jy,jz)
+##                 je=1
+####                 do while ((nume(je,kk).ne.jent).and.(je.le.nje(kk)))
+##                while (nume(je,kk)!= jent and je<=nje(kk)):
+##
+##                  je=je+1
+##                 end do
+##
+##                   leafareadensity(je,kk)=leafareadensity(je,kk)+s/(dx*dy*dz(jz))
+##                 N_detailed(je,kk)=(N_detailed(je,kk)*S_vt_vx(je,kk)+azot*s)/(S_vt_vx(je,kk)+s)
+##                 S_vt_vx(je,kk) = S_vt_vx(je,kk) + s
+##                 S_vx(kk) = S_vx(kk) + s
+##                 nje(kk)=max(je,nje(kk))
+##                 nemax=max(nemax,nje(kk))
+##                 nume(je,kk)=jent
+##                endif
+##               end if
+##              end do   ! End of file
+##              998 continue
+##  close (2)
 
 def _read(f, *args):
     print '_read (',args,')'
