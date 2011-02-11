@@ -17,7 +17,7 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['_118602512', '_146337616', '_147184400']
+__all__ = ['_118602512', '_146337616', '_147184400', 'vgx1']
 
 
 _118602512 = DataFactory(name='grid3Da_2004.grd',
@@ -41,4 +41,8 @@ _147184400 = DataFactory(name='mmeteo052000.mto',
                     )
 
 
-
+vgx1 = DataFactory(name='aa2004petit.vgx',
+                    description=' Vegetation and Nitrogen in a VegeStar format',
+                    editors=None,
+                    includes=None,
+                    )

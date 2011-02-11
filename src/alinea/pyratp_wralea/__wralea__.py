@@ -17,7 +17,7 @@ __institutes__ = None
 __icon__ = ''
 
 
-__all__ = ['read_grid_read_grid']
+__all__ = ['read_grid_read_grid', 'read_vgx_grid']
 
 
 
@@ -33,6 +33,14 @@ read_grid_read_grid = Factory(name='read grid',
                 widgetclass=None,
                )
 
+read_vgx_grid = Factory(name='grid from vegestar',
+                authors=' (wralea authors)',
+                category='simulation, ecophysiology',
+                nodemodule='ratp',
+                nodeclass='read_vgx',
+                inputs=[{'interface': IFileStr(filter='*.vgx'), 'name': 'filename', 'value': None, 'desc': 'Vegestar 3d Grid file'}],
+                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
+               )
 
 
 
