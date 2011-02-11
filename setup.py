@@ -36,6 +36,9 @@ package_dir = dict( [('',pkg_root_dir)] + [(namespace + "." + pkg, pkg_root_dir 
 
 # Define global variables 
 has_scons = True
+lib_dirs = None
+inc_dirs = None
+bin_dirs = None
 if has_scons:
     build_prefix = "build-scons"
     scons_scripts=['SConstruct']
@@ -45,9 +48,6 @@ if has_scons:
 else:
     build_prefix = None
     scons_scripts=None
-    lib_dirs = None
-    inc_dirs = None
-    bin_dirs = None
 
 # List of top level wralea packages (directories with __wralea__.py) 
 #wralea_entry_points = ['%s = %s'%(pkg,namespace + '.' + pkg) for pkg in top_pkgs]
