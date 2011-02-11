@@ -39,9 +39,9 @@ has_scons = True
 if has_scons:
     build_prefix = "build-scons"
     scons_scripts=['SConstruct']
-    lib_dirs = {'lib' : build_prefix+'/lib' }
-    inc_dirs = { 'include' : build_prefix+'/include' }
-    bin_dirs = { 'bin' : build_prefix+'/bin' }
+    #lib_dirs = {'lib' : build_prefix+'/lib' }
+    #inc_dirs = { 'include' : build_prefix+'/include' }
+    #bin_dirs = { 'bin' : build_prefix+'/bin' }
 else:
     build_prefix = None
     scons_scripts=None
