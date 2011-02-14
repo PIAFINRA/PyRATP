@@ -44,3 +44,14 @@ read_vgx_grid = Factory(name='grid from vegestar',
 
 
 
+fill_grid = Factory(name='fill grid',
+                authors=' (wralea authors)',
+                description='fill a RATP Grid with vegetation',
+                category='simulation, ecophysiology',
+                nodemodule='ratp',
+                nodeclass='fill_grid',
+                inputs=[{'interface': IFileStr(filter='*.grd'), 'name': 'filename', 'value': None, 'desc': '3d Grid file'}],
+                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
