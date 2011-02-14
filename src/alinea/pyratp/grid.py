@@ -114,6 +114,7 @@ class Grid(object):
         """
         tv,tx,ty,tz,ts,tn = vege3D.Vege3D.readVGX(filename)
         print ty[5]
+        return tv,tx,ty,tz,ts,tn
 
     @staticmethod
     def toto(entity, x, y, z, s, n):
