@@ -102,6 +102,7 @@ class Grid(object):
 
         grid3d.volume_canopy = np.zeros(nent+1)
         grid3d.voxel_canopy = np.zeros(nent)
+        return grid3d
 
     @staticmethod
     def readVgx(filename):
@@ -115,6 +116,17 @@ class Grid(object):
         print ty[5]
 
     @staticmethod
+    def toto(entity, x, y, z, s, n):
+        print 'entity',entity
+        print 'x',x
+        print 'y',y
+        print 'z',z
+        print 's',s
+        print 'n',n
+
+
+
+    @staticmethod
     def fill(entity, x, y, z, s, n):
         """ Filling the 3D Grid with points, area and nitrogen content.
         lkjfkjrzelkrjzelrkjzer
@@ -122,8 +134,9 @@ class Grid(object):
             - `x`: an array of abscisse.
             - .
         """
-
-        if entity.max() > grid3d.nent:
+        print "x",x
+        print entity.max()
+        if entity.max() >  grid3d.nent:
             raise ValueError('Number of entity is too great')
 
         if s.min() < 0.:
@@ -152,6 +165,7 @@ class Grid(object):
             grid3d.s_vt[i] = s[entity==i].sum()
 
         dx, dy = grid3d.dx, grid3d.dy
+
         zzz = grid3d.dz.cumsum()
 
         #dh: tableau des hauteurs z
