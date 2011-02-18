@@ -152,6 +152,7 @@ class Grid(object):
             x[i] = x[i]/100 - grid.xorig
             y[i] = y[i]/100 - grid.yorig
             z[i] = -z[i]/100 + grid.zorig
+            s[i] = s[i]/10000           #passage cm2 en m2
             if z[i].min() < 0.:
                 raise ValueError('Some elements have a negative Z value.')
 
