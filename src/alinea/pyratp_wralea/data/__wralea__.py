@@ -1,5 +1,5 @@
 
-# This file has been generated at Thu Dec 16 15:17:25 2010
+# This file has been generated at Fri Feb 18 11:03:17 2011
 
 from openalea.core import *
 
@@ -17,32 +17,42 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['_118602512', '_146337616', '_147184400', 'vgx1']
+__all__ = ['_73705712', '_73705744', '_75464656', '_73705680', '_74797968']
 
 
-_118602512 = DataFactory(name='grid3Da_2004.grd',
+_73705712 = DataFactory(name='mmeteo052000.mto',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_146337616 = DataFactory(name='digitalAD2004.dgt',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_147184400 = DataFactory(name='mmeteo052000.mto',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-vgx1 = DataFactory(name='aa2004petit.vgx',
+_73705744 = DataFactory(name='aa2004petit.vgx',
                     description=' Vegetation and Nitrogen in a VegeStar format',
                     editors=None,
                     includes=None,
                     )
+
+
+_75464656 = DataFactory(name='grid3Da_2004.grd',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_73705680 = DataFactory(name='digitalAD2004.dgt',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_74797968 = DataFactory(name='aa2004.vgx',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+

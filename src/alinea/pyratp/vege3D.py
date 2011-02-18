@@ -57,7 +57,7 @@ class Vege3D(object):
         """
     @staticmethod
 
-    def readVGX(fileNameVGX,typeVege=1,bltypeVege=True,Azote=2):
+    def readVGX(fileNameVGX,typeVege,bltypeVege=True,Azote=2):
 ##    def readVGX(self,fileNameVGX,typeVege=1,bltypeVege=True,Azote=2):
         nbLigne = 0
         """ Reading a VegeSTAR (*.vgx) file and return 6 numpy arrays (type of vegetation, X, Y, Z, Leaf surface and Nitrogen """

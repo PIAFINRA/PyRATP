@@ -106,7 +106,7 @@ class Grid(object):
             - `x`: an array of abscisse.
             - .
         """
-        tv,tx,ty,tz,ts,tn = vege3D.Vege3D.readVGX(filename)
+        tv,tx,ty,tz,ts,tn = vege3D.Vege3D.readVGX(filename,2)
         return tv,tx,ty,tz,ts,tn
 
 
@@ -119,7 +119,20 @@ class Grid(object):
             - `x`: an array of abscisse.
             - .
 ##        """
+        x = x/100 - grid.xorig
+        y = y/100 - grid.yorig
+        z = -z/100 + grid.zorig
+        s = s/10000           #passage cm2 en m2
 
+        lneg=np.where(z<0) #suppression de feuilles ayant un z<0
+        entity=np.delete(entity,lneg[0])
+        x=np.delete(x,lneg[0])
+        y=np.delete(y,lneg[0])
+        z=np.delete(z,lneg[0])
+        s=np.delete(s,lneg[0])
+        n=np.delete(n,lneg[0])
+##        if z.min() < 0.:
+##                raise ValueError('Some elements have a negative Z value.')
 
         if entity.max() >  grid.nent:
             raise ValueError('Number of entity is too great')
@@ -128,6 +141,7 @@ class Grid(object):
             raise ValueError('Negative area value is prohibited')
 
         ztot = grid.dz.sum()
+        print 'zmax',z.max(),'ztot',ztot
         if z.max() > ztot:
             raise ValueError('Some Z points are outside of the grid')
 
@@ -139,7 +153,7 @@ class Grid(object):
         grid.s_canopy = s.sum()
          # sum the surface of each element of the same entity
         for i in range(grid.nent-1):
-            grid.s_vt[i] = s[entity==i].sum()
+            grid.s_vt[i] = s[entity==i+1].sum()
 
         dx, dy , dz = grid.dx, grid.dy, grid.dz
         #dh: tableau des hauteurs z
@@ -149,15 +163,8 @@ class Grid(object):
         dh=np.delete(dh,0)
         print 'dh',dh
         for i in range(np.alen(x)):
-            x[i] = x[i]/100 - grid.xorig
-            y[i] = y[i]/100 - grid.yorig
-            z[i] = -z[i]/100 + grid.zorig
-            s[i] = s[i]/10000           #passage cm2 en m2
-            if z[i].min() < 0.:
-                raise ValueError('Some elements have a negative Z value.')
 
-
-            # Compute the coord of each element in the grid.
+          # Compute the coord of each element in the grid.
             # modulo is used to build a toric scene.
             #------------------------------------------ Attention au decalage de 1--------------------------------
             jx = int((x[i]/dx)%grid.njx)
@@ -165,28 +172,27 @@ class Grid(object):
             jz = np.where(dh>z[i])[0][0]
 
             jz = grid.njz-jz-1 # -1 compatibilite F90-python
-            print i, jx, jy, jz,x[i],y[i],z[i]
+##            print i, jx, jy, jz,x[i],y[i],z[i]
             # TO CONTINUE (line 318)
          #Cas ou il n'y avait encore rien dans la cellule (jx,jy,jz)
             if grid.kxyz[jx,jy,jz]==0 :
-
                  grid.kxyz[jx,jy,jz]=k+1 #ajouter 1 pour utilisation f90
                  grid.numx[k]=jx + 1 #ajouter 1 pour utilisation f90
                  grid.numy[k]=jy + 1 #ajouter 1 pour utilisation f90
                  grid.numz[k]=jz + 1 #ajouter 1 pour utilisation f90
                  grid.nje[k]=1
-                 grid.nume[1,k]=entity[i]
-                 grid.leafareadensity[1,k]=s[i]/(dx*dy*dz[jz])
-                 grid.s_vt_vx[1,k]=s[i]
+                 grid.nume[0,k]=entity[i]
+                 grid.leafareadensity[0,k]=s[i]/(dx*dy*dz[jz])
+                 grid.s_vt_vx[0,k]=s[i]
                  grid.s_vx[k]=s[i]
-                 grid.n_detailed[1,k]=n[i]
+                 grid.n_detailed[0,k]=n[i]
                  k=k+1
             else:
               #    Cas ou il y avait deja quelque chose dans la cellule [jx,jy,jz]
 
                 kk=grid.kxyz[jx,jy,jz]-1 #retirer 1 pour compatiblite python
-                je=1
-                while (grid.nume[je,kk]!= entity[i] and je<=grid.nje[kk]):
+                je=0
+                while (grid.nume[je,kk]!= entity[i] and (je+1)<=grid.nje[kk]):
                     je=je+1
 
                 grid.leafareadensity[je,kk]=grid.leafareadensity[je,kk]+s[i]/(dx*dy*dz[jz])
@@ -194,13 +200,20 @@ class Grid(object):
                 grid.n_detailed[je,kk]=(grid.n_detailed[je,kk]*grid.s_vt_vx[je,kk]+n[i]*s[i])/(grid.s_vt_vx[je,kk]+s[i])
                 grid.s_vt_vx[je,kk] = grid.s_vt_vx[je,kk] + s[i]
                 grid.s_vx[kk] = grid.s_vx[kk] + s[i]
-                grid.nje[kk]=max(je,grid.nje[kk])
+                grid.nje[kk]=max(je+1,grid.nje[kk])
                 grid.nemax=max(grid.nemax,grid.nje[kk])
                 grid.nume[je,kk]=entity[i]
-        print 'i,j,k,lad,surface1,surface2,azote'
-        for k in range(grid.njx* grid.njy* grid.njz):
-            print grid.numx[k],grid.numy[k],grid.numz[k],grid.leafareadensity[1,k],grid.s_vt_vx[1,k], grid.s_vx[k],grid.n_detailed[1,k]
+            grid.nveg=k
+        print 'grid.nveg',grid.nveg
+        print 'i,j,k,entuty,lad,surface1,surface2,azote'
 
+        for  jent in range(0,grid.nent):
+            for  k in range(0,grid.nveg):
+
+                for je in range (0,grid.nje[k]):
+
+                    if jent==grid.nume[je,k]-1 :
+                        print grid.numx[k],grid.numy[k],grid.numz[k],grid.nume[je,k],grid.leafareadensity[je,k],grid.s_vt_vx[je,k], grid.s_vx[k],grid.n_detailed[je,k],k+1
 
 def _read(f, *args):
     l = f.readline()
