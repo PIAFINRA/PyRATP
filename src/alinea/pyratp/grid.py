@@ -35,8 +35,9 @@ class Grid(object):
 
         # voxel size according to X- Y- and Z- axis
         # TEST
-        _read(f, grid3d.dx, grid3d.dy, *grid3d.dz[:-1])
-
+        _read(f, grid3d.dx, grid3d.dy, grid3d.dz[:-1])
+        print 'grid3d.dx',grid3d.dx
+        print 'grid3d.dz',grid3d.dz
         # 3D grid origin
         _read(f, grid3d.xorig, grid3d.yorig, grid3d.zorig)
 
@@ -68,15 +69,8 @@ class Grid(object):
         njx, njy, njz = grid3d.njx, grid3d.njy, grid3d.njz
         dx, dy = grid3d.dx, grid3d.dy
         kxyz = grid3d.kxyz
-        numx, numy, numz, nje = grid3d.numx, grid3d.numy, grid3d.numz, grid3d.nje
-        leafareadensity, N_detailed, nume = grid3d.leafareadensity, grid3d.n_detailed, grid3d.nume
-        nent = grid3d.nent
-        S_vt_vx = grid3d.s_vt_vx
-        S_vx = grid3d.s_vx
-        S_vt = grid3d.s_vt
-        volume_canopy = grid3d.volume_canopy
-        voxel_canopy = grid3d.voxel_canopy
 
+        nent = grid3d.nent
         nvegmax = njx * njy * njz
 
         xrang = njx * dx
@@ -94,7 +88,7 @@ class Grid(object):
         grid3d.nume = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
 
         # Leaf area (m^2) per voxel and vegetation type
-        grid3d.S_vt_vx =  np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+        grid3d.s_vt_vx =  np.zeros(nent*nvegmax).reshape(nent, nvegmax)
         # Leaf area (m^2) per voxel
         grid3d.s_vx = np.zeros(nvegmax)
         # Leaf area (m^2) per vegetation type
@@ -113,73 +107,51 @@ class Grid(object):
             - .
         """
         tv,tx,ty,tz,ts,tn = vege3D.Vege3D.readVGX(filename)
-        print ty[5]
         return tv,tx,ty,tz,ts,tn
 
-    @staticmethod
-    def toto(entity, x, y, z, s, n):
-        print 'entity',entity
-        print 'x',x
-        print 'y',y
-        print 'z',z
-        print 's',s
-        print 'n',n
-
-
 
     @staticmethod
-    def fill(entity, x, y, z, s, n):
+    def fill(entity, x, y, z, s, n ,grid):
+##        print entity, x, y, z, s, n
         """ Filling the 3D Grid with points, area and nitrogen content.
         lkjfkjrzelkrjzelrkjzer
         :Parameters:
             - `x`: an array of abscisse.
             - .
-        """
-        print "x",x
-        print entity.max()
-        if entity.max() >  grid3d.nent:
+##        """
+
+
+        if entity.max() >  grid.nent:
             raise ValueError('Number of entity is too great')
 
         if s.min() < 0.:
             raise ValueError('Negative area value is prohibited')
 
-        ztot = grid3d.dz.sum()
+        ztot = grid.dz.sum()
         if z.max() > ztot:
             raise ValueError('Some Z points are outside of the grid')
 
-        grid3d.volume_canopy = 0.
-        grid3d.s_canopy=0.
-        grid3d.s_vx=0.
-        grid3d.s_vt=0.
-        grid3d.s_vt_vx=0.
-        grid3d.n_canopy=0.
-
-        grid3d.nemax = 1
-
+        grid.nemax = 1
         nft, k = 0, 0
 
         nft = np.alen(entity)
-        grid3d.n_canopy = (n*s).sum()
-        grid3d.s_canopy = s.sum()
+        grid.n_canopy = (n*s).sum()
+        grid.s_canopy = s.sum()
          # sum the surface of each element of the same entity
-        for i in range(grid3d.nent):
-            grid3d.s_vt[i] = s[entity==i].sum()
+        for i in range(grid.nent-1):
+            grid.s_vt[i] = s[entity==i].sum()
 
-        dx, dy = grid3d.dx, grid3d.dy
-
-        zzz = grid3d.dz.cumsum()
-
+        dx, dy , dz = grid.dx, grid.dy, grid.dz
         #dh: tableau des hauteurs z
         dh = np.array(0)
-        for i in range(np.alen(dz)):
-            dh=np.append(dh,dz[:i].sum())
-        nb.delete(dh,0)
-
+        for i in range(np.alen(dz)-1):
+            dh=np.append(dh,dz[:i+1].sum()+grid.zorig)
+        dh=np.delete(dh,0)
+        print 'dh',dh
         for i in range(np.alen(x)):
-            x[i] = x[i]/100 - grid3d.xorigin
-            y[i] = y[i]/100 - grid3d.yorigin
-            z[i] = -z[i]/100 + grid3d.zorigin
-
+            x[i] = x[i]/100 - grid.xorig
+            y[i] = y[i]/100 - grid.yorig
+            z[i] = -z[i]/100 + grid.zorig
             if z[i].min() < 0.:
                 raise ValueError('Some elements have a negative Z value.')
 
@@ -187,60 +159,71 @@ class Grid(object):
             # Compute the coord of each element in the grid.
             # modulo is used to build a toric scene.
             #------------------------------------------ Attention au decalage de 1--------------------------------
-            jx = int((x[i]/dx)%njx)+1
-            jy = int((y[i]/dy)%njy)+1
-            jz = np.alen(np.where(dh<z[i])[0])-1
-            jz = grid3d.njz-jz+1
+            jx = int((x[i]/dx)%grid.njx)
+            jy = int((y[i]/dy)%grid.njy)
+            jz = np.where(dh>z[i])[0][0]
 
+            jz = grid.njz-jz-1 # -1 compatibilite F90-python
+            print i, jx, jy, jz,x[i],y[i],z[i]
             # TO CONTINUE (line 318)
          #Cas ou il n'y avait encore rien dans la cellule (jx,jy,jz)
-##            if grid3d.kxyz(jx,jy,jz)==0 :
-##                 k=k+1
-##                 grid3d.kxyz(jx,jy,jz)=k
-##                 grid3d.numx(k)=jx
-##                 grid3d.numy(k)=jy
-##                 grid3d.numz(k)=jz
-##                 grid3d.nje(k)=1
-##                 grid3d.nume(1,k)=jent
-##                 grid3d.leafareadensity(1,k)=s/(dx*dy*dz(jz))
-##                 grid3d.S_vt_vx(1,k)=s
-##                 grid3d.S_vx(k)=s
-##                 grid3d.N_detailed(1,k)=azot
-##            else:
-##              #    Cas ou il y avait deja quelque chose dans la cellule (jx,jy,jz)
-##              pass
-##                 kk=grid3d.kxyz(jx,jy,jz)
-##                 je=1
-####                 do while ((nume(je,kk).ne.jent).and.(je.le.nje(kk)))
-##                while (nume(je,kk)!= jent and je<=nje(kk)):
-##
-##                  je=je+1
-##                 end do
-##
-##                   leafareadensity(je,kk)=leafareadensity(je,kk)+s/(dx*dy*dz(jz))
-##                 N_detailed(je,kk)=(N_detailed(je,kk)*S_vt_vx(je,kk)+azot*s)/(S_vt_vx(je,kk)+s)
-##                 S_vt_vx(je,kk) = S_vt_vx(je,kk) + s
-##                 S_vx(kk) = S_vx(kk) + s
-##                 nje(kk)=max(je,nje(kk))
-##                 nemax=max(nemax,nje(kk))
-##                 nume(je,kk)=jent
-##                endif
-##               end if
-##              end do   ! End of file
-##              998 continue
-##  close (2)
+            if grid.kxyz[jx,jy,jz]==0 :
+
+                 grid.kxyz[jx,jy,jz]=k+1 #ajouter 1 pour utilisation f90
+                 grid.numx[k]=jx + 1 #ajouter 1 pour utilisation f90
+                 grid.numy[k]=jy + 1 #ajouter 1 pour utilisation f90
+                 grid.numz[k]=jz + 1 #ajouter 1 pour utilisation f90
+                 grid.nje[k]=1
+                 grid.nume[1,k]=entity[i]
+                 grid.leafareadensity[1,k]=s[i]/(dx*dy*dz[jz])
+                 grid.s_vt_vx[1,k]=s[i]
+                 grid.s_vx[k]=s[i]
+                 grid.n_detailed[1,k]=n[i]
+                 k=k+1
+            else:
+              #    Cas ou il y avait deja quelque chose dans la cellule [jx,jy,jz]
+
+                kk=grid.kxyz[jx,jy,jz]-1 #retirer 1 pour compatiblite python
+                je=1
+                while (grid.nume[je,kk]!= entity[i] and je<=grid.nje[kk]):
+                    je=je+1
+
+                grid.leafareadensity[je,kk]=grid.leafareadensity[je,kk]+s[i]/(dx*dy*dz[jz])
+
+                grid.n_detailed[je,kk]=(grid.n_detailed[je,kk]*grid.s_vt_vx[je,kk]+n[i]*s[i])/(grid.s_vt_vx[je,kk]+s[i])
+                grid.s_vt_vx[je,kk] = grid.s_vt_vx[je,kk] + s[i]
+                grid.s_vx[kk] = grid.s_vx[kk] + s[i]
+                grid.nje[kk]=max(je,grid.nje[kk])
+                grid.nemax=max(grid.nemax,grid.nje[kk])
+                grid.nume[je,kk]=entity[i]
+        print 'i,j,k,lad,surface1,surface2,azote'
+        for k in range(grid.njx* grid.njy* grid.njz):
+            print grid.numx[k],grid.numy[k],grid.numz[k],grid.leafareadensity[1,k],grid.s_vt_vx[1,k], grid.s_vx[k],grid.n_detailed[1,k]
+
 
 def _read(f, *args):
-    print '_read (',args,')'
     l = f.readline()
     l= l.split('!')[0] # remove comments
     l = l.strip().split(' ')
     l = filter(None,l)
-    print l
     assert len(args) <= len(l)
-
     args = list(args)
+
     for i in range(len(args)):
+        taille = args[i].size
         args[i].fill(l[i])
-    print args
+        if  taille >1:
+            k=0
+            for j in l[i:(i+taille)]:
+                args[i][k]=np.float32(j)
+                k=k+1
     return
+
+
+
+
+
+
+
+
+

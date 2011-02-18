@@ -1,5 +1,5 @@
 
-# This file has been generated at Mon Feb 14 11:30:22 2011
+# This file has been generated at Mon Feb 14 12:03:43 2011
 
 from openalea.core import *
 
@@ -17,7 +17,7 @@ __institutes__ = None
 __icon__ = ''
 
 
-__all__ = ['ratp_read_vgx', 'ratp_read_grid', 'ratp_fill_grid', 'ratp_toto_grid']
+__all__ = ['ratp_read_vgx', 'ratp_read_grid', 'ratp_fill_grid']
 
 
 
@@ -57,7 +57,7 @@ ratp_fill_grid = Factory(name='fill grid',
                 category='Unclassified',
                 nodemodule='ratp',
                 nodeclass='fill_grid',
-                inputs=[{'interface': IInt, 'name': 'entity', 'value': None, 'desc': '3d Grid file'}, {'interface': IFloat, 'name': 'x', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'y', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'z', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 's', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'n', 'value': None, 'desc': ''}],
+                inputs=[{'interface': IInt, 'name': 'entity', 'value': None, 'desc': '3d Grid file'}, {'interface': IFloat, 'name': 'x', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'y', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'z', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 's', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'n', 'value': None, 'desc': ''}, {'interface': None, 'name': 'grid', 'value': None, 'desc': ''}],
                 outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
                 widgetmodule=None,
                 widgetclass=None,
@@ -72,7 +72,7 @@ ratp_toto_grid = Factory(name='toto grid',
                 category='Unclassified',
                 nodemodule='ratp',
                 nodeclass='toto_grid',
-                inputs=[{'interface': ISequence, 'name': 'entity', 'value': None, 'desc': '3d Grid file'}, {'interface': IFloat, 'name': 'x', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'y', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'z', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 's', 'value': None, 'desc': ''}, {'interface': None, 'name': 'n', 'value': None, 'desc': ''}],
+                inputs=[{'interface': ISequence, 'name': 'entity', 'value': None, 'desc': '3d Grid file'}, {'interface': IFloat, 'name': 'x', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'y', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'z', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 's', 'value': None, 'desc': ''}, {'interface': None, 'name': 'n', 'value': None, 'desc': ''}, {'interface': None, 'name': 'grid', 'value': None, 'desc': ''}],
                 outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
                 widgetmodule=None,
                 widgetclass=None,
