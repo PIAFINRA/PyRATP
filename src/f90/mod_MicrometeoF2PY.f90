@@ -13,6 +13,8 @@ real, allocatable :: glob(:), diff(:), direct(:), dsg (:) ! global, diffuse and 
 real :: ratmos      ! atmospheric radiation
 real :: tsol,taref,earef,caref ! soil temperature, air temperature, water vapour pressure in the air (Pa), CO2 partial pressure in the air (Pa)
 real, allocatable :: uref(:)  ! wind speed, in each horizontal layer (jz=1,njz)
+real, allocatable :: tabMeteo(:,:)  ! Meteo data
+integer :: ntimemax
 logical  :: endmeteo     ! TRUE if end of mmeteo file has been reached
 
 contains
@@ -37,29 +39,44 @@ contains
 
  end subroutine mm_initiate
 
- subroutine mm_read(ntime,pathMeteo,spec)
+ subroutine mm_read(ntime,tabMeteo)
   use grid3D
   use vegetation_types
 
+  real tabMeteo(:,:)
+
   character*17 pathMeteo
   character*6 spec
-
-  logical :: linenotread
+  integer ii
 
   call mm_initiate
 
+    ii = 1
+    day=tabMeteo(ntime,ii)
+    ii = ii+1
+    hour=tabMeteo(ntime,ii)
+    ii = ii+1
+    do iblo=1,nblomin
+        glob(iblo)=tabMeteo(ntime,ii)
+        ii = ii+1
+        diff(iblo)=tabMeteo(ntime,ii)
+        ii = ii+1
+    end do
+    ratmos=tabMeteo(ntime,ii)
+    ii = ii+1
+    tsol=tabMeteo(ntime,ii)
+    ii = ii+1
+    taref=tabMeteo(ntime,ii)
+    ii = ii+1
+    earef=tabMeteo(ntime,ii)
+    ii = ii+1
+    caref=tabMeteo(ntime,ii)
+    ii = ii+1
+    urefref=tabMeteo(ntime,ii)
 
-  open (4,file=pathMeteo//spec)
-  linenotread = .true.
-   do i=1,ntime
-    !write(*,*) 'i=',i
-    read(4,*,end = 998)  ! Skip ntime lines, i.e. header (1st line) + (ntime - 1) data lines
-   end do
 
-   do while(linenotread)
-   read(4,*,end = 998) day,hour,(glob(iblo),diff(iblo),iblo=1,nblomin), ratmos,tsol,taref,earef,caref,urefref
    !write(*,*) 'day,hour =',day,hour !,(glob(iblo),diff(iblo),iblo=1,nblomin), ratmos,tsol,taref,earef,caref,urefref
-   linenotread = .false.
+
 !   Rem: L'azimut 0 est défini pour la direction SUD,
 !      i.e. un rayon avancant vers le NORD, donc les X > 0
 !    L'azimut 90 est défini pour la direction OUEST,
@@ -95,16 +112,6 @@ contains
     uref(jz) = urefref
    end do
    !write(*,*) 'end meteo'
-
-
-  end do
-  998 continue
-  if (linenotread) then
-    !write(*,*) 'End of mmeteo file reached: Job terminated'
-    endmeteo=.TRUE.
-  endif
-  !write(*,*) 'close 4'
-  close(4)
 
 
  end subroutine mm_read

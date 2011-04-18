@@ -159,7 +159,7 @@ class Grid(object):
         #dh: tableau des hauteurs z
         dh = np.array(0)
         for i in range(np.alen(dz)-1):
-            dh=np.append(dh,dz[:i+1].sum()+grid.zorig)
+            dh=np.append(dh,dz[:i+1].sum())
         dh=np.delete(dh,0)
         print 'dh',dh
         for i in range(np.alen(x)):
@@ -167,10 +167,15 @@ class Grid(object):
           # Compute the coord of each element in the grid.
             # modulo is used to build a toric scene.
             #------------------------------------------ Attention au decalage de 1--------------------------------
-            jx = int((x[i]/dx)%grid.njx)
-            jy = int((y[i]/dy)%grid.njy)
-            jz = np.where(dh>z[i])[0][0]
+            jx = int((abs(x[i])/dx))
+            jx=(jx)%grid.njx
+            if x[i]<=0:jx = grid.njx-jx-1
 
+            jy = int(abs(y[i])/dy)
+            jy=(jy)%grid.njy
+            if y[i]<=0:jy = grid.njy-jy-1
+
+            jz = np.where(dh>z[i])[0][0]
             jz = grid.njz-jz-1 # -1 compatibilite F90-python
 ##            print i, jx, jy, jz,x[i],y[i],z[i]
             # TO CONTINUE (line 318)
@@ -220,11 +225,13 @@ def _read(f, *args):
     l= l.split('!')[0] # remove comments
     l = l.strip().split(' ')
     l = filter(None,l)
+    print 'l3',l,type(l)
     assert len(args) <= len(l)
     args = list(args)
-
+    print 'args',args, len(args)
     for i in range(len(args)):
         taille = args[i].size
+        print l[i]
         args[i].fill(l[i])
         if  taille >1:
             k=0

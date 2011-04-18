@@ -288,7 +288,7 @@ contains
 
    if (leafOK) then
     nft=nft+1
-    !write(*,*) 'Allocating leaf #', nft
+    write(*,*) 'Allocating leaf #', nft
     s=s/10000.    ! conversion from cm² to m²
     N_canopy=N_canopy+azot*s
 
@@ -297,10 +297,24 @@ contains
 
  !   Affectation de la feuille a une cellule
 
-    jx=nint(xx/dx)+1
+ !   jx=nint(xx/dx)+1
+ !   jx=modulo(jx-1,njx)+1
+ !   jy=nint(yy/dy)+1
+ !   jy=modulo(jy-1,njy)+1
+
+    jx=aint(abs(xx)/dx)+1
     jx=modulo(jx-1,njx)+1
-    jy=nint(yy/dy)+1
+
+    if (xx.le.0) then
+        jx = njx-jx +1
+    endif
+
+    jy=aint(abs(yy)/dy)+1
     jy=modulo(jy-1,njy)+1
+
+    if (yy.le.0) then
+        jy = njy-jy +1
+    endif
 
      if (zz.gt.ztot) then
      !write(*,*) 'Leaf #', nft,' is higher than 3D grid height:',zz,' > ',ztot

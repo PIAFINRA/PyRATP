@@ -17,7 +17,7 @@ __institutes__ = None
 __icon__ = ''
 
 
-__all__ = ['ratp_read_vgx', 'ratp_read_grid', 'ratp_fill_grid']
+__all__ = ['ratp_read_vgx', 'ratp_read_grid', 'ratp_fill_grid','ratp_read_skyvault','ratp_read_vegetation','ratp_read_micrometeo']
 
 
 
@@ -57,21 +57,6 @@ ratp_fill_grid = Factory(name='fill grid',
                 category='Unclassified',
                 nodemodule='ratp',
                 nodeclass='fill_grid',
-                inputs=[{'interface': IInt, 'name': 'entity', 'value': None, 'desc': '3d Grid file'}, {'interface': IFloat, 'name': 'x', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'y', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'z', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 's', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'n', 'value': None, 'desc': ''}, {'interface': None, 'name': 'grid', 'value': None, 'desc': ''}],
-                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
-ratp_toto_grid = Factory(name='toto grid',
-                authors=' (wralea authors)',
-                description='toto',
-                category='Unclassified',
-                nodemodule='ratp',
-                nodeclass='toto_grid',
                 inputs=[{'interface': ISequence, 'name': 'entity', 'value': None, 'desc': '3d Grid file'}, {'interface': IFloat, 'name': 'x', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'y', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'z', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 's', 'value': None, 'desc': ''}, {'interface': None, 'name': 'n', 'value': None, 'desc': ''}, {'interface': None, 'name': 'grid', 'value': None, 'desc': ''}],
                 outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
                 widgetmodule=None,
@@ -81,3 +66,38 @@ ratp_toto_grid = Factory(name='toto grid',
 
 
 
+ratp_read_skyvault =Factory(name='read_skyvault',
+                authors=' (wralea authors)',
+                description='read the skyvault file',
+                category='Unclassified',
+                nodemodule='ratp',
+                nodeclass='read_skyvault',
+                inputs=[{'interface': IFileStr(filter="*.skv", save=False), 'name': 'filename', 'value': None, 'desc': 'Skywvault file'}],
+                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+ratp_read_vegetation =Factory(name='read_vegetation',
+                authors=' (wralea authors)',
+                description='read the vegetation files',
+                category='Unclassified',
+                nodemodule='ratp',
+                nodeclass='read_vegetation',
+                inputs=[{'interface': IFileStr(filter="*.vfn", save=False), 'name': 'filename', 'value': None, 'desc': 'Vegetation file'}],
+                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+ratp_read_micrometeo =Factory(name='read_micrometeo',
+                authors=' (wralea authors)',
+                description='read the micrometeo files',
+                category='Unclassified',
+                nodemodule='ratp',
+                nodeclass='read_micrometeo',
+                inputs=[{'interface': IFileStr(filter="*.mto", save=False), 'name': 'filename', 'value': None, 'desc': 'Micrometeo file'}],
+                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
