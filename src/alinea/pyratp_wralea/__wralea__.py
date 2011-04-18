@@ -17,7 +17,7 @@ __institutes__ = None
 __icon__ = ''
 
 
-__all__ = ['ratp_read_vgx', 'ratp_read_grid', 'ratp_fill_grid','ratp_read_skyvault','ratp_read_vegetation','ratp_read_micrometeo']
+__all__ = ['ratp_read_vgx', 'ratp_read_grid', 'ratp_fill_grid','ratp_read_skyvault','ratp_read_vegetation','ratp_read_micrometeo','ratp_do_all']
 
 
 
@@ -98,6 +98,19 @@ ratp_read_micrometeo =Factory(name='read_micrometeo',
                 nodeclass='read_micrometeo',
                 inputs=[{'interface': IFileStr(filter="*.mto", save=False), 'name': 'filename', 'value': None, 'desc': 'Micrometeo file'}],
                 outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+ratp_do_all =Factory(name='do_all',
+                authors=' (wralea authors)',
+                description='run RATP',
+                category='Unclassified',
+                nodemodule='ratp',
+                nodeclass='DoAll',
+                inputs=None,
+                outputs=None,
                 widgetmodule=None,
                 widgetclass=None,
                )
