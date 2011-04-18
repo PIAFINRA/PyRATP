@@ -1,5 +1,5 @@
 
-# This file has been generated at Mon Feb 14 12:03:43 2011
+# This file has been generated at Mon Apr 18 15:48:53 2011
 
 from openalea.core import *
 
@@ -17,18 +17,18 @@ __institutes__ = None
 __icon__ = ''
 
 
-__all__ = ['ratp_read_vgx', 'ratp_read_grid', 'ratp_fill_grid','ratp_read_skyvault','ratp_read_vegetation','ratp_read_micrometeo','ratp_do_all']
+__all__ = ['ratp_read_skyvault', 'ratp_DoAll', 'ratp_fill_grid', 'ratp_read_grid', 'ratp_read_vgx', 'ratp_read_vegetation', 'ratp_read_micrometeo']
 
 
 
-ratp_read_vgx = Factory(name='plant from vegestar',
+ratp_read_skyvault = Factory(name='read_skyvault',
                 authors=' (wralea authors)',
-                description='',
+                description='read the skyvault file',
                 category='Unclassified',
                 nodemodule='ratp',
-                nodeclass='read_vgx',
-                inputs=[{'interface': IFileStr(filter="*.vgx", save=False), 'name': 'filename', 'value': None, 'desc': 'Vegestar 3d Grid file'}],
-                outputs=[{'interface': ISequence, 'name': 'entity', 'desc': 'No output for the moment'}, {'interface': IFloat, 'name': 'x', 'desc': ''}, {'interface': None, 'name': 'y', 'desc': ''}, {'interface': None, 'name': 'z', 'desc': ''}, {'interface': None, 'name': 's', 'desc': ''}, {'interface': None, 'name': 'n', 'desc': ''}],
+                nodeclass='read_skyvault',
+                inputs=[{'interface': IFileStr(filter="*.skv", save=False), 'name': 'filename', 'value': None, 'desc': 'Skywvault file'}],
+                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -36,14 +36,14 @@ ratp_read_vgx = Factory(name='plant from vegestar',
 
 
 
-ratp_read_grid = Factory(name='read grid',
+ratp_DoAll = Factory(name='do_all',
                 authors=' (wralea authors)',
-                description='Build a RATP Grid',
-                category='simulation, ecophysiology',
+                description='run RATP',
+                category='Unclassified',
                 nodemodule='ratp',
-                nodeclass='read_grid',
-                inputs=[{'interface': IFileStr(filter="*.grd", save=False), 'name': 'filename', 'value': None, 'desc': '3d Grid file'}],
-                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
+                nodeclass='DoAll',
+                inputs=[{'interface': ISequence, 'name': 'inputs', 'value': None, 'desc': ''}],
+                outputs=[{'interface': None, 'name': 'out', 'desc': ''}],
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -66,19 +66,37 @@ ratp_fill_grid = Factory(name='fill grid',
 
 
 
-ratp_read_skyvault =Factory(name='read_skyvault',
+ratp_read_grid = Factory(name='read grid',
                 authors=' (wralea authors)',
-                description='read the skyvault file',
-                category='Unclassified',
+                description='Build a RATP Grid',
+                category='simulation, ecophysiology',
                 nodemodule='ratp',
-                nodeclass='read_skyvault',
-                inputs=[{'interface': IFileStr(filter="*.skv", save=False), 'name': 'filename', 'value': None, 'desc': 'Skywvault file'}],
+                nodeclass='read_grid',
+                inputs=[{'interface': IFileStr(filter="*.grd", save=False), 'name': 'filename', 'value': None, 'desc': '3d Grid file'}],
                 outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
 
-ratp_read_vegetation =Factory(name='read_vegetation',
+
+
+
+ratp_read_vgx = Factory(name='plant from vegestar',
+                authors=' (wralea authors)',
+                description='',
+                category='Unclassified',
+                nodemodule='ratp',
+                nodeclass='read_vgx',
+                inputs=[{'interface': IFileStr(filter="*.vgx", save=False), 'name': 'filename', 'value': None, 'desc': 'Vegestar 3d Grid file'}],
+                outputs=[{'interface': ISequence, 'name': 'entity', 'desc': 'No output for the moment'}, {'interface': IFloat, 'name': 'x', 'desc': ''}, {'interface': None, 'name': 'y', 'desc': ''}, {'interface': None, 'name': 'z', 'desc': ''}, {'interface': None, 'name': 's', 'desc': ''}, {'interface': None, 'name': 'n', 'desc': ''}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
+ratp_read_vegetation = Factory(name='read_vegetation',
                 authors=' (wralea authors)',
                 description='read the vegetation files',
                 category='Unclassified',
@@ -90,7 +108,10 @@ ratp_read_vegetation =Factory(name='read_vegetation',
                 widgetclass=None,
                )
 
-ratp_read_micrometeo =Factory(name='read_micrometeo',
+
+
+
+ratp_read_micrometeo = Factory(name='read_micrometeo',
                 authors=' (wralea authors)',
                 description='read the micrometeo files',
                 category='Unclassified',
@@ -103,14 +124,5 @@ ratp_read_micrometeo =Factory(name='read_micrometeo',
                )
 
 
-ratp_do_all =Factory(name='do_all',
-                authors=' (wralea authors)',
-                description='run RATP',
-                category='Unclassified',
-                nodemodule='ratp',
-                nodeclass='DoAll',
-                inputs=None,
-                outputs=None,
-                widgetmodule=None,
-                widgetclass=None,
-               )
+
+

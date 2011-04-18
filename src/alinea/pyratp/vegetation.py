@@ -10,6 +10,8 @@ from alinea.pyratp import pyratp
 import numpy as np
 import math
 import os
+pj = os.path.join
+
 class Vegetation(object):
     """
     """
@@ -54,7 +56,9 @@ class Vegetation(object):
 
         jent=0
         for i in listVege:
-            nomfVeg = chemin + '\\'+ i.split(' ')[1][:-1]
+            # second column
+            fn = i.split(' ')[1].strip()
+            nomfVeg = pj(chemin, fn)
             fVeg = open(nomfVeg)
 
 

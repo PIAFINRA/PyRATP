@@ -15,5 +15,5 @@ class runRATP(object):
         """
         pass
     @staticmethod
-    def DoAll():
-        pyratp.ratp.do_all
+    def DoAll(*args):
+        pyratp.ratp.do_all()
