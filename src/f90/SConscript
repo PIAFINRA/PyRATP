@@ -42,12 +42,21 @@ def f2py_builder(target=None, source=None, env=None):
     os.chdir(str(target[0].dir))
     f2py_str = 'f2py.py' if os.name == 'nt' else 'f2py'
     if os.name == 'nt':
+
+      f2py_pyf = [f2py_str, '-m pyratp','--overwrite-signature', '-h']+sources
       f2py_cmd = [f2py_str, '-c','--build-dir .', '--compiler=%s'%('mingw32',), '--fcompiler=gnu95']+sources
     else:
+      f2py_pyf = [f2py_str, '-m pyratp','--overwrite-signature', '-h']+sources
       f2py_cmd = [f2py_str, '-c', '--fcompiler=%s'%(lib_env['FORTRAN'])]+sources
     
+    q = subprocess.Popen(" ".join(f2py_pyf), shell = True, 
+                          stdout = subprocess.PIPE, stderr = subprocess.PIPE)
     p = subprocess.Popen(" ".join(f2py_cmd), shell = True, 
                           stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    for i in q.stdout.readlines():
+        print "F2PY: ", i.rstrip("\n")
+    for i in q.stderr.readlines():
+        print "F2PY: ", i.rstrip("\n")
     for i in p.stdout.readlines():
         print "F2PY: ", i.rstrip("\n")
     for i in p.stderr.readlines():
