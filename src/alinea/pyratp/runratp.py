@@ -23,8 +23,9 @@ class runRATP(object):
         print 'DOALL'
         if os.path.isdir("c:/tmpRATP"):
             shutil.rmtree("c:/tmpRATP")
-        path = '/tmp/tmpRATP'
-        #os.mkdir("c:/tmpRATP/")
+        #path = '/tmp/tmpRATP'
+        path = 'c:/tmpRATP'
+        os.mkdir("c:/tmpRATP/")
         os.mkdir(path+"/Resul")
 
         pyratp.ratp.do_all()
