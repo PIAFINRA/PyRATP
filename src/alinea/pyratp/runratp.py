@@ -8,6 +8,8 @@
 from alinea.pyratp import pyratp
 import os
 import shutil
+import tempfile
+
 #import pyRATP
 class runRATP(object):
     """
@@ -21,7 +23,8 @@ class runRATP(object):
         print 'DOALL'
         if os.path.isdir("c:/tmpRATP"):
             shutil.rmtree("c:/tmpRATP")
-        os.mkdir("c:/tmpRATP/")
-        os.mkdir("c:/tmpRATP/Resul/")
+        path = '/tmp/tmpRATP'
+        #os.mkdir("c:/tmpRATP/")
+        os.mkdir(path+"/Resul")
 
         pyratp.ratp.do_all()
