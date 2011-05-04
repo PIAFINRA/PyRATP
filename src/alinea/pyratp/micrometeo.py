@@ -25,15 +25,22 @@ class MicroMeteo(object):
         listVegeNom = []
         f = open(filename)
         nbli = len(f.readlines())-1
-        print nbli
+        micrometeo.nbli=nbli
+        print "type(nbli)",type(nbli)
+        print "type(micrometeo.nbli)",type(micrometeo.nbli)
         f.close()
-        micrometeo.tabMeteo = np.zeros((nbli,13))
+        col = np.int32(13)
+        micrometeo.tabMeteo = np.zeros(micrometeo.nbli*col).reshape( micrometeo.nbli,col)
         f = open(filename)
         f.readline()
         li=[]
-        for i in range(nbli):
-            li.append(_read(f))
-        micrometeo.tabMeteo = np.array(li)
+##        for i in range(nbli):
+##            li=_read(f)
+##            for ii in range(len(li)):
+##                micrometeo.tabMeteo[ii,i] = li[ii]
+        print micrometeo.tabMeteo.size
+        f.close()
+        print 'MICROMETEO OK'
 
 def _read(f):
     l = f.readline()
@@ -41,7 +48,7 @@ def _read(f):
     l= l.split('\n')[0] # remove chr(13)
     l = l.split(' ')
     l = filter(None,l)
-    for j in l:
-        j=np.float32(j)
+    for j in range(len(l)):
+        l[j]=np.float32(l[j])
     return l
 

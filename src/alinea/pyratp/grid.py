@@ -36,8 +36,8 @@ class Grid(object):
         # voxel size according to X- Y- and Z- axis
         # TEST
         _read(f, grid3d.dx, grid3d.dy, grid3d.dz[:-1])
-        print 'grid3d.dx',grid3d.dx
-        print 'grid3d.dz',grid3d.dz
+##        print 'grid3d.dx',grid3d.dx
+##        print 'grid3d.dz',grid3d.dz
         # 3D grid origin
         _read(f, grid3d.xorig, grid3d.yorig, grid3d.zorig)
 
@@ -71,7 +71,9 @@ class Grid(object):
         kxyz = grid3d.kxyz
 
         nent = grid3d.nent
+        print "type(nent)",type(nent),nent
         nvegmax = njx * njy * njz
+        print "type(nvegmax)",type(nvegmax)
 
         xrang = njx * dx
         yrang = njy * dy
@@ -96,6 +98,7 @@ class Grid(object):
 
         grid3d.volume_canopy = np.zeros(nent+1)
         grid3d.voxel_canopy = np.zeros(nent)
+        print 'GRILLE OK'
         return grid3d
 
     @staticmethod
@@ -141,7 +144,7 @@ class Grid(object):
             raise ValueError('Negative area value is prohibited')
 
         ztot = grid.dz.sum()
-        print 'zmax',z.max(),'ztot',ztot
+##        print 'zmax',z.max(),'ztot',ztot
         if z.max() > ztot:
             raise ValueError('Some Z points are outside of the grid')
 
@@ -161,7 +164,7 @@ class Grid(object):
         for i in range(np.alen(dz)-1):
             dh=np.append(dh,dz[:i+1].sum())
         dh=np.delete(dh,0)
-        print 'dh',dh
+##        print 'dh',dh
         for i in range(np.alen(x)):
 
           # Compute the coord of each element in the grid.
@@ -208,30 +211,63 @@ class Grid(object):
                 grid.nje[kk]=max(je+1,grid.nje[kk])
                 grid.nemax=max(grid.nemax,grid.nje[kk])
                 grid.nume[je,kk]=entity[i]
-            grid.nveg=k
-        print 'grid.nveg',grid.nveg
-        print 'i,j,k,entuty,lad,surface1,surface2,azote'
 
-        for  jent in range(0,grid.nent):
-            for  k in range(0,grid.nveg):
+        grid.nveg=k
+        grid.nsol=grid.njx*grid.njy   # Numbering soil surface areas
+        for jx in range(grid.njx-1):
+            for jy in range(grid.njy-1):
+                grid.kxyz[jx,jy,grid.njz]=grid.njy*jx+jy+1
+        grid.n_canopy=grid.n_canopy/grid.s_canopy
 
-                for je in range (0,grid.nje[k]):
+        for k in range(grid.nveg-1):
+            for je in range(grid.nje[k]-1):
+                if je==0:
+                 grid.volume_canopy[grid.nent]=grid.volume_canopy[grid.nent]+dx*dy*dz[grid.numz[k]-1]  # Incrementing total canopy volume
+                if  grid.s_vt_vx[je,k]> 0. :
+                 grid.volume_canopy[grid.nume[je,k]-1]=grid.volume_canopy[grid.nume[je,k]-1]+dx*dy*dz[grid.numz[k]-1]
+                 grid.voxel_canopy[grid.nume[je,k]-1]=grid.voxel_canopy[grid.nume[je,k]-1]+1
 
-                    if jent==grid.nume[je,k]-1 :
-                        print grid.numx[k],grid.numy[k],grid.numz[k],grid.nume[je,k],grid.leafareadensity[je,k],grid.s_vt_vx[je,k], grid.s_vx[k],grid.n_detailed[je,k],k+1
+##
+##  do k=1,nveg
+##   do je=1,nje(k)
+##    if (je.eq.1) then
+##     volume_canopy(nent+1)=volume_canopy(nent+1)+dx*dy*dz(numz(k))  ! Incrementing total canopy volume
+##    endif
+##    if (S_vt_vx(je,k).gt.0.) then
+##     volume_canopy(nume(je,k))=volume_canopy(nume(je,k))+dx*dy*dz(numz(k))
+##     voxel_canopy(nume(je,k))=voxel_canopy(nume(je,k))+1
+##    end if
+##   end do
+##  end do
+##  do jent=1,nent
+##   !write(*,*)'Volume occupied by vegetation type ',jent,' (m3) :', volume_canopy(jent),'   (',voxel_canopy(jent),')'
+##  end do
+##  !write(*,*)'Volume occupied by total canopy (m3) :', volume_canopy(nent+1)
+##
+##  !write(*,*)'Average N nitrogen content (g m-2):',N_canopy
+##  !write(*,*)'Maximum number of vegetation types in one voxel:',nemax
+
+
+##        for  jent in range(0,grid.nent):
+##            for  k in range(0,grid.nveg):
+##
+##                for je in range (0,grid.nje[k]):
+##
+##                    if jent==grid.nume[je,k]-1 :
+##                        print grid.numx[k],grid.numy[k],grid.numz[k],grid.nume[je,k],grid.leafareadensity[je,k],grid.s_vt_vx[je,k], grid.s_vx[k],grid.n_detailed[je,k],k+1
 
 def _read(f, *args):
     l = f.readline()
     l= l.split('!')[0] # remove comments
     l = l.strip().split(' ')
     l = filter(None,l)
-    print 'l3',l,type(l)
+##    print 'l3',l,type(l)
     assert len(args) <= len(l)
     args = list(args)
-    print 'args',args, len(args)
+##    print 'args',args, len(args)
     for i in range(len(args)):
         taille = args[i].size
-        print l[i]
+##        print l[i]
         args[i].fill(l[i])
         if  taille >1:
             k=0

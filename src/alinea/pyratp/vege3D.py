@@ -128,6 +128,7 @@ class Vege3D(object):
 
             if nbLigne == typeVege : nbLigne=0
         file.close()
+        print 'VEGE3D OK'
         return (tabTypeVege,tabX,tabY,tabZ,tabS,tabN)
 
 

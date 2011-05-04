@@ -7,7 +7,7 @@ character*6 spec_mmeteo  ! for mmeteo
 
 ! Input meteorological data at current time step
 
-integer :: ntime
+integer :: ntime, nbli
 real :: day,hour    ! day and hour
 real, allocatable :: glob(:), diff(:), direct(:), dsg (:) ! global, diffuse and direction radiation in band iblo, D/G ratio in band iblo
 real :: ratmos      ! atmospheric radiation
@@ -39,20 +39,23 @@ contains
 
  end subroutine mm_initiate
 
- subroutine mm_read(ntime,tabMeteo)
+ subroutine mm_read(ntime,nbli)
+
   use grid3D
   use vegetation_types
 
-  real tabMeteo(:,:)
+  !dimension tabMeteo(nbli,13)
 
   character*17 pathMeteo
   character*6 spec
   integer ii
-
-  call mm_initiate
-
+  write(*,*) '...mm_read : ',ntime
+  !call mm_initiate
+    !write(*,*) 'taille tabmeteo : ',size(tabMeteo)
+    !write(*,*) 'shape tabmeteo : ',shape(tabMeteo),tabMeteo(1,1)
     ii = 1
     day=tabMeteo(ntime,ii)
+    write(*,*) '...mm_read day : ',day
     ii = ii+1
     hour=tabMeteo(ntime,ii)
     ii = ii+1

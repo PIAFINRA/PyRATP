@@ -31,7 +31,7 @@ contains
 
 
  !write(*,*)
- !write(*,*)  ' R. A. T. P.    Version 2.0'
+ write(*,*)  ' R. A. T. P.    Version 2.0'
  !write(*,*)  ' Radiation Absorption, Transpiration and Photosynthesis'
  !write(*,*)
  !write(*,*)  ' Spatial distribution in a 3D grid of voxels'
@@ -55,7 +55,6 @@ contains
  dpx=dx/5.
  dpy=dy/5.
 
-
  scattering=.FALSE.
  isolated_box=.FALSE.
 
@@ -63,7 +62,7 @@ contains
 
  call hi_doall(dpx,dpy,isolated_box)  ! Compute interception of diffuse and scattering radiation, ie exchange coefficients
 
-
+ pathResult = 'c:/tmpRATP/Resul/'
  fname=pathResult//'output_PARclasses.dat'
  open (2,file=fname)
  write(2,*) 'ntime day hour vt PARg %SF50 %SF100'
@@ -90,11 +89,19 @@ contains
  ntime=0
  endmeteo=.FALSE.
 
+    write(*,*) 'taille N_detailed : ',size(N_detailed)
+    write(*,*) 'shape N_detailed : ',shape(N_detailed),N_detailed(1,1)
+
+    write(*,*) 'taille tabMeteo : ',size(tabMeteo)
+    write(*,*) 'shape tabMeteo : ',shape(tabMeteo),tabMeteo(1,1)
+
  do while (.NOT.((endmeteo).OR.((nlarvaout+nlarvadead).ge.voxel_canopy(2))))
   ntime=ntime+1
-  write(*,*) '...Iteration : ',ntime
-  call mm_read(ntime,tabMeteo)  ! Read micrometeo data (line #ntime in file mmeteo.<spec>)
+  write(*,*) '...Iteration : ',ntime,nbli
+  !call mm_read(ntime,nbli)  ! Read micrometeo data (line #ntime in file mmeteo.<spec>)
+  write(*,*) '...mm_read : '
   call swrb_doall     ! Compute short wave radiation balance
+  write(*,*) '...swrb_doall : '
   call eb_doall_mine    ! Compute energy balance
   call miph_doall     ! Compute miner larva development
 
@@ -169,7 +176,7 @@ contains
 
 ! Deallocation des tableaux
 
- call g3d_destroy
+ !call g3d_destroy
  call sv_destroy
  call vt_destroy
  call mm_destroy

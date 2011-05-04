@@ -27,14 +27,14 @@ class Vegetation(object):
         listVegeNom = []
         f = open(filename)
         listVege = f.readlines()
-        print listVege
+##        print listVege
         f.close()
         listParamVege=[]
         nent = len(listVege)
         vegetation.mu = np.zeros(nent)
         vegetation.nbincli = np.zeros(nent)
         vegetation.nblo = np.zeros(nent)
-        vegetation.Aga = np.zeros((nent,2))
+        vegetation.Aga = np.zeros(nent*2).reshape(nent,2)
         vegetation.AgsN = np.zeros((nent,2))
         vegetation.i_gsPAR = np.zeros(nent)
         vegetation.AgsPAR = np.zeros((nent,10))
@@ -64,76 +64,76 @@ class Vegetation(object):
 
             _read(fVeg,varTemp)
             vegetation.mu[jent] = varTemp
-            print 'vegetation.mu',vegetation.mu
+##            print 'vegetation.mu',vegetation.mu
             _read(fVeg,varTemp)
             vegetation.nbincli[jent]=varTemp
-            print 'vegetation.nbincli',vegetation.nbincli
+##            print 'vegetation.nbincli',vegetation.nbincli
             if jent==0:
                 vegetation.distinc =  np.zeros((nent,vegetation.nbincli[jent]))
-                print 'vegetation.distinc',vegetation.distinc
+##                print 'vegetation.distinc',vegetation.distinc
             _read(fVeg,vegetation.distinc[jent])
-            print 'vegetation.distinc',vegetation.distinc[jent]
+##            print 'vegetation.distinc',vegetation.distinc[jent]
             _read(fVeg,varTemp)
             vegetation.nblo[jent]=varTemp
-            print 'vegetation.nblo[jent]', vegetation.nblo[jent]
+##            print 'vegetation.nblo[jent]', vegetation.nblo[jent]
 
             if jent==0:
                 vegetation.rf =  np.zeros((nent,vegetation.nblo[jent]))
             _read(fVeg,vegetation.rf[jent])
-            print 'vegetation.rf[jent]',vegetation.rf[jent]
+##            print 'vegetation.rf[jent]',vegetation.rf[jent]
 
             _read(fVeg,vegetation.Aga[jent])
             _read(fVeg,vegetation.AgsN[jent])
-            print 'vegetation.AgsN',vegetation.AgsN
+##            print 'vegetation.AgsN',vegetation.AgsN
 
             gsPar=(fVeg.readline().split('!')[0]).split('\t')
             vegetation.i_gsPAR[jent]=gsPar[0]
             for n in range(len(gsPar[2:])):
                 vegetation.AgsPAR[jent][n] = gsPar[2:][n]
-            print 'AgsPAR',vegetation.AgsPAR
+##            print 'AgsPAR',vegetation.AgsPAR
 
 
             gsCA=(fVeg.readline().split('!')[0]).split('\t')
             vegetation.i_gsCA[jent]=gsCA[0]
             for n in range(len(gsCA[2:])):
                 vegetation.AgsCA[jent][n] = gsCA[2:][n]
-            print 'AgsCA',vegetation.AgsCA
+##            print 'AgsCA',vegetation.AgsCA
 
 
             gsLT=(fVeg.readline().split('!')[0]).split('\t')
             vegetation.i_gsLT[jent]=gsLT[0]
             for n in range(len(gsLT[2:])):
                 vegetation.AgsLT[jent][n] = gsLT[2:][n]
-            print 'AgsLT',vegetation.AgsLT
+##            print 'AgsLT',vegetation.AgsLT
 
             _read(fVeg,vegetation.AgsVPD[jent])
-            print 'vegetation.AgsVPD',vegetation.AgsVPD
+##             'vegetation.AgsVPD',vegetation.AgsVPD
 
             _read(fVeg,vegetation.AVcmaxN[jent])
-            print 'vegetation.AVCmaxN',vegetation.AVcmaxN
+##             'vegetation.AVCmaxN',vegetation.AVcmaxN
 
             _read(fVeg,vegetation.AJmaxN[jent])
-            print 'vegetation.AJmaxN[jent]',vegetation.AJmaxN[jent]
+##            print 'vegetation.AJmaxN[jent]',vegetation.AJmaxN[jent]
 
             _read(fVeg,vegetation.ARdN[jent])
-            print 'vegetation.ARdN[jent]',vegetation.ARdN[jent]
+##            print 'vegetation.ARdN[jent]',vegetation.ARdN[jent]
             _read(fVeg,varMine)
             vegetation.Ismine[jent]=varMine
-            print 'vegetation.Ismine[jent]',vegetation.Ismine[jent]
+##            print 'vegetation.Ismine[jent]',vegetation.Ismine[jent]
             _read(fVeg,varEpm)
             vegetation.epm[jent]=varEpm
-            print 'vegetation.epm[jent]',vegetation.epm[jent]
+##            print 'vegetation.epm[jent]',vegetation.epm[jent]
             jent +=1
             fVeg.close()
-
+            print 'VEGETATION OK'
 
 
 def _read(f, *args):
     l = f.readline()
     l= l.split('!')[0] # remove comments
 ##    print 'l1',l, type(l)
-    l = l.strip().split('\t')
-##    l = l.split('\t')
+##    l = l.strip().split('\t')
+    l = l.split('\t')
 ##    print 'l2',l, type(l)
     l = filter(None,l)
 ##    print 'l3',l, type(l)
