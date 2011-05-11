@@ -28,11 +28,9 @@ class MicroMeteo(object):
         micrometeo.nbli=nbli
         f.close()
         col = np.int32(13)
-<<<<<<< .mine
+
         micrometeo.tabmeteo = np.zeros(micrometeo.nbli*col).reshape(micrometeo.nbli ,col)
-=======
-        micrometeo.tabMeteo = np.zeros((micrometeo.nbli,col), dtype=np.float32, order='F')
->>>>>>> .r1372
+
         f = open(filename)
         f.readline()
         li=[]
