@@ -23,15 +23,19 @@ class Skyvault(object):
         skyvault = pyratp.skyvault
         listGene = []
         f = open(filename)
-        ndir=int(f.readline().strip().split('\t')[0])
-        for n in range(ndir):
+        skyvault.ndir=int(f.readline().strip().split('\t')[0])
+        skyvault.hmoy=np.zeros(skyvault.ndir)
+        skyvault.azmoy=np.zeros(skyvault.ndir)
+        skyvault.omega=np.zeros(skyvault.ndir)
+        skyvault.pc=np.zeros(skyvault.ndir)
+        for n in range(skyvault.ndir):
             listGene.append(f.readline().strip().split('\t'))
         tabGene=np.array(listGene)
         tabGene = np.cast['float64'](tabGene)
-        hmoy=np.transpose(tabGene)[0]*math.pi / 180
-        azmoy=np.transpose(tabGene)[1]*math.pi / 180
-        omega=np.transpose(tabGene)[2]
-        pc=np.transpose(tabGene)[3]
+        skyvault.hmoy=np.transpose(tabGene)[0]*math.pi / 180
+        skyvault.azmoy=np.transpose(tabGene)[1]*math.pi / 180
+        skyvault.omega=np.transpose(tabGene)[2]
+        skyvault.pc=np.transpose(tabGene)[3]
         print 'SKYVAULT OK'
         f.close()
 

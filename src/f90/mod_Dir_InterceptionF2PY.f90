@@ -31,6 +31,7 @@ logical :: isolated_box   ! TRUE if isolated array of voxels (and FALSE if the a
 contains
  subroutine di_doall(hmoy0, azmoy0, omega0, dpx0, dpy0, scatt0, ib0)
 
+
 !
 ! Compute directional interception, i.e. variables ri, ff__b,
 !   for a given direction, i.e. defined by direction (hmoy0,azmoy0) (in degree) and solide angle omega0
@@ -54,6 +55,8 @@ contains
 
 
  real, allocatable :: xka(:)
+
+ ! write(*,*) 'di_doall debut'
 
   hmoy0=hmoy0*pi/180.    ! Conversion to radians
   azmoy0=azmoy0*pi/180.
@@ -89,8 +92,9 @@ contains
   allocate(rka(nent))
   xka=0.
   rka=0.
-
+!  write(*,*) 'nbincli',nbincli,'nent',nent
   do jent=1,nent  ! For each vegetation type
+
 !   sumrka=0.  ! Sum of rka over directions should be ONE
    di=(pi/2.)/nbincli(jent)
          do jinc=1,nbincli(jent)
@@ -127,7 +131,8 @@ contains
   allocate(share(nemax,nveg))
   xk=0.
   share=0.
-
+!  write(*,*) 'nveg',nveg
+!  write(*,*) 'leafareadensity',leafareadensity(2,2)
       do k=1,nveg
          do je=1,nje(k)
             share(je,k) = xka(nume(je,k)) * leafareadensity(je,k) *mu(nume(je,k))  ! Inclusion of a leaf dispersion parameter   (done on 11 March 2008)
@@ -138,6 +143,7 @@ contains
    end do
   end do
 
+!  write(*,*) 'deallocate(xka)'
   deallocate(xka)  ! Not ever used
 
 
@@ -202,7 +208,7 @@ contains
   if (oay.eq.0.) oay=1.e-08
   if (oaz.eq.0.) oaz=1.e-08
 
- ! write(*,*) 'Azimuth:',azmoy0*180./pi,' Elevation:',hmoy0*180./pi
+!  write(*,*) 'Azimuth:',azmoy0*180./pi,' Elevation:',hmoy0*180./pi
 
 !  Beam sampling
   do idx=1, idmx
@@ -216,6 +222,7 @@ contains
 
 ! STAR computations (from coefficients riv and share, and dividing by leaf area)
 
+ ! write(*,*) 'STAR computations'
   do k=1,nveg
    do je=1, nje(k)
     jent=nume(je,k)
@@ -386,7 +393,7 @@ contains
     endif
    endif
 
-!   write(*,*) 'kt=',kt,'jx=',jx,'jy=',jy,'jz=',jz
+   !write(*,*) 'kt=',kt,'jx=',jx,'jy=',jy,'jz=',jz
 
    kt=kt+1
    if (kt.gt.nraymax) then
@@ -421,6 +428,9 @@ contains
     if (jx.gt.njx) jx=jx-njx
     jy=jynum(kt)+jyy-1
     if (jy.gt.njy) jy=jy-njy
+
+!   write(*,*) 'jx,jy,jz,num(kt)=kxyz(jx,jy,jz) :',jx,jy,jz,kxyz(jx,jy,jz)
+
     num(kt)=kxyz(jx,jy,jz)
    end do  ! do-loop KT=1,KTM
    do kt=1,ktm-1      ! Computing light interception properties of grid voxels

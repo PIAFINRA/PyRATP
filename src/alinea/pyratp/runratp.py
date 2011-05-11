@@ -20,7 +20,7 @@ class runRATP(object):
         pass
     @staticmethod
     def DoAll(*args):
-        print 'DOALL'
+##        print 'DOALL'
         if os.path.isdir("c:/tmpRATP"):
             shutil.rmtree("c:/tmpRATP")
         #path = '/tmp/tmpRATP'

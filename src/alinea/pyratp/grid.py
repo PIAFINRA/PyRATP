@@ -36,8 +36,6 @@ class Grid(object):
         # voxel size according to X- Y- and Z- axis
         # TEST
         _read(f, grid3d.dx, grid3d.dy, grid3d.dz[:-1])
-##        print 'grid3d.dx',grid3d.dx
-##        print 'grid3d.dz',grid3d.dz
         # 3D grid origin
         _read(f, grid3d.xorig, grid3d.yorig, grid3d.zorig)
 
@@ -71,9 +69,7 @@ class Grid(object):
         kxyz = grid3d.kxyz
 
         nent = grid3d.nent
-        print "type(nent)",type(nent),nent
         nvegmax = njx * njy * njz
-        print "type(nvegmax)",type(nvegmax)
 
         xrang = njx * dx
         yrang = njy * dy
@@ -87,6 +83,7 @@ class Grid(object):
 
         grid3d.leafareadensity= np.zeros(nent*nvegmax).reshape(nent, nvegmax)
         grid3d.n_detailed = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+##        grid3d.toto = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
         grid3d.nume = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
 
         # Leaf area (m^2) per voxel and vegetation type
@@ -115,7 +112,6 @@ class Grid(object):
 
     @staticmethod
     def fill(entity, x, y, z, s, n ,grid):
-##        print entity, x, y, z, s, n
         """ Filling the 3D Grid with points, area and nitrogen content.
         lkjfkjrzelkrjzelrkjzer
         :Parameters:
@@ -144,7 +140,6 @@ class Grid(object):
             raise ValueError('Negative area value is prohibited')
 
         ztot = grid.dz.sum()
-##        print 'zmax',z.max(),'ztot',ztot
         if z.max() > ztot:
             raise ValueError('Some Z points are outside of the grid')
 
@@ -155,16 +150,15 @@ class Grid(object):
         grid.n_canopy = (n*s).sum()
         grid.s_canopy = s.sum()
          # sum the surface of each element of the same entity
-        for i in range(grid.nent-1):
+        for i in range(grid.nent):
             grid.s_vt[i] = s[entity==i+1].sum()
 
         dx, dy , dz = grid.dx, grid.dy, grid.dz
         #dh: tableau des hauteurs z
         dh = np.array(0)
-        for i in range(np.alen(dz)-1):
+        for i in range(np.alen(dz)):
             dh=np.append(dh,dz[:i+1].sum())
         dh=np.delete(dh,0)
-##        print 'dh',dh
         for i in range(np.alen(x)):
 
           # Compute the coord of each element in the grid.
@@ -194,6 +188,7 @@ class Grid(object):
                  grid.s_vt_vx[0,k]=s[i]
                  grid.s_vx[k]=s[i]
                  grid.n_detailed[0,k]=n[i]
+
                  k=k+1
             else:
               #    Cas ou il y avait deja quelque chose dans la cellule [jx,jy,jz]
@@ -206,68 +201,40 @@ class Grid(object):
                 grid.leafareadensity[je,kk]=grid.leafareadensity[je,kk]+s[i]/(dx*dy*dz[jz])
 
                 grid.n_detailed[je,kk]=(grid.n_detailed[je,kk]*grid.s_vt_vx[je,kk]+n[i]*s[i])/(grid.s_vt_vx[je,kk]+s[i])
+##                grid.toto[je,kk]=(grid.n_detailed[je,kk]*grid.s_vt_vx[je,kk]+n[i]*s[i])/(grid.s_vt_vx[je,kk]+s[i])
                 grid.s_vt_vx[je,kk] = grid.s_vt_vx[je,kk] + s[i]
                 grid.s_vx[kk] = grid.s_vx[kk] + s[i]
                 grid.nje[kk]=max(je+1,grid.nje[kk])
                 grid.nemax=max(grid.nemax,grid.nje[kk])
                 grid.nume[je,kk]=entity[i]
 
+##            print 'grid.kxyz',grid.kxyz[1:2]
         grid.nveg=k
         grid.nsol=grid.njx*grid.njy   # Numbering soil surface areas
-        for jx in range(grid.njx-1):
-            for jy in range(grid.njy-1):
+        for jx in range(grid.njx):
+            for jy in range(grid.njy):
                 grid.kxyz[jx,jy,grid.njz]=grid.njy*jx+jy+1
         grid.n_canopy=grid.n_canopy/grid.s_canopy
 
-        for k in range(grid.nveg-1):
-            for je in range(grid.nje[k]-1):
+        for k in range(grid.nveg):
+            for je in range(grid.nje[k]):
                 if je==0:
                  grid.volume_canopy[grid.nent]=grid.volume_canopy[grid.nent]+dx*dy*dz[grid.numz[k]-1]  # Incrementing total canopy volume
                 if  grid.s_vt_vx[je,k]> 0. :
                  grid.volume_canopy[grid.nume[je,k]-1]=grid.volume_canopy[grid.nume[je,k]-1]+dx*dy*dz[grid.numz[k]-1]
                  grid.voxel_canopy[grid.nume[je,k]-1]=grid.voxel_canopy[grid.nume[je,k]-1]+1
-
+##            print 'numx[k],numy[k],numz[k]',grid.numx[k],grid.numy[k],grid.numz[k]
 ##
-##  do k=1,nveg
-##   do je=1,nje(k)
-##    if (je.eq.1) then
-##     volume_canopy(nent+1)=volume_canopy(nent+1)+dx*dy*dz(numz(k))  ! Incrementing total canopy volume
-##    endif
-##    if (S_vt_vx(je,k).gt.0.) then
-##     volume_canopy(nume(je,k))=volume_canopy(nume(je,k))+dx*dy*dz(numz(k))
-##     voxel_canopy(nume(je,k))=voxel_canopy(nume(je,k))+1
-##    end if
-##   end do
-##  end do
-##  do jent=1,nent
-##   !write(*,*)'Volume occupied by vegetation type ',jent,' (m3) :', volume_canopy(jent),'   (',voxel_canopy(jent),')'
-##  end do
-##  !write(*,*)'Volume occupied by total canopy (m3) :', volume_canopy(nent+1)
-##
-##  !write(*,*)'Average N nitrogen content (g m-2):',N_canopy
-##  !write(*,*)'Maximum number of vegetation types in one voxel:',nemax
-
-
-##        for  jent in range(0,grid.nent):
-##            for  k in range(0,grid.nveg):
-##
-##                for je in range (0,grid.nje[k]):
-##
-##                    if jent==grid.nume[je,k]-1 :
-##                        print grid.numx[k],grid.numy[k],grid.numz[k],grid.nume[je,k],grid.leafareadensity[je,k],grid.s_vt_vx[je,k], grid.s_vx[k],grid.n_detailed[je,k],k+1
 
 def _read(f, *args):
     l = f.readline()
     l= l.split('!')[0] # remove comments
     l = l.strip().split(' ')
     l = filter(None,l)
-##    print 'l3',l,type(l)
     assert len(args) <= len(l)
     args = list(args)
-##    print 'args',args, len(args)
     for i in range(len(args)):
         taille = args[i].size
-##        print l[i]
         args[i].fill(l[i])
         if  taille >1:
             k=0

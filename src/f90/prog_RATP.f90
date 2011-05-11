@@ -59,6 +59,7 @@ contains
  isolated_box=.FALSE.
 
 ! call Farquhar_parameters_set
+ write(*,*) 'doall'
 
  call hi_doall(dpx,dpy,isolated_box)  ! Compute interception of diffuse and scattering radiation, ie exchange coefficients
 
@@ -83,34 +84,39 @@ contains
 
 
 ! Memory allocation in MinerPheno module
+ write(*,*) 'miph_destroy'
  call miph_destroy
+ write(*,*) 'miph_allocate'
  call miph_allocate ! includes Variable initiation to 0
 
  ntime=0
  endmeteo=.FALSE.
-
+ call mm_initiate
     write(*,*) 'taille N_detailed : ',size(N_detailed)
     write(*,*) 'shape N_detailed : ',shape(N_detailed),N_detailed(1,1)
 
     write(*,*) 'taille tabMeteo : ',size(tabMeteo)
     write(*,*) 'shape tabMeteo : ',shape(tabMeteo),tabMeteo(1,1)
+    write(*,*) 'voxel_canopy(2):',voxel_canopy(2)
 
  do while (.NOT.((endmeteo).OR.((nlarvaout+nlarvadead).ge.voxel_canopy(2))))
   ntime=ntime+1
   write(*,*) '...Iteration : ',ntime,nbli
-  !call mm_read(ntime,nbli)  ! Read micrometeo data (line #ntime in file mmeteo.<spec>)
+  call mm_read(ntime,nbli)  ! Read micrometeo data (line #ntime in file mmeteo.<spec>)
   write(*,*) '...mm_read : '
   call swrb_doall     ! Compute short wave radiation balance
   write(*,*) '...swrb_doall : '
   call eb_doall_mine    ! Compute energy balance
+  write(*,*) '...eb_doall_mine : '
   call miph_doall     ! Compute miner larva development
-
+  write(*,*) '...miph_doall : '
+  write(*,*) 'nent ',nent
   do jent=1,nent
    write(2,20) ntime, day, hour, jent, glob(1)*2.02/0.48, (Spar(jent,class)/S_vt(jent), class=1,45) ! %SF per irradiance class
    write(3,30) ntime, day, hour, jent, taref, (Sts(jent,class)/S_vt(jent), class=10,45)
   end do
 
-  write(10,70) ntime, day, hour, sum_taref, Nlarvaout, Nlarvadead, taref, sum_dev_rate(1), sum_dev_rate(10), sum_dev_rate(100)
+  write(10,70) ntime, day, hour, sum_taref, Nlarvaout, Nlarvadead, taref !, sum_dev_rate(1), sum_dev_rate(10), sum_dev_rate(100)
 
   !if (hour.eq.12) then
   do k=1,nveg
@@ -129,7 +135,7 @@ contains
   end do
   !end if
 
-  if (ntime.eq.ntimemax) then
+  if (ntime.eq.nbli) then
     endmeteo=.TRUE.
   end if
 
@@ -179,7 +185,7 @@ contains
  !call g3d_destroy
  call sv_destroy
  call vt_destroy
- call mm_destroy
+ !call mm_destroy
  call di_destroy
  call hi_destroy
  call swrb_destroy

@@ -26,22 +26,24 @@ class MicroMeteo(object):
         f = open(filename)
         nbli = len(f.readlines())-1
         micrometeo.nbli=nbli
-        print "type(nbli)",type(nbli)
-        print "type(micrometeo.nbli)",type(micrometeo.nbli)
         f.close()
         col = np.int32(13)
+<<<<<<< .mine
+        micrometeo.tabmeteo = np.zeros(micrometeo.nbli*col).reshape(micrometeo.nbli ,col)
+=======
         micrometeo.tabMeteo = np.zeros((micrometeo.nbli,col), dtype=np.float32, order='F')
+>>>>>>> .r1372
         f = open(filename)
         f.readline()
         li=[]
-##        for i in range(nbli):
-##            li=_read(f)
-##            for ii in range(len(li)):
-##                micrometeo.tabMeteo[ii,i] = li[ii]
-        print micrometeo.tabMeteo.size
+        for i in range(nbli):
+            li=_read(f)
+            for ii in range(len(li)):
+                micrometeo.tabmeteo[i,ii] = li[ii]
         f.close()
         print 'MICROMETEO OK'
         return micrometeo
+
 
 def _read(f):
     l = f.readline()

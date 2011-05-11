@@ -102,10 +102,11 @@ contains
 
 
 !     For each sky direction jdir, jdir=1,ndir
-  do jdir=1,ndir
+!  write(*,*) 'ndir',ndir
 
 !   Directional interception (includes computation of extinction coefficient, beam sampling, and exchange coefficients)
-
+  do jdir=1,ndir
+ !  write(*,*) 'jdir',jdir
    call di_doall(hmoy(jdir)*180./pi, azmoy(jdir)*180./pi, omega(jdir),dpx0,dpy0,scattering,isolated_box)
 
 

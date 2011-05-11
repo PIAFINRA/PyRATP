@@ -14,6 +14,7 @@ real :: ratmos      ! atmospheric radiation
 real :: tsol,taref,earef,caref ! soil temperature, air temperature, water vapour pressure in the air (Pa), CO2 partial pressure in the air (Pa)
 real, allocatable :: uref(:)  ! wind speed, in each horizontal layer (jz=1,njz)
 real, allocatable :: tabMeteo(:,:)  ! Meteo data
+
 integer :: ntimemax
 logical  :: endmeteo     ! TRUE if end of mmeteo file has been reached
 
@@ -49,27 +50,30 @@ contains
   character*17 pathMeteo
   character*6 spec
   integer ii
-  write(*,*) '...mm_read : ',ntime
+  !write(*,*) '...mm_read : ',ntime
+  !write(*,*) 'tabMeteo : ',(tabMeteo(ntime,ii),ii=1,13)
   !call mm_initiate
     !write(*,*) 'taille tabmeteo : ',size(tabMeteo)
     !write(*,*) 'shape tabmeteo : ',shape(tabMeteo),tabMeteo(1,1)
     ii = 1
     day=tabMeteo(ntime,ii)
-    write(*,*) '...mm_read day : ',day
+    !write(*,*) '...mm_read nblomin : ',nblomin
     ii = ii+1
     hour=tabMeteo(ntime,ii)
-    ii = ii+1
     do iblo=1,nblomin
+        ii = ii+1
         glob(iblo)=tabMeteo(ntime,ii)
         ii = ii+1
         diff(iblo)=tabMeteo(ntime,ii)
-        ii = ii+1
     end do
+    ii = ii+1
     ratmos=tabMeteo(ntime,ii)
     ii = ii+1
     tsol=tabMeteo(ntime,ii)
     ii = ii+1
     taref=tabMeteo(ntime,ii)
+    !write(*,*) 'ii,tabMeteo(ntime,ii) =',ii,tabMeteo(ntime,ii)
+    !write(*,*) 'taref =',taref
     ii = ii+1
     earef=tabMeteo(ntime,ii)
     ii = ii+1
@@ -78,7 +82,7 @@ contains
     urefref=tabMeteo(ntime,ii)
 
 
-   !write(*,*) 'day,hour =',day,hour !,(glob(iblo),diff(iblo),iblo=1,nblomin), ratmos,tsol,taref,earef,caref,urefref
+  ! write(*,*) 'day,hour =',day,hour ,(glob(iblo),diff(iblo),iblo=1,nblomin), ratmos,tsol,taref,earef,caref,urefref
 
 !   Rem: L'azimut 0 est défini pour la direction SUD,
 !      i.e. un rayon avancant vers le NORD, donc les X > 0
