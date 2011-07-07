@@ -217,7 +217,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
      drv=0.
      else
      rv=(rss+ra)*(rsi+ra)/(rss+rsi+2.*ra)
-     drv=(rss+ra)*drsi*(rss+rsi+2.*ra - rsi+ra)/(rss+rsi+2.*ra)**2
+     drv=((rss+ra)/(rss+rsi+2*ra))**2*drsi
     endif
 
     rh=ra/2.
@@ -385,7 +385,354 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   deallocate(rayirt)   ! Thermal infrared radiation emitted by shaded/sunlit foliage of each vegetation type in each voxel
 
  end subroutine eb_doall_mine
+!-----------------------------------------------------------eb_doall-------------------------------------------------------------
+ subroutine eb_doall
 
+! Computation of the energy balance of each vegetation type in each voxel.
+!   - compute net radiation, transpiration
+!   - computestomatal conductance, leaf resistances
+!   - compute leaf temperature
+
+
+  use constant_values
+  use grid3D
+  use skyvault
+  use vegetation_types
+  use dir_interception
+  use hemi_interception
+  use micrometeo
+  use shortwave_balance
+
+real, allocatable :: E(:,:,:)   ! Latent heat flux by shaded/sunlit foliage of each vegetation type in each voxel
+
+real, allocatable  :: raco2(:)   ! Leaf boundary layer resistance (s m-1) of each voxel for CO2 transport
+
+real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit are of each vegetation type in each voxel
+
+
+
+  real, allocatable :: rni(:,:,:)   ! Constant part in net radiation of shaded/sunlit foliage of each vegetation type in each voxel
+  real, allocatable :: rayirt(:,:,:)  ! Thermal infrared radiation emitted by shaded/sunlit foliage of each vegetation type in each voxel
+
+  real :: rayirtsol, ratm
+
+  logical :: next_iter      ! .TRUE. if an additional iteration is needed to solve the energy balance
+  integer :: niter        ! Iteration #
+  real  :: bilanmax       ! Maximum departure from energy balance observed during a given iteration
+
+  real  :: ga, ra       ! leaf boundary layer conductance (m s-1) / resistance (s m-1)
+  real  :: es, des       ! Saturating water vapor pressure (Pa), and its derivative with regard to leaf temperature
+
+  real  :: rss, rsi, drsi     ! Stomatal resistance / conductance of upper (rss) and lower (rsi, gsi) sides, and some derivatives
+
+  integer :: jent        ! Current vegetation type #
+  real  :: leaf_nitrogen, par_irrad, leaf_temp, VPDair ! Input parameters for Jarvis stomatal model
+
+  real  :: rv, drv, rh      ! Total resistance to water vapour (rv) and heat (rh) transfer, and derivative of rv
+  real  :: rn, drn       ! Net radiation of current shaded / sunlit vegetation type in currentvoxel (W m-2), and its derivative
+  real  :: devap        ! Derivative of current latent heat flux (with regard to temperature)
+  real  :: h, dh        ! Sensible heat flux from current shaded / sunlit vegetation type in currentvoxel (W m-2), and its derivative
+  real  :: bilan, dbilan     ! Departure from energy balance in current shaded / sunlit vegetation type in currentvoxel (W m-2), and its derivative
+
+  real  :: rssCO2, rsico2     ! Lower ans upper side stomatal resistance (s m-1) for CO2 transport
+
+  real :: epsilon          ! Intermediate term in decoupling factor calcultation
+
+  integer :: tsclass
+
+  call cv_set ! Setting physical constant values ...
+
+
+!  Allocation of module arrays
+
+  call eb_destroy
+
+  allocate(E_vt_vx(nemax,nveg))
+  allocate(E_vx(nveg))
+  allocate(E_vt(nent))
+  allocate(E_ss_vt(0:1,nent))
+
+  allocate(ts(0:1,nemax,nveg))
+  allocate(gs(0:1,nemax,nveg))
+  allocate(rco2(0:1,nemax,nveg))
+
+  allocate(Sts(nent,0:100))
+
+!  Initialisation of output variables for energy balance:
+
+  E_vt_vx = 0.  ! Evaporation rate per voxel and vegetation type
+  E_vx = 0.       ! Evaporation rate per voxel
+  E_vt = 0.    ! Evaporation rate per vegetation type
+  E_ss_vt = 0. ! Evaporation rate of shaded/sunlit area per vegetation type
+  E_ss = 0.      ! Evaporation rate of canopy shaded/sunlit area
+  E_canopy = 0.      ! Evaporation rate of canopy
+  H_canopy = 0.      ! Sensible heat rate of canopy
+
+  Sts=0.
+
+!  Allocation of local arrays
+
+  allocate(E(0:1,nemax,nveg))
+  allocate(raco2(nveg))
+  allocate(omega_factor(0:1,nemax,nveg))
+  allocate(rni(0:1,nemax,nveg))
+  allocate(rayirt(0:1,nemax,nveg))
+
+
+!  Starting net radiation balance
+
+  rayirtsol=sigma*(tsol+273.15)**4*dx*dy  ! TIR radiation emitted by each ground zone (W)
+  do k=1,nveg
+  do je=1,nje(k)
+!   Contribution of atmospheric radiation to long wave radiation balance of type je in voxel k
+         ratm=ratmos*rdiv(je,k)/S_vt_vx(je,k)
+!   Contribution of TIR radiation emitted by ground zones ksol, ksol=1,nsol
+   rsol=0.
+   do ksol=1,nsol
+    rsol=rsol+ffvs(k,je,ksol)
+   end do
+         rsol=rsol*rayirtsol/S_vt_vx(je,k)
+
+         do joe=0,1
+            rni(joe,je,k)=SWRA_detailed(joe,je,k)+ratm+rsol
+   end do
+  end do
+  end do
+
+!-----------------------------!
+!  Starting energy balance !
+!-----------------------------!
+
+!
+!  Initialisation of leaf temperature, i.e. equal to air temperature taref
+!
+  do k=1,nveg
+  do je=1,nje(k)
+  do joe=0,1
+   ts(joe,je,k)=taref
+         rayirt(joe,je,k)=2.*sigma*(taref+273.15)**4*S_detailed(joe,je,k)  ! TIR radiation flux emitted by shaded / sunlit vegetation in voxels (including 2 sides)
+  end do
+  end do
+  end do
+
+!
+!  Iterative solving of energy balance for each vegetation type in each voxel
+!
+
+      niter=0
+  next_iter=.TRUE.
+
+  do while (next_iter)
+
+   niter=niter+1
+   !write(*,*) 'Iteration:',niter
+
+   bilanmax=0.
+   E_canopy=0. ! Pour essai Shuttleworth-Wallace (09 Dec 2002, avec FB)
+   H_canopy=0.    ! idem
+
+   do k=1,nveg     ! Computation of the energy balance
+
+   do je=1,nje(k)    ! For each voxel, each vegetation type, shaded and sunlit area
+
+   do joe=0,1
+   !write(*,*) 'joe:',joe
+
+    jent=nume(je,k)
+    !write(*,*) 'jent:',jent
+    leaf_nitrogen = N_detailed(je,k)
+    par_irrad=PARirrad(joe,je,k)
+    leaf_temp=ts(joe,je,k)
+    esair=610.78*exp((17.27*taref)/(237.3+taref))
+    VPDair=esair-earef
+    !write(*,*) 'VPDair:',VPDair
+!    Leaf boundary resistance / conductance
+!
+!    ra : one-side resistance, in s.m-1
+!    ga : one-side conductance, in m s-1
+    !write(*,*) 'numz(k)',numz(k)
+    !write(*,*) 'uref(numz(k))',uref(numz(k))
+    ga=Aga(jent,1)*uref(numz(k))+Aga(jent,2)
+
+    !write(*,*) 'ga',ga
+    ra=1./ga
+
+!    Saturating water vapor pressure, es, at temperature ts: Tetens' formula (1930), en Pa
+!    and its derivative des, with regard to temperature ts
+
+    es=610.78*exp((17.27*ts(joe,je,k))/(237.3+ts(joe,je,k)))
+    des=610.78*17.27*237.3/((237.3+ts(joe,je,k))**2)*exp((17.27*ts(joe,je,k))/(237.3+ts(joe,je,k)))
+
+
+!    Stomatal resistance (in s m-1) / conductance (in m s-1)
+!    rss:  upper side stomatal resistance
+!    rsi:  lower side stomatal resistance
+!    gs :  lower side stomatal conductance
+
+    rss=10000.    ! Arbitrary high value
+    !write(*,*) 'call Jarvis_stomata avant'
+    call Jarvis_stomata(jent,leaf_nitrogen,par_irrad,caref,leaf_temp,VPDair,ga,rsi,drsi)
+    !write(*,*) 'call Jarvis_stomata apres'
+
+!    Total resistances, i.e. boundary layer + stomatal and 2 sides, in s m-1
+!    rv : water vapour transfert
+!    rh : heat transfert
+
+    if (es.lt.earef) then   ! Saturation at leaf surface (i.e. dew formation)
+     rv=ra/2.
+     drv=0.
+     else
+     rv=(rss+ra)*(rsi+ra)/(rss+rsi+2.*ra)
+     drv=((rss+ra)/(rss+rsi+2*ra))**2*drsi
+    endif
+
+    rh=ra/2.
+
+!
+!    Computation of the energy terms of the energy balance
+!    (as a function of leaf temperature)
+
+!    1- Net radiation : rn (W m-2)
+
+    rn=rni(joe,je,k)
+    do ks=1,nveg    ! Contribution of emitted radiation by shaded / sunlit vegetation in every voxel
+    do jes=1,nje(ks)
+    do joes=0,1
+     rn=rn+ffvv(k,je,ks,jes)*rayirt(joes,jes,ks)/S_vt_vx(je,k)
+    end do
+    end do
+    end do
+    rn=rn-rayirt(joe,je,k)/S_detailed(joe,je,k)
+
+!    1'- Derivative of net radiation with regard to leaf temperature: drn
+
+    drn=2*4*sigma*(ts(joe,je,k)+273.15)**3*(ffvv(k,je,k,je)*S_detailed(joe,je,k)/(S_vt_vx(je,k))-1.)
+
+
+!    2- Latent heat flux: evap, in W m-2
+
+    E(joe,je,k)=(rho*cp/gamma)*(es-earef)/rv
+    E_canopy=E_canopy+E(joe,je,k)*S_detailed(joe,je,k)
+
+!    2'- Derivative of latent heat flux with regard to leaf temperature: devap
+
+    devap=(rho*cp/gamma)*(des*rv-(es-earef)*drv)/rv**2
+
+
+!    3- Sensible heat flux: h (W m-2)
+
+    h=(rho*cp)*(ts(joe,je,k)-taref)/rh
+    H_canopy=H_canopy+h*S_detailed(joe,je,k)
+
+!    3'- Derivative of sensible heat flux with regard to leaf temperature: dh
+
+    dh=rho*cp/rh
+
+!    5- Energy balance (bilan) and its derivative (dbilan)
+
+    bilan=rn-E(joe,je,k)-h
+    dbilan=drn-devap-dh
+    bilanmax=amax1(bilanmax,abs(bilan))
+
+!    6- Updating leaf temperature (and emitted TIR radiation) for next iteration
+
+    ts(joe,je,k)=ts(joe,je,k)-(bilan/dbilan)
+    rayirt(joe,je,k)=2.*sigma*(ts(joe,je,k)+273.15)**4*S_detailed(joe,je,k)
+
+
+!    Computation of resistances to CO2 transport (in s m-1)
+!
+    raco2(k)=1.37*ra    ! Leaf boundary layer resistance for CO2 transfert
+    rssco2=1.6*rss     ! Upper side stomatal resistance for CO2 transfert
+    rsico2=1.6*rsi     ! Lower side stomatal resistance for CO2 transfert
+!    Total resistance to CO2 transfert, i.e. leaf boundary layer + stomatal and 2 sides
+    rco2(joe,je,k)=(rssco2+raco2(k))*(rsico2+raco2(k))/(rssco2+rsico2+2.*raco2(k))
+!    Conversion to µmol CO2-1 m2 s   (a 25 °C)
+    rco2(joe,je,k)=rco2(joe,je,k)/1000./0.0414 / 1.e6
+
+
+!    Computation of the decoupling factor (omega), Jarvis et Mc Naughton (1986)
+!
+    gs(joe,je,k)=1/rss + 1/rsi
+    epsilon=des/gamma + 2.
+    omega_factor(joe,je,k)=epsilon/(epsilon + 2. * ga/gs(joe,je,k) )
+
+   end do    ! Loop-end of computation of the energy balance
+   end do
+   end do
+
+   !write(*,*) 'Iteration #',niter,'Maximum deviation from energy balance (W m-2): ',bilanmax
+
+   next_iter = (bilanmax.gt.1).and.(niter.lt.100)
+
+  end do
+
+!  Summing up evaporation rates at different levels
+
+  do k=1,nveg
+   do je=1,nje(k)
+    jent=nume(je,k)
+    do joe=0,1
+     E(joe,je,k) = E(joe,je,k) * S_detailed(joe,je,k)/lambda/18*1000.  ! Evaporation rate in mmol H20 s-1
+     E_vt_vx(je,k) = E_vt_vx(je,k) + E(joe,je,k)
+     E_vx(k) = E_vx(k) + E(joe,je,k)
+     E_vt(jent) = E_vt(jent) + E(joe,je,k)
+     E_ss_vt(joe,jent) = E_ss_vt(joe,jent) + E(joe,je,k)
+     E_ss(joe) = E_ss(joe) + E(joe,je,k)
+    end do
+   end do
+  end do
+  E_canopy = E_canopy / lambda/18*1000.  ! Evaporation rate in mmol H20 s-1
+
+
+!  Normalisation of Es by leaf area
+
+  do k=1,nveg
+   do je=1,nje(k)
+    E_vt_vx(je,k)=E_vt_vx(je,k)/S_vt_vx(je,k)
+   end do
+   E_vx(k)=E_vx(k)/S_vx(k)
+  end do
+  do jent=1,nent
+   do joe=0,1
+    E_ss_vt(joe,jent)=E_ss_vt(joe,jent)/S_ss_vt(joe,jent)
+   end do
+   E_vt(jent)=E_vt(jent)/S_vt(jent)
+  end do
+  do joe=0,1
+   E_ss(joe)=E_ss(joe)/S_ss(joe)
+  end do
+  E_canopy = E_canopy / S_canopy
+  H_canopy = H_canopy / S_canopy
+
+
+!  Distribution of leaf temperature at canopy scale
+
+  do k=1,nveg
+   do je=1,nje(k)
+    do joe=0,1
+     tsclass=int(ts(joe,je,k))+1
+     Sts(nume(je,k),tsclass)=Sts(nume(je,k),tsclass)+S_detailed(joe,je,k)
+    end do
+   end do
+  end do
+
+
+
+!  write(*,*) 'gs',gs(0,1,kxyz(4,9,8)),gs(1,1,kxyz(4,9,8))
+!  write(*,*) 'rni',rni(0,1,kxyz(4,9,8)),rni(1,1,kxyz(4,9,8))
+
+
+! Deallocation of local arrays used in subroutine eb_doall
+  deallocate(E)     ! Latent heat flux by shaded/sunlit foliage of each vegetation type in each voxel
+  deallocate(raco2)    ! Leaf boundary layer resistance (s m-1) of each voxel for CO2 transport
+!  deallocate(gs)     ! Stomatal conductance (two sides) (m s-1) of shaded/sunlit are of each vegetation type in each voxel
+  deallocate(omega_factor) ! Decoupling factor of shaded/sunlit are of each vegetation type in each voxel
+  deallocate(rni)    ! Constant part in net radiation of shaded/sunlit foliage of each vegetation type in each voxel
+  deallocate(rayirt)   ! Thermal infrared radiation emitted by shaded/sunlit foliage of each vegetation type in each voxel
+
+ end subroutine eb_doall
+!------------------------------------------------------------------end  eb_doall
 
  subroutine Jarvis_stomata(jent,leaf_nitrogen,par_irrad,ca,leaf_temp, VPDair,ga,rsi,drsi)
 

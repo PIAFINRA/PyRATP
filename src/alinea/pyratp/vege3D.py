@@ -112,7 +112,7 @@ class Vege3D(object):
             if bltypeVege :
                 typeV = nbLigne
             else:
-                typeV=2#random.randint(1,typeVege)
+                typeV = 1 #random.randint(1,typeVege)
 
             X = (liste[listEntete.index("TransX")])
             Y = (liste[listEntete.index("TransY")])
