@@ -1,5 +1,5 @@
 
-# This file has been generated at Mon May 30 15:17:13 2011
+# This file has been generated at Thu Oct 13 11:32:38 2011
 
 from openalea.core import *
 
@@ -57,7 +57,7 @@ ratp_fill_grid = Factory(name='fill grid',
                 category='Unclassified',
                 nodemodule='ratp',
                 nodeclass='fill_grid',
-                inputs=[{'interface': ISequence, 'name': 'entity', 'value': None, 'desc': '3d Grid file'}, {'interface': IFloat, 'name': 'x', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'y', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'z', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 's', 'value': None, 'desc': ''}, {'interface': None, 'name': 'n', 'value': None, 'desc': ''}, {'interface': None, 'name': 'grid', 'value': None, 'desc': ''}],
+                inputs=[{'interface': IInt, 'name': 'entity', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'x', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'y', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'z', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 's', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'n', 'value': None, 'desc': ''}, {'interface': None, 'name': 'grid', 'value': None, 'desc': ''}],
                 outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
                 widgetmodule=None,
                 widgetclass=None,
@@ -88,7 +88,7 @@ ratp_read_vgx = Factory(name='plant from vegestar',
                 nodemodule='ratp',
                 nodeclass='read_vgx',
                 inputs=[{'interface': IFileStr(filter="*.vgx", save=False), 'name': 'filename', 'value': None, 'desc': 'Vegestar 3d Grid file'}],
-                outputs=[{'interface': ISequence, 'name': 'entity', 'desc': 'No output for the moment'}, {'interface': IFloat, 'name': 'x', 'desc': ''}, {'interface': None, 'name': 'y', 'desc': ''}, {'interface': None, 'name': 'z', 'desc': ''}, {'interface': None, 'name': 's', 'desc': ''}, {'interface': None, 'name': 'n', 'desc': ''}],
+                outputs=[{'interface': IInt, 'name': 'entity', 'desc': ''}, {'interface': IFloat, 'name': 'x', 'desc': ''}, {'interface': IFloat, 'name': 'y', 'desc': ''}, {'interface': IFloat, 'name': 'z', 'desc': ''}, {'interface': IFloat, 'name': 's', 'desc': ''}, {'interface': IFloat, 'name': 'n', 'desc': ''}],
                 widgetmodule=None,
                 widgetclass=None,
                )

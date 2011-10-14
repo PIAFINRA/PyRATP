@@ -16,6 +16,7 @@ real, allocatable :: gs(:,:,:)   ! Stomatal conductance (two sides) (m s-1) of s
 
 real, allocatable :: rco2(:,:,:)  ! Total leaf resistance (2 sides, boundary layer + stomatal, s m-1) of each voxel for CO2 transport
 
+real, allocatable :: E(:,:,:)   ! Latent heat flux by shaded/sunlit foliage of each vegetation type in each voxel
 
 contains
 
@@ -36,7 +37,7 @@ contains
   use micrometeo
   use shortwave_balance
 
-real, allocatable :: E(:,:,:)   ! Latent heat flux by shaded/sunlit foliage of each vegetation type in each voxel
+
 
 real, allocatable  :: raco2(:)   ! Leaf boundary layer resistance (s m-1) of each voxel for CO2 transport
 
@@ -85,6 +86,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   allocate(E_vx(nveg))
   allocate(E_vt(nent))
   allocate(E_ss_vt(0:1,nent))
+  allocate(E(0:1,nemax,nveg))
 
   allocate(ts(0:1,nemax,nveg))
   allocate(gs(0:1,nemax,nveg))
@@ -101,12 +103,12 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   E_ss = 0.      ! Evaporation rate of canopy shaded/sunlit area
   E_canopy = 0.      ! Evaporation rate of canopy
   H_canopy = 0.      ! Sensible heat rate of canopy
-
+  E = 0.
   Sts=0.
 
 !  Allocation of local arrays
 
-  allocate(E(0:1,nemax,nveg))
+
   allocate(raco2(nveg))
   allocate(omega_factor(0:1,nemax,nveg))
   allocate(rni(0:1,nemax,nveg))
@@ -377,7 +379,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
 
 
 ! Deallocation of local arrays used in subroutine eb_doall
-  deallocate(E)     ! Latent heat flux by shaded/sunlit foliage of each vegetation type in each voxel
+
   deallocate(raco2)    ! Leaf boundary layer resistance (s m-1) of each voxel for CO2 transport
 !  deallocate(gs)     ! Stomatal conductance (two sides) (m s-1) of shaded/sunlit are of each vegetation type in each voxel
   deallocate(omega_factor) ! Decoupling factor of shaded/sunlit are of each vegetation type in each voxel
@@ -403,7 +405,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   use micrometeo
   use shortwave_balance
 
-real, allocatable :: E(:,:,:)   ! Latent heat flux by shaded/sunlit foliage of each vegetation type in each voxel
+
 
 real, allocatable  :: raco2(:)   ! Leaf boundary layer resistance (s m-1) of each voxel for CO2 transport
 
@@ -451,7 +453,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   allocate(E_vx(nveg))
   allocate(E_vt(nent))
   allocate(E_ss_vt(0:1,nent))
-
+  allocate(E(0:1,nemax,nveg))
   allocate(ts(0:1,nemax,nveg))
   allocate(gs(0:1,nemax,nveg))
   allocate(rco2(0:1,nemax,nveg))
@@ -467,12 +469,12 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   E_ss = 0.      ! Evaporation rate of canopy shaded/sunlit area
   E_canopy = 0.      ! Evaporation rate of canopy
   H_canopy = 0.      ! Sensible heat rate of canopy
-
+  E = 0.
   Sts=0.
 
 !  Allocation of local arrays
 
-  allocate(E(0:1,nemax,nveg))
+
   allocate(raco2(nveg))
   allocate(omega_factor(0:1,nemax,nveg))
   allocate(rni(0:1,nemax,nveg))
@@ -724,7 +726,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
 
 
 ! Deallocation of local arrays used in subroutine eb_doall
-  deallocate(E)     ! Latent heat flux by shaded/sunlit foliage of each vegetation type in each voxel
+  !deallocate(E)     ! Latent heat flux by shaded/sunlit foliage of each vegetation type in each voxel
   deallocate(raco2)    ! Leaf boundary layer resistance (s m-1) of each voxel for CO2 transport
 !  deallocate(gs)     ! Stomatal conductance (two sides) (m s-1) of shaded/sunlit are of each vegetation type in each voxel
   deallocate(omega_factor) ! Decoupling factor of shaded/sunlit are of each vegetation type in each voxel
@@ -937,7 +939,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   if (allocated(E_vx))   deallocate(E_vx)
   if (allocated(E_vt))   deallocate(E_vt)
   if (allocated(E_ss_vt))  deallocate(E_ss_vt)
-
+  if (allocated(E))  deallocate(E)
   if (allocated(ts))   deallocate(ts)
   if (allocated(gs))   deallocate(gs)
   if (allocated(rco2))   deallocate(rco2)

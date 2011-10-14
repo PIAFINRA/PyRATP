@@ -37,7 +37,7 @@ contains
 
 
  !write(*,*)
- !write(*,*)  ' R. A. T. P.    Version 2.0'
+ write(*,*)  ' R. A. T. P. Mineuse   Version 2.0'
  !write(*,*)  ' Radiation Absorption, Transpiration and Photosynthesis'
  !write(*,*)
  !write(*,*)  ' Spatial distribution in a 3D grid of voxels'
@@ -64,7 +64,7 @@ contains
  scattering=.FALSE.
  isolated_box=.FALSE.
 
-! call Farquhar_parameters_set
+ call Farquhar_parameters_set
  !write(*,*) 'doall'
 
  call hi_doall(dpx,dpy,isolated_box)  ! Compute interception of diffuse and scattering radiation, ie exchange coefficients
@@ -128,7 +128,8 @@ contains
    do class = 1,45
     out_time_tree(itertree,class+51) = Sts(jent,class)/S_vt(jent)
    end do
-
+   out_time_tree(itertree,97) = A_canopy
+   out_time_tree(itertree,98) = E_canopy
    write(2,20) ntime, day, hour, jent, glob(1)*2.02/0.48, (Spar(jent,class)/S_vt(jent), class=1,45) ! %SF per irradiance class
    write(3,30) ntime, day, hour, jent, taref, (Sts(jent,class)/S_vt(jent), class=10,45)
   end do
@@ -141,25 +142,31 @@ contains
      iterspatial = iterspatial +1
      jent=nume(je,k)
      if (ismine(jent).eq.1) then
-       out_time_spatial(iterspatial,1) = ntime
+      out_time_spatial(iterspatial,1) = ntime
        out_time_spatial(iterspatial,2) = day
        out_time_spatial(iterspatial,3) = hour
-       out_time_spatial(iterspatial,4) = k
-       out_time_spatial(iterspatial,5) = ts(0,1,k)
-       out_time_spatial(iterspatial,6) = ts(0,2,k)
-       out_time_spatial(iterspatial,7) = ts(1,1,k)
-       out_time_spatial(iterspatial,8) = ts(1,2,k)
-       out_time_spatial(iterspatial,9) = taref
+       out_time_spatial(iterspatial,4) = taref
+       out_time_spatial(iterspatial,5) = k
+    !Boucler sur nombre vegetation
+       out_time_spatial(iterspatial,6) = ts(0,je,k)
+       out_time_spatial(iterspatial,7) = ts(1,je,k)
+    !Boucler sur nombre vegetation
+       out_time_spatial(iterspatial,8) = A_detailed(0,je,k)
+       out_time_spatial(iterspatial,9) = A_detailed(1,je,k)
+       out_time_spatial(iterspatial,10) = E(0,je,k)
+       out_time_spatial(iterspatial,11) = E(1,je,k)
+       out_time_spatial(iterspatial,12) = S_detailed(0,je,k)
+       out_time_spatial(iterspatial,13) = S_detailed(1,je,k)
 
       if (larvadeath(k).gt.0) then
        write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, 1000 + ntime + .0
-       out_time_spatial(iterspatial,10) = 1000 + ntime + .0
+       out_time_spatial(iterspatial,14) = 1000 + ntime + .0
       else if  (larvaout(k).gt.0) then
        write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, 5000 + ntime + .0
-       out_time_spatial(iterspatial,10) = 5000 + ntime + .0
+       out_time_spatial(iterspatial,14) = 5000 + ntime + .0
       else
        write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, tbody(k)
-       out_time_spatial(iterspatial,10) = tbody(k)
+       out_time_spatial(iterspatial,14) = tbody(k)
       end if
      end if
    end do
@@ -235,7 +242,7 @@ contains
 subroutine do_all
 
  !write(*,*)
- !write(*,*)  ' R. A. T. P.    Version 2.0'
+ write(*,*)  ' R. A. T. P.    Version 2.0'
  !write(*,*)  ' Radiation Absorption, Transpiration and Photosynthesis'
  !write(*,*)
  !write(*,*)  ' Spatial distribution in a 3D grid of voxels'
@@ -262,7 +269,7 @@ subroutine do_all
  scattering=.FALSE.
  isolated_box=.FALSE.
 
-! call Farquhar_parameters_set
+ call Farquhar_parameters_set
  !write(*,*) 'doall'
 
  call hi_doall(dpx,dpy,isolated_box)  ! Compute interception of diffuse and scattering radiation, ie exchange coefficients
@@ -293,9 +300,10 @@ subroutine do_all
   call mm_read(ntime,nbli)  ! Read micrometeo data (line #ntime in file mmeteo.<spec>)
   !write(*,*) '...mm_read : '
   call swrb_doall     ! Compute short wave radiation balance
-  !write(*,*) '...swrb_doall : '
-  call eb_doall
 
+  call eb_doall
+  call ps_doall
+  write(*,*) '...swrb_doall : '
   do jent=1,nent
    itertree = itertree +1
    out_time_tree(itertree,1) = ntime
@@ -310,7 +318,8 @@ subroutine do_all
    do class = 1,45
     out_time_tree(itertree,class+51) = Sts(jent,class)/S_vt(jent)
    end do
-
+   out_time_tree(itertree,97) = A_canopy
+   out_time_tree(itertree,98) = E_canopy
    write(2,20) ntime, day, hour, jent, glob(1)*2.02/0.48, (Spar(jent,class)/S_vt(jent), class=1,45) ! %SF per irradiance class
    write(3,30) ntime, day, hour, jent, taref, (Sts(jent,class)/S_vt(jent), class=10,45)
   end do
@@ -321,20 +330,25 @@ subroutine do_all
    do je=1,nje(k)
      iterspatial = iterspatial +1
      jent=nume(je,k)
-
+       !write(*,*) k,je,jent
        out_time_spatial(iterspatial,1) = ntime
        out_time_spatial(iterspatial,2) = day
        out_time_spatial(iterspatial,3) = hour
-       out_time_spatial(iterspatial,4) = k
+       out_time_spatial(iterspatial,4) = taref
+       out_time_spatial(iterspatial,5) = k
     !Boucler sur nombre vegetation
-     !  out_time_spatial(iterspatial,5) = ts(0,1,k)
-      ! out_time_spatial(iterspatial,6) = ts(0,2,k)
-     !  out_time_spatial(iterspatial,7) = ts(1,1,k)
-     !  out_time_spatial(iterspatial,8) = ts(1,2,k)
+       out_time_spatial(iterspatial,6) = ts(0,je,k)
+       out_time_spatial(iterspatial,7) = ts(1,je,k)
     !Boucler sur nombre vegetation
+       out_time_spatial(iterspatial,8) = A_detailed(0,je,k)
+       out_time_spatial(iterspatial,9) = A_detailed(1,je,k)
+       out_time_spatial(iterspatial,10) = E(0,je,k)
+       out_time_spatial(iterspatial,11) = E(1,je,k)
+       out_time_spatial(iterspatial,12) = S_detailed(0,je,k)
+       out_time_spatial(iterspatial,13) = S_detailed(1,je,k)
 
-       out_time_spatial(iterspatial,9) = taref
-       write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref
+
+        write(12,90) ntime, day, hour, k, ts(0,1,k), ts(1,1,k), taref
    end do
   end do
   !end if
@@ -363,7 +377,7 @@ subroutine do_all
 30 format(i4,1x,f4.0,1x,f6.2,1x,i2,1x,f6.2,50(1x,f5.3))
 70 format(i4,1x,f4.0,1x,f6.2,1x,f9.0,2(1x,i5),1x,f6.2,3(1x,f6.4))
 80 format(i5,1x,3(i3,1x),2(i4,1x),f8.1)
-90 format(i4,1x,f4.0,1x,f6.2,1x,i5,6(1x,f8.3))
+90 format(i4,1x,f4.0,1x,f6.2,1x,i5,3(1x,f8.3))
 
 
 ! Deallocation des tableaux

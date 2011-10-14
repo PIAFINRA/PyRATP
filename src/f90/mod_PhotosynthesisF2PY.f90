@@ -30,7 +30,7 @@ real, allocatable :: cvcmax(:,:)   ! Scaling factor for VCmax, depends on vegeta
 real, allocatable :: cjmax(:,:)   ! Scaling factor for Jmax, depends on vegetation type# and voxel#, beacuse depends on leaf nitrogen content.
 real, allocatable :: crespd(:,:)   ! Scaling factor for RespD, depends on vegetation type# and voxel#, beacuse depends on leaf nitrogen content.
 
-
+real, allocatable :: A_detailed(:,:,:)! Assimilation rate per voxel and vegetation of shaded/sunlit area
 real, allocatable :: A_vt_vx(:,:)  ! Assimilation rate per voxel and vegetation type
 real, allocatable :: A_vx(:)       ! Assimilation rate per voxel
 real, allocatable :: A_vt(:)    ! Assimilation rate per vegetation type
@@ -40,13 +40,13 @@ real ::      A_canopy         ! Assimilation rate of canopy
 
 
 contains
- 
+
  subroutine Farquhar_parameters_set
 
 
 ! Parameters of the Farquhar's model : default values, ie for walnut tree (Le Roux et al. 1999)
 !
-! RUBISCO PARAMETERS AT 25°C 
+! RUBISCO PARAMETERS AT 25°C
 !
   kc25=27.9   !  kc25: Michaelis constant of Rubisco for carboxylation (Pa)
   ko25=41959   !  ko25: Michaelis constant of Rubisco for oxigenation (Pa)
@@ -116,7 +116,7 @@ contains
 
     Jmax25 = AJmaxN(jent,1) * N_detailed(je,k) + AJmaxN(jent,1)
     cjmax(je,k) = alog( Jmax25 / (exp(-dhajmax/r/298.15)/(1+exp(dsjmax/r- (dhdjmax/r/298.15)))) )
-    
+
     Rd25 = ARdN(jent,1) * N_detailed(je,k) + ARdN(jent,1)
     crespd(je,k) = alog( Rd25 / exp(-dharespd/r/298.15) )
    end do
@@ -143,14 +143,14 @@ contains
   call Farquhar_scaling_factors
 
 !  Allocation of module arrays (except arrays of scaling factors allocated in
-
+  allocate(A_detailed(0:1,nemax,nveg))
   allocate(A_vt_vx(nemax,nveg))
   allocate(A_vx(nveg))
   allocate(A_vt(nent))
   allocate(A_ss_vt(0:1,nent))
 
 !  Initialisation of output variables for photosynthesis:
-   
+  A_detailed = 0.
   A_vt_vx = 0.  ! Assimilation rate per voxel and vegetation type
   A_vx = 0.       ! Assimilation rate per voxel
   A_vt = 0.    ! Assimilation rate per vegetation type
@@ -168,15 +168,16 @@ contains
      rco2Pa=rco2(joe,je,k)*101325. ! Conversion into µmol CO2-1 m2 s Pa
      A=0.
      call Farquhar_model_1(A,crespd(je,k),cvcmax(je,k),cjmax(je,k),rco2Pa,ts(joe,je,k)+273.15,PARirrad(joe,je,k),caref)
-     
+
      A = A * S_detailed(joe,je,k)  ! Net A rate in µmol CO2 s-1
+     A_detailed(joe,je,k) = A
      A_vt_vx(je,k) = A_vt_vx(je,k) + A
      A_vx(k) = A_vx(k) + A
      A_vt(jent) = A_vt(jent) + A
      A_ss_vt(joe,jent) = A_ss_vt(joe,jent) + A
      A_ss(joe) = A_ss(joe) + A
      A_canopy = A_canopy + A
-    end do 
+    end do
    end do
   end do
 
@@ -185,7 +186,7 @@ contains
   do k=1,nveg
    do je=1,nje(k)
     A_vt_vx(je,k)=A_vt_vx(je,k)/S_vt_vx(je,k)
-   end do 
+   end do
    A_vx(k)=A_vx(k)/S_vx(k)
   end do
   do jent=1,nent
@@ -198,7 +199,7 @@ contains
    A_ss(joe)=A_ss(joe)/S_ss(joe)
   end do
   A_canopy = A_canopy / S_canopy
-     
+
 
  end subroutine ps_doall
 
@@ -230,7 +231,7 @@ contains
   aa=rco2Pa
   bb=(4.*respd-zj)*rco2Pa/4. - caref - O2/specif
   ccc=zj*(caref/4.-O2/specif/8.)-respd*(caref+O2/specif)
-  dd=bb*bb-4.*aa*ccc    
+  dd=bb*bb-4.*aa*ccc
   wj=(-bb-sqrt(dd))/(2*aa)
 
 !  Assimilation rate limited by Rubisco,  Wc (µmol CO2 m-2 s-1)
@@ -252,7 +253,7 @@ contains
   if (allocated(cjmax)) deallocate(cjmax)  ! Scaling factor for Jmax, depends on vegetation type# and voxel#, beacuse depends on leaf nitrogen content.
   if (allocated(crespd)) deallocate(crespd) ! Scaling factor for RespD, depends on vegetation type# and voxel#, beacuse depends on leaf nitrogen content.
 
-
+  if (allocated(A_detailed)) deallocate(A_detailed)! Assimilation rate per voxel and vegetation of shaded/sunlit area
   if (allocated(A_vt_vx))  deallocate(A_vt_vx) ! Assimilation rate per voxel and vegetation type
   if (allocated(A_vx))   deallocate(A_vx)      ! Assimilation rate per voxel
   if (allocated(A_vt))   deallocate(A_vt)   ! Assimilation rate per vegetation type

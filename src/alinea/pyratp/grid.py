@@ -144,14 +144,13 @@ class Grid(object):
             raise ValueError('Some Z points are outside of the grid')
 
         grid.nemax = 1
-        nft, k = 0, 0
+        k = 0
 
-        nft = np.alen(entity)
         grid.n_canopy = (n*s).sum()
         grid.s_canopy = s.sum()
          # sum the surface of each element of the same entity
         for i in range(grid.nent):
-            grid.s_vt[i] = s[entity==i+1].sum()
+            grid.s_vt[i] = s[entity==i].sum()
 
         dx, dy , dz = grid.dx, grid.dy, grid.dz
         #dh: tableau des hauteurs z
@@ -183,7 +182,7 @@ class Grid(object):
                  grid.numy[k]=jy + 1 #ajouter 1 pour utilisation f90
                  grid.numz[k]=jz + 1 #ajouter 1 pour utilisation f90
                  grid.nje[k]=1
-                 grid.nume[0,k]=entity[i]
+                 grid.nume[0,k]=entity[i]+1
                  grid.leafareadensity[0,k]=s[i]/(dx*dy*dz[jz])
                  grid.s_vt_vx[0,k]=s[i]
                  grid.s_vx[k]=s[i]
@@ -195,7 +194,7 @@ class Grid(object):
 
                 kk=grid.kxyz[jx,jy,jz]-1 #retirer 1 pour compatiblite python
                 je=0
-                while (grid.nume[je,kk]!= entity[i] and (je+1)<=grid.nje[kk]):
+                while (grid.nume[je,kk]!= (entity[i]+1) and (je+1)<=grid.nje[kk]):
                     je=je+1
 
                 grid.leafareadensity[je,kk]=grid.leafareadensity[je,kk]+s[i]/(dx*dy*dz[jz])
@@ -206,9 +205,9 @@ class Grid(object):
                 grid.s_vx[kk] = grid.s_vx[kk] + s[i]
                 grid.nje[kk]=max(je+1,grid.nje[kk])
                 grid.nemax=max(grid.nemax,grid.nje[kk])
-                grid.nume[je,kk]=entity[i]
+                grid.nume[je,kk]=entity[i]+1
 
-##            print 'grid.kxyz',grid.kxyz[1:2]
+
         grid.nveg=k
         grid.nsol=grid.njx*grid.njy   # Numbering soil surface areas
         for jx in range(grid.njx):
