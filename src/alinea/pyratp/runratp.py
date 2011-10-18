@@ -13,24 +13,21 @@ import tempfile
 import sys
 #import pyRATP
 import subprocess
+import platform
+
 class runRATP(object):
     """
     """
-    def __init__(self, *args, **kwds):
-        """
-        """
-        pass
     @staticmethod
     def DoAll(*args):
         ratp = pyratp.ratp
         ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*14*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,14)
         ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*98*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,98)
 
-        if os.path.isdir("c:/tmpRATP"):
-            shutil.rmtree("c:/tmpRATP")
-        #path = '/tmp/tmpRATP'
-        path = 'c:/tmpRATP'
-        os.mkdir("c:/tmpRATP/")
+        path = 'c:/tmpRATP' if platform.system() == 'Windows' else '/tmp/tmpRATP'
+        if os.path.isdir(path):
+            shutil.rmtree(path)
+        os.mkdir(path)
         os.mkdir(path+"/Resul")
         print np.where(pyratp.vegetation_types.ismine==1)
         try:
@@ -44,8 +41,5 @@ class runRATP(object):
             pyratp.ratp.do_all()
 
 
-
-
-
-        np.savetxt('c:/spacial.txt',ratp.out_time_spatial,'%.6e')
-        np.savetxt('c:/tree.txt',ratp.out_time_tree,'%.6e')
+        np.savetxt(path+"/Resul"+'/spacial.txt',ratp.out_time_spatial,'%.6e')
+        np.savetxt(path+"/Resul"+'/tree.txt',ratp.out_time_tree,'%.6e')
