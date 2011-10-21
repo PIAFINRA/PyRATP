@@ -266,6 +266,7 @@ python module pyratp ! in
             real allocatable,dimension(:,:) :: sts
             real allocatable,dimension(:,:,:) :: gs
             real allocatable,dimension(:,:) :: e_ss_vt
+            real allocatable,dimension(:,:,:) :: e
             real dimension(2) :: e_ss
             subroutine eb_doall_mine ! in :pyratp:mod_Energy_BalanceF2PY.f90:energy_balance
                 use constant_values
@@ -277,6 +278,16 @@ python module pyratp ! in
                 use skyvault
                 use hemi_interception
             end subroutine eb_doall_mine
+            subroutine eb_doall ! in :pyratp:mod_Energy_BalanceF2PY.f90:energy_balance
+                use constant_values
+                use dir_interception
+                use shortwave_balance
+                use grid3d
+                use vegetation_types
+                use micrometeo
+                use skyvault
+                use hemi_interception
+            end subroutine eb_doall
             subroutine jarvis_stomata(jent,leaf_nitrogen,par_irrad,ca,leaf_temp,vpdair,ga,rsi,drsi) ! in :pyratp:mod_Energy_BalanceF2PY.f90:energy_balance
                 use vegetation_types
                 integer :: jent
@@ -296,6 +307,7 @@ python module pyratp ! in
             real :: alpha
             real :: specif25
             real :: kc25
+            real allocatable,dimension(:,:,:) :: a_detailed
             real :: a_canopy
             real allocatable,dimension(:,:) :: cvcmax
             real :: dhaspecif
@@ -410,11 +422,13 @@ python module pyratp ! in
             character*200 :: fname
             integer optional :: filetypearchi=1
             real allocatable,dimension(:,:) :: out_time_tree
+            subroutine do_all_mine ! in :pyratp:prog_RATP.f90:ratp
+            end subroutine do_all_mine
             subroutine do_all ! in :pyratp:prog_RATP.f90:ratp
             end subroutine do_all
         end module ratp
     end interface 
 end python module pyratp
 
-! This file was auto-generated with f2py (version:2).
+! This file was auto-generated with f2py (version:1).
 ! See http://cens.ioc.ee/projects/f2py2e/

@@ -43,3 +43,5 @@ class runRATP(object):
 
         np.savetxt(path+"/Resul"+'/spacial.txt',ratp.out_time_spatial,'%.6e')
         np.savetxt(path+"/Resul"+'/tree.txt',ratp.out_time_tree,'%.6e')
+
+        return ratp.out_time_spatial, ratp.out_time_tree

@@ -17,7 +17,8 @@ __institutes__ = None
 __icon__ = ''
 
 
-__all__ = ['ratp_read_skyvault', 'ratp_DoAll', 'ratp_fill_grid', 'ratp_read_grid', 'ratp_read_vgx', 'ratp_read_vegetation', 'ratp_read_micrometeo']
+__all__ = ['ratp_read_skyvault', 'ratp_DoAll', 'ratp_fill_grid', 'ratp_read_grid', 'ratp_read_vgx', 'ratp_read_vegetation', 'ratp_read_micrometeo', 'extract_leaves',
+'extract_time', 'extract_spatial']
 
 
 
@@ -43,7 +44,7 @@ ratp_DoAll = Factory(name='do_all',
                 nodemodule='ratp',
                 nodeclass='DoAll',
                 inputs=[{'interface': ISequence, 'name': 'inputs', 'value': None, 'desc': ''}],
-                outputs=[{'interface': None, 'name': 'out', 'desc': ''}],
+                outputs=[{ 'name': 'time_spatial', 'desc': 'time evolution for each voxel'}, { 'name': 'tree', 'desc': 'time evolution for each voxel'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -124,5 +125,34 @@ ratp_read_micrometeo = Factory(name='read_micrometeo',
                )
 
 
-
+extract_leaves =  Factory(name='extract leaves',
+                authors=' (wralea authors)',
+                category='Mtg, light',
+                nodemodule='ratp',
+                nodeclass='extract_leaves',
+                inputs=[{ 'name': 'mtg', 'desc': 'MTG file'}, 
+                        dict(name='scaling factor', value=100, interface='IFloat'),
+                        dict(name='nitrogen', value=2., interface='IFloat'),
+                        ],
+                outputs=[dict(name='leaves_id', desc='vertex id for leaves '), 
+                         dict(name='entity', desc='the vegetation type'), 
+                         dict(name='X', desc='X coordinate'), 
+                         dict(name='Y', desc='Y coordinate'), 
+                         dict(name='Z', desc='Z coordinate'), 
+                         dict(name='leaf area', desc='leaf area'), 
+                         dict(name='leaf nitrogen', desc='leaf nitrogen'), 
+                         ],
+               )
+extract_time=  Factory(name='extract time',
+                authors=' (wralea authors)',
+                category='Mtg, light',
+                nodemodule='ratp',
+                nodeclass='ExtractTime',
+               )
+extract_spatial=  Factory(name='extract spatial',
+                authors=' (wralea authors)',
+                category='Mtg, light',
+                nodemodule='ratp',
+                nodeclass='ExtractTime',
+               )
 

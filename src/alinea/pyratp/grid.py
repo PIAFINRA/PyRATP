@@ -107,7 +107,7 @@ class Grid(object):
             - .
         """
         tv,tx,ty,tz,ts,tn = vege3D.Vege3D.readVGX(filename,2)
-        return tv,tx,ty,tz,ts,tn
+        return tv,tx,ty,-tz,ts/10000.,tn
 
 
     @staticmethod
@@ -120,8 +120,8 @@ class Grid(object):
 ##        """
         x = x/100 - grid.xorig
         y = y/100 - grid.yorig
-        z = -z/100 + grid.zorig
-        s = s/10000           #passage cm2 en m2
+        z = z/100 + grid.zorig
+        s = s           #passage cm2 en m2
 
         lneg=np.where(z<0) #suppression de feuilles ayant un z<0
         entity=np.delete(entity,lneg[0])

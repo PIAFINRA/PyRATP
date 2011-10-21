@@ -69,24 +69,25 @@ contains
 
  call hi_doall(dpx,dpy,isolated_box)  ! Compute interception of diffuse and scattering radiation, ie exchange coefficients
 
- pathResult = 'c:/tmpRATP/Resul/'
+ !pathResult = 'c:/tmpRATP/Resul/'
+ pathResult = '/tmp/tmpRATP/Resul/'
  fname=pathResult//'output_PARclasses.dat'
- open (2,file=fname)
- write(2,*) 'ntime day hour vt PARg %SF50 %SF100'
+ !open (2,file=fname)
+ !write(2,*) 'ntime day hour vt PARg %SF50 %SF100'
 
  fname=pathResult//'output_tsclasses.dat'
- open (3,file=fname)
- write(3,*) 'ntime day hour vt Tair %SF11 %SF12'
+ !open (3,file=fname)
+ !write(3,*) 'ntime day hour vt Tair %SF11 %SF12'
 
  fname=pathResult//'output_minerpheno.dat'
- open (10,file=fname)
- write(10,*) 'ntime day hour sumTair Nlarvaout Nlarvadead Tair'
+ !open (10,file=fname)
+ !write(10,*) 'ntime day hour sumTair Nlarvaout Nlarvadead Tair'
 
 ! Leaf temperature at the voxel scale
 
  fname = pathResult//'output_leafTemp.dat'
- open (12,file=fname)
- write(12,*) 'ntime day hour voxel Tsh Tshm Tsl Tslm Tair Tbody(10xx mort,+50xx out)'
+ !open (12,file=fname)
+ !write(12,*) 'ntime day hour voxel Tsh Tshm Tsl Tslm Tair Tbody(10xx mort,+50xx out)'
 
 
 ! Memory allocation in MinerPheno module
@@ -102,7 +103,7 @@ contains
 
  do while (.NOT.((endmeteo).OR.((nlarvaout+nlarvadead).ge.voxel_canopy(2))))
   ntime=ntime+1
-  !write(*,*) '...Iteration : ',ntime,nbli
+ ! write(*,*) '...Iteration : ',ntime,nbli
   call mm_read(ntime,nbli)  ! Read micrometeo data (line #ntime in file mmeteo.<spec>)
   !write(*,*) '...mm_read : '
   call swrb_doall     ! Compute short wave radiation balance
@@ -130,11 +131,11 @@ contains
    end do
    out_time_tree(itertree,97) = A_canopy
    out_time_tree(itertree,98) = E_canopy
-   write(2,20) ntime, day, hour, jent, glob(1)*2.02/0.48, (Spar(jent,class)/S_vt(jent), class=1,45) ! %SF per irradiance class
-   write(3,30) ntime, day, hour, jent, taref, (Sts(jent,class)/S_vt(jent), class=10,45)
+   !write(2,20) ntime, day, hour, jent, glob(1)*2.02/0.48, (Spar(jent,class)/S_vt(jent), class=1,45) ! %SF per irradiance class
+   !write(3,30) ntime, day, hour, jent, taref, (Sts(jent,class)/S_vt(jent), class=10,45)
   end do
 
-  write(10,70) ntime, day, hour, sum_taref, Nlarvaout, Nlarvadead, taref !, sum_dev_rate(1), sum_dev_rate(10), sum_dev_rate(100)
+  !write(10,70) ntime, day, hour, sum_taref, Nlarvaout, Nlarvadead, taref !, sum_dev_rate(1), sum_dev_rate(10), sum_dev_rate(100)
 
   !if (hour.eq.12) then
   do k=1,nveg
@@ -158,16 +159,16 @@ contains
        out_time_spatial(iterspatial,12) = S_detailed(0,je,k)
        out_time_spatial(iterspatial,13) = S_detailed(1,je,k)
 
-      if (larvadeath(k).gt.0) then
-       write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, 1000 + ntime + .0
-       out_time_spatial(iterspatial,14) = 1000 + ntime + .0
-      else if  (larvaout(k).gt.0) then
-       write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, 5000 + ntime + .0
-       out_time_spatial(iterspatial,14) = 5000 + ntime + .0
-      else
-       write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, tbody(k)
-       out_time_spatial(iterspatial,14) = tbody(k)
-      end if
+!      if (larvadeath(k).gt.0) then
+       !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, 1000 + ntime + .0
+!       out_time_spatial(iterspatial,14) = 1000 + ntime + .0
+!      else if  (larvaout(k).gt.0) then
+!       write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, 5000 + ntime + .0
+!       out_time_spatial(iterspatial,14) = 5000 + ntime + .0
+!      else
+!       write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, tbody(k)
+!       out_time_spatial(iterspatial,14) = tbody(k)
+!      end if
      end if
    end do
   end do
@@ -183,27 +184,27 @@ contains
 
 
 ! close (1)
- close (2)
- close (3)
- close (10)
- close (12)
+! close (2)
+! close (3)
+! close (10)
+! close (12)
 
 ! Mine phenology at voxel scale, at the end of the simulation period
 
  fname = pathResult//'output_minerspatial.dat'
- open (11,file=fname)
- write(11,*) 'Voxel# jx jy jz time_death time_out sum_tair_out'
+ !open (11,file=fname)
+ !write(11,*) 'Voxel# jx jy jz time_death time_out sum_tair_out'
 
 
 
 
- do k=1,nveg
-  if (sum_dev_rate(k).gt.0.) then   ! Voxel k includes a miner
-   write(11,80) k, numx(k), numy(k), numz(k), larvadeath(k), larvaout(k), sum_tair(k)
-  endif
- end do
+! do k=1,nveg
+!  if (sum_dev_rate(k).gt.0.) then   ! Voxel k includes a miner
+!   write(11,80) k, numx(k), numy(k), numz(k), larvadeath(k), larvaout(k), sum_tair(k)
+!  endif
+! end do
 
- close (11)
+! close (11)
 
 
 
@@ -274,19 +275,20 @@ subroutine do_all
 
  call hi_doall(dpx,dpy,isolated_box)  ! Compute interception of diffuse and scattering radiation, ie exchange coefficients
 
- pathResult = 'c:/tmpRATP/Resul/'
+ !pathResult = 'c:/tmpRATP/Resul/'
+ pathResult = '/tmp/tmpRATP/Resul/'
  fname=pathResult//'output_PARclasses.dat'
- open (2,file=fname)
- write(2,*) 'ntime day hour vt PARg %SF50 %SF100'
+ !open (2,file=fname)
+ !write(2,*) 'ntime day hour vt PARg %SF50 %SF100'
 
  fname=pathResult//'output_tsclasses.dat'
- open (3,file=fname)
- write(3,*) 'ntime day hour vt Tair %SF11 %SF12'
+ !open (3,file=fname)
+ !write(3,*) 'ntime day hour vt Tair %SF11 %SF12'
 
 ! Leaf temperature at the voxel scale
  fname = pathResult//'output_leafTemp.dat'
- open (12,file=fname)
- write(12,*) 'ntime day hour voxel Tsh Tsl Tair'
+ !open (12,file=fname)
+ !write(12,*) 'ntime day hour voxel Tsh Tsl Tair'
 
 
  ntime=0
@@ -296,14 +298,14 @@ subroutine do_all
 
  do while (.NOT.((endmeteo)))
   ntime=ntime+1
-  !write(*,*) '...Iteration : ',ntime,nbli
+  write(*,*) '...Iteration : ',ntime,nbli
   call mm_read(ntime,nbli)  ! Read micrometeo data (line #ntime in file mmeteo.<spec>)
   !write(*,*) '...mm_read : '
   call swrb_doall     ! Compute short wave radiation balance
 
   call eb_doall
   call ps_doall
-  write(*,*) '...swrb_doall : '
+  !write(*,*) '...swrb_doall : '
   do jent=1,nent
    itertree = itertree +1
    out_time_tree(itertree,1) = ntime
@@ -320,8 +322,8 @@ subroutine do_all
    end do
    out_time_tree(itertree,97) = A_canopy
    out_time_tree(itertree,98) = E_canopy
-   write(2,20) ntime, day, hour, jent, glob(1)*2.02/0.48, (Spar(jent,class)/S_vt(jent), class=1,45) ! %SF per irradiance class
-   write(3,30) ntime, day, hour, jent, taref, (Sts(jent,class)/S_vt(jent), class=10,45)
+   !write(2,20) ntime, day, hour, jent, glob(1)*2.02/0.48, (Spar(jent,class)/S_vt(jent), class=1,45) ! %SF per irradiance class
+   !write(3,30) ntime, day, hour, jent, taref, (Sts(jent,class)/S_vt(jent), class=10,45)
   end do
 
 
@@ -348,7 +350,7 @@ subroutine do_all
        out_time_spatial(iterspatial,13) = S_detailed(1,je,k)
 
 
-        write(12,90) ntime, day, hour, k, ts(0,1,k), ts(1,1,k), taref
+       !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(1,1,k), taref
    end do
   end do
   !end if
@@ -363,9 +365,9 @@ subroutine do_all
 
 
 ! close (1)
- close (2)
- close (3)
- close (12)
+! close (2)
+! close (3)
+! close (12)
 
 
 
