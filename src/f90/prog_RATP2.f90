@@ -28,7 +28,7 @@ module RATP
 
  character*2 hhx, hhy, hhz
 
- real, allocatable :: out_time_spatial(:,:), out_time_tree(:,:),out_rayt(:,:)
+ real, allocatable :: out_time_spatial(:,:), out_time_tree(:,:)
 
 contains
 !----------------------------
@@ -68,7 +68,7 @@ contains
  !write(*,*) 'doall'
 
  call hi_doall(dpx,dpy,isolated_box)  ! Compute interception of diffuse and scattering radiation, ie exchange coefficients
- !ttot
+
  !pathResult = 'c:/tmpRATP/Resul/'
  pathResult = '/tmp/tmpRATP/Resul/'
  fname=pathResult//'output_PARclasses.dat'
@@ -300,12 +300,12 @@ subroutine do_all
   ntime=ntime+1
   write(*,*) '...Iteration : ',ntime,nbli
   call mm_read(ntime,nbli)  ! Read micrometeo data (line #ntime in file mmeteo.<spec>)
-  write(*,*) '...mm_read : '
+  !write(*,*) '...mm_read : '
   call swrb_doall     ! Compute short wave radiation balance
 
   call eb_doall
   call ps_doall
-  write(*,*) '...swrb_doall : '
+  !write(*,*) '...swrb_doall : '
   do jent=1,nent
    itertree = itertree +1
    out_time_tree(itertree,1) = ntime
@@ -348,6 +348,7 @@ subroutine do_all
        out_time_spatial(iterspatial,11) = E(1,je,k)
        out_time_spatial(iterspatial,12) = S_detailed(0,je,k)
        out_time_spatial(iterspatial,13) = S_detailed(1,je,k)
+
 
        !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(1,1,k), taref
    end do
@@ -395,99 +396,5 @@ subroutine do_all
 
  write(*,*) 'CALCULS TERMINES 2'
  end subroutine do_all
-
- subroutine do_interception
-
- !write(*,*)
-  write(*,*)  ' R. A. T. P.    Version 2.0'
- !write(*,*)  ' Radiation Absorption, Transpiration and Photosynthesis'
- !write(*,*)
- !write(*,*)  ' Spatial distribution in a 3D grid of voxels'
- !write(*,*)
- !write(*,*)  '                July 2003'
- !write(*,*)
-
- !write(*,*)
- !write(*,*)
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! spec_grid='grd'     ! definition de la grille
-! spec_vegetation='veg'   ! definition des types de végétation
-
-! spec_gfill='dgi'     ! definition du fichier de structure (feuillage)
-!spec_mmeteo='mto'     ! definition du fichier mmeteo
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-! call qui permet de tester l existance des tableaux dynamiques et de les vider s'ils existent
- call out_rayt_destroy
- call cv_set
-
- dpx=dx/5.
- dpy=dy/5.
-
- scattering=.FALSE.
- isolated_box=.FALSE.
- call hi_doall(dpx,dpy,isolated_box)  ! Compute interception of diffuse and scattering radiation, ie exchange coefficients
- ntime=0
- endmeteo=.FALSE.
- call mm_initiate
-
- allocate(out_rayt(nbli*nveg*nemax,9))
- do while (.NOT.((endmeteo)))
-  ntime=ntime+1
-  write(*,*) '...Iteration : ',ntime,nbli
-  call mm_read(ntime,nbli)  ! Read micrometeo data (line #ntime in file mmeteo.<spec>)
-  !write(*,*) '...mm_read : '
-  call swrb_doall     ! Compute short wave radiation balance
-
-
-  do k=1,nveg 
-  
-   do je=1,nje(k)
-     iterspatial = iterspatial +1
-     jent=nume(je,k)
-      
-    ! Sortie rayonnement
-       out_rayt(iterspatial,1) = jent
-       out_rayt(iterspatial,2) = ntime
-       out_rayt(iterspatial,3) = day
-       out_rayt(iterspatial,4) = hour
-       out_rayt(iterspatial,5) = k
-    ! cf xintav
-       out_rayt(iterspatial,6) = PARirrad(0,je,k)
-       out_rayt(iterspatial,7) = PARirrad(1,je,k)
-       out_rayt(iterspatial,8) = S_detailed(0,je,k)
-       out_rayt(iterspatial,9) = S_detailed(1,je,k)
-
-       !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(1,1,k), taref
-   end do
-  end do  
-  !end if
-
-  if (ntime.eq.nbli) then
-    endmeteo=.TRUE.
-  end if
-
- end do
-
- nbiter =nbiter + ntime
-
-! Deallocation des tableaux
-
- call sv_destroy
- call vt_destroy
- call di_destroy
- call hi_destroy
- call swrb_destroy
-
- write(*,*) 'CALCULS TERMINES INTERCEPTION'
- end subroutine do_interception
-
- subroutine out_rayt_destroy
-  !write(*,*) 'destroy out_rayt'
-  if (allocated(out_rayt))  deallocate(out_rayt)
- end subroutine out_rayt_destroy 
-	
- 
 end module RATP
 

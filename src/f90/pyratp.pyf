@@ -411,6 +411,7 @@ python module pyratp ! in
             character*2 :: hhx
             integer optional :: itertree=0
             character(len=17) :: pathresult
+            real allocatable,dimension(:,:) :: out_rayt
             integer optional :: iterspatial=0
             integer optional :: nbiter=0
             integer optional :: val=1
@@ -426,9 +427,13 @@ python module pyratp ! in
             end subroutine do_all_mine
             subroutine do_all ! in :pyratp:prog_RATP.f90:ratp
             end subroutine do_all
+            subroutine do_interception ! in :pyratp:prog_RATP.f90:ratp
+            end subroutine do_interception
+            subroutine out_rayt_destroy ! in :pyratp:prog_RATP.f90:ratp
+            end subroutine out_rayt_destroy
         end module ratp
     end interface 
 end python module pyratp
 
-! This file was auto-generated with f2py (version:1).
+! This file was auto-generated with f2py (version:2).
 ! See http://cens.ioc.ee/projects/f2py2e/

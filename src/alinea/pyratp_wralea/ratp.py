@@ -5,7 +5,8 @@ from alinea.pyratp import grid
 from alinea.pyratp import vegetation
 from alinea.pyratp import micrometeo
 from alinea.pyratp import runratp
-from alinea.pyratp import mtg_extract
+from alinea.pyratp import mtg_extract 
+from alinea.pyratp import can2riri 
 
 
 read_grid = grid.Grid.read
@@ -16,9 +17,10 @@ read_skyvault = skyvault.Skyvault.read
 read_vegetation = vegetation.Vegetation.read
 read_micrometeo = micrometeo.MicroMeteo.read
 
-DoAll = runratp.runRATP.DoAll
+DoAll = runratp.runRATP.DoAll  
+DoIrradiation = runratp.runRATP.DoIrradiation
 extract_leaves = mtg_extract.extract_leaves
-
+can2riri = can2riri.can2riri
 
 class ExtractColumn( Node ):
     """ Extract column based on str

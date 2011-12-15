@@ -585,7 +585,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
      drv=0.
      else
      rv=(rss+ra)*(rsi+ra)/(rss+rsi+2.*ra)
-     drv=((rss+ra)/(rss+rsi+2*ra))**2*drsi
+     drv=drsi*((rss+ra)/(rss+rsi+2*ra))**2
     endif
 
     rh=ra/2.

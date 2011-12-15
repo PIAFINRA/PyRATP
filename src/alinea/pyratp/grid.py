@@ -107,7 +107,7 @@ class Grid(object):
             - .
         """
         tv,tx,ty,tz,ts,tn = vege3D.Vege3D.readVGX(filename,2)
-        return tv,tx,ty,-tz,ts/10000.,tn
+        return tv/100,tx/100,ty/100,-tz/100,ts/10000.,tn
 
 
     @staticmethod
@@ -118,10 +118,10 @@ class Grid(object):
             - `x`: an array of abscisse.
             - .
 ##        """
-        x = x/100 - grid.xorig
-        y = y/100 - grid.yorig
-        z = z/100 + grid.zorig
-        s = s           #passage cm2 en m2
+        x = x - grid.xorig
+        y = y - grid.yorig
+        z = z + grid.zorig
+        s = s           
 
         lneg=np.where(z<0) #suppression de feuilles ayant un z<0
         entity=np.delete(entity,lneg[0])
@@ -158,6 +158,10 @@ class Grid(object):
         for i in range(np.alen(dz)):
             dh=np.append(dh,dz[:i+1].sum())
         dh=np.delete(dh,0)
+        
+        #Relation Voxel2entite
+        d_E2V = {} #entity id to voxel id
+
         for i in range(np.alen(x)):
 
           # Compute the coord of each element in the grid.
@@ -187,6 +191,7 @@ class Grid(object):
                  grid.s_vt_vx[0,k]=s[i]
                  grid.s_vx[k]=s[i]
                  grid.n_detailed[0,k]=n[i]
+                 d_E2V[i] = k
 
                  k=k+1
             else:
@@ -206,6 +211,7 @@ class Grid(object):
                 grid.nje[kk]=max(je+1,grid.nje[kk])
                 grid.nemax=max(grid.nemax,grid.nje[kk])
                 grid.nume[je,kk]=entity[i]+1
+                d_E2V[i] = kk
 
 
         grid.nveg=k
@@ -224,6 +230,9 @@ class Grid(object):
                  grid.voxel_canopy[grid.nume[je,k]-1]=grid.voxel_canopy[grid.nume[je,k]-1]+1
 ##            print 'numx[k],numy[k],numz[k]',grid.numx[k],grid.numy[k],grid.numz[k]
 ##
+        return grid, d_E2V
+
+
 
 def _read(f, *args):
     l = f.readline()
