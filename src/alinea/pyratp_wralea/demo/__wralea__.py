@@ -1,9 +1,4 @@
-
-<<<<<<< .mine
 # This file has been generated at Tue Dec 06 09:07:41 2011
-=======
-# This file has been generated at Fri Nov 25 08:33:18 2011
->>>>>>> .r1756
 
 from openalea.core import *
 
@@ -21,11 +16,7 @@ __institutes__ = None
 __icon__ = ''
 
 
-<<<<<<< .mine
 __all__ = ['test1', '_68166608', '_68166512', 'micrometeo', '_68166576', 'vegetation', 'complet']
-=======
-__all__ = ['test1', '_96874448', '_96940176', '_137456336', 'micrometeo', '_96940240', 'vegetation', 'complet']
->>>>>>> .r1756
 
 
 
@@ -181,11 +172,7 @@ test1 = CompositeNodeFactory(name='test1',
 
 
 
-<<<<<<< .mine
 _68166608 = CompositeNodeFactory(name='vegestar grid',
-=======
-_96874448 = CompositeNodeFactory(name='test_grid',
->>>>>>> .r1756
                              description='',
                              category='Unclassified',
                              doc='',
@@ -264,75 +251,38 @@ _96874448 = CompositeNodeFactory(name='test_grid',
 
 
 
-<<<<<<< .mine
 _68166512 = CompositeNodeFactory(name='test_grid',
-=======
-_96940176 = CompositeNodeFactory(name='vegestar grid',
->>>>>>> .r1756
                              description='',
                              category='Unclassified',
                              doc='',
                              inputs=[],
                              outputs=[],
-<<<<<<< .mine
                              elt_factory={  2: ('PyRATP', 'read grid'), 3: ('pyratp.data', 'grid3Da_2004.grd')},
                              elt_connections={  36852704: (3, 0, 2, 0)},
-=======
-                             elt_factory={  2: ('pyratp.data', 'aa2004petit.vgx'), 3: ('PyRATP', 'grid from vegestar')},
-                             elt_connections={  38204384: (2, 0, 3, 0)},
->>>>>>> .r1756
                              elt_data={  2: {  'block': False,
-<<<<<<< .mine
          'caption': 'read grid',
-=======
-         'caption': 'aa2004petit.vgx',
->>>>>>> .r1756
          'delay': 0,
-<<<<<<< .mine
          'factory': '<openalea.core.node.NodeFactory object at 0x8d21ad0> : "read grid"',
-=======
-         'factory': '<openalea.core.data.DataFactory object at 0x63e1910> : "aa2004petit.vgx"',
->>>>>>> .r1756
          'hide': True,
          'id': 2,
          'lazy': True,
-<<<<<<< .mine
          'port_hide_changed': set(),
          'posx': -269.0,
          'posy': -50.0,
-=======
-         'port_hide_changed': set([2]),
-         'posx': -185.0,
-         'posy': -28.0,
->>>>>>> .r1756
          'priority': 0,
          'use_user_color': False,
          'user_application': None,
          'user_color': None},
    3: {  'block': False,
-<<<<<<< .mine
          'caption': 'grid3Da_2004.grd',
-=======
-         'caption': 'grid from vegestar',
->>>>>>> .r1756
          'delay': 0,
-<<<<<<< .mine
          'factory': '<openalea.core.data.DataFactory object at 0x8d21810> : "grid3Da_2004.grd"',
-=======
-         'factory': '<openalea.core.node.NodeFactory object at 0x3cb0890> : "grid from vegestar"',
->>>>>>> .r1756
          'hide': True,
          'id': 3,
          'lazy': True,
-<<<<<<< .mine
          'port_hide_changed': set([2]),
          'posx': -293.0,
          'posy': -112.0,
-=======
-         'port_hide_changed': set(),
-         'posx': -195.0,
-         'posy': 35.0,
->>>>>>> .r1756
          'priority': 0,
          'use_user_color': False,
          'user_application': None,
@@ -363,24 +313,16 @@ _96940176 = CompositeNodeFactory(name='vegestar grid',
                  'use_user_color': True,
                  'user_application': None,
                  'user_color': None}},
-<<<<<<< .mine
                              elt_value={  2: [],
    3: [  (0, 'PackageData(pyratp.data, grid3Da_2004.grd)'),
-=======
-                             elt_value={  2: [  (0, 'PackageData(pyratp.data, aa2004petit.vgx)'),
->>>>>>> .r1756
          (1, 'None'),
          (2, 'None')],
    3: [],
    '__in__': [],
    '__out__': []},
-<<<<<<< .mine
                              elt_ad_hoc={  2: {  'position': [-269.0, -50.0], 'useUserColor': False, 'userColor': None},
    3: {  'position': [-293.0, -112.0], 'useUserColor': False, 'userColor': None},
-=======
-                             elt_ad_hoc={  2: {  'position': [-185.0, -28.0], 'useUserColor': False, 'userColor': None},
-   3: {  'position': [-195.0, 35.0], 'useUserColor': False, 'userColor': None},
->>>>>>> .r1756
+
    '__in__': {  'position': [0, 0], 'useUserColor': True, 'userColor': None},
    '__out__': {  'position': [0, 0], 'useUserColor': True, 'userColor': None}},
                              lazy=True,
@@ -390,152 +332,6 @@ _96940176 = CompositeNodeFactory(name='vegestar grid',
 
 
 
-<<<<<<< .mine
-micrometeo = CompositeNodeFactory(name='micrometeo',
-=======
-_137456336 = CompositeNodeFactory(name='plot vegestar',
->>>>>>> .r1756
-                             description='',
-                             category='Unclassified',
-                             doc='',
-                             inputs=[],
-                             outputs=[],
-<<<<<<< .mine
-                             elt_factory={  2: ('PyRATP', 'read_micrometeo'), 3: ('pyratp.data', 'mmeteo052000.mto')},
-                             elt_connections={  10014916: (3, 0, 2, 0)},
-=======
-                             elt_factory={  2: ('vplants.plantgl.visualization', 'plot3D'),
-   3: ('pyratp.data', 'digitalAA2004.vgx'),
-   4: ('vplants.plantgl.objects', 'Scene')},
-                             elt_connections={  36272200: (3, 0, 4, 0), 36272224: (4, 0, 2, 0)},
->>>>>>> .r1756
-                             elt_data={  2: {  'block': False,
-<<<<<<< .mine
-         'caption': 'read_micrometeo',
-=======
-         'caption': 'plot3D',
->>>>>>> .r1756
-         'delay': 0,
-<<<<<<< .mine
-         'factory': '<openalea.core.node.NodeFactory object at 0x04089E10> : "read_micrometeo"',
-=======
-         'factory': '<openalea.core.node.NodeFactory object at 0x76b6a10> : "plot3D"',
->>>>>>> .r1756
-         'hide': True,
-         'id': 2,
-         'lazy': True,
-<<<<<<< .mine
-         'port_hide_changed': set(),
-         'posx': -78.0,
-         'posy': -29.0,
-=======
-         'port_hide_changed': set(),
-         'posx': 25.424675834706903,
-         'posy': 31.303213599957054,
->>>>>>> .r1756
-         'priority': 0,
-         'use_user_color': False,
-         'user_application': None,
-         'user_color': None},
-   3: {  'block': False,
-<<<<<<< .mine
-         'caption': 'mmeteo052000.mto',
-=======
-         'caption': 'digitalAA2004.vgx',
->>>>>>> .r1756
-         'delay': 0,
-<<<<<<< .mine
-         'factory': '<openalea.core.data.DataFactory object at 0x046A4E30> : "mmeteo052000.mto"',
-=======
-         'factory': '<openalea.core.data.DataFactory object at 0x7299f50> : "digitalAA2004.vgx"',
->>>>>>> .r1756
-         'hide': True,
-         'id': 3,
-         'lazy': True,
-<<<<<<< .mine
-         'port_hide_changed': set([2]),
-         'posx': -61.0,
-         'posy': -177.0,
-=======
-         'port_hide_changed': set([2]),
-         'posx': -16.606869186831673,
-         'posy': -47.910082786788735,
-         'priority': 0,
-         'use_user_color': False,
-         'user_application': None,
-         'user_color': None},
-   4: {  'block': False,
-         'caption': 'Scene',
-         'delay': 0,
-         'factory': '<openalea.core.node.NodeFactory object at 0x6317dd0> : "Scene"',
-         'hide': True,
-         'id': 4,
-         'lazy': True,
-         'port_hide_changed': set(),
-         'posx': 28.070017829069485,
-         'posy': -3.0862323267563276,
->>>>>>> .r1756
-         'priority': 0,
-         'use_user_color': False,
-         'user_application': None,
-         'user_color': None},
-   '__in__': {  'block': False,
-                'caption': 'In',
-                'delay': 0,
-                'hide': True,
-                'id': 0,
-                'lazy': True,
-                'port_hide_changed': set(),
-                'posx': 0,
-                'posy': 0,
-                'priority': 0,
-                'use_user_color': True,
-                'user_application': None,
-                'user_color': None},
-   '__out__': {  'block': False,
-                 'caption': 'Out',
-                 'delay': 0,
-                 'hide': True,
-                 'id': 1,
-                 'lazy': True,
-                 'port_hide_changed': set(),
-                 'posx': 0,
-                 'posy': 0,
-                 'priority': 0,
-                 'use_user_color': True,
-                 'user_application': None,
-                 'user_color': None}},
-<<<<<<< .mine
-                             elt_value={  2: [],
-   3: [  (0, 'PackageData(pyratp.data, mmeteo052000.mto)'),
-=======
-                             elt_value={  2: [],
-   3: [  (0, 'PackageData(pyratp.data, digitalAA2004.vgx)'),
->>>>>>> .r1756
-         (1, 'None'),
-         (2, 'None')],
-<<<<<<< .mine
-=======
-   4: [],
->>>>>>> .r1756
-   '__in__': [],
-   '__out__': []},
-<<<<<<< .mine
-                             elt_ad_hoc={  2: {  'position': [-78.0, -29.0], 'useUserColor': False, 'userColor': None},
-   3: {  'position': [-61.0, -177.0], 'useUserColor': False, 'userColor': None},
-=======
-                             elt_ad_hoc={  2: {'position': [25.424675834706903, 31.303213599957054], 'userColor': None, 'useUserColor': False},
-   3: {'position': [-16.606869186831673, -47.910082786788735], 'userColor': None, 'useUserColor': False},
-   4: {'position': [28.070017829069485, -3.0862323267563276], 'userColor': None, 'useUserColor': False},
-   '__in__': {'position': [0, 0], 'userColor': None, 'useUserColor': True},
-   '__out__': {'position': [0, 0], 'userColor': None, 'useUserColor': True}},
-                             lazy=True,
-                             eval_algo='LambdaEvaluation',
-                             )
-
-
-
-
 micrometeo = CompositeNodeFactory(name='micrometeo',
                              description='',
                              category='Unclassified',
@@ -546,6 +342,7 @@ micrometeo = CompositeNodeFactory(name='micrometeo',
                              elt_connections={  10014916: (3, 0, 2, 0)},
                              elt_data={  2: {  'block': False,
          'caption': 'read_micrometeo',
+
          'delay': 0,
          'factory': '<openalea.core.node.NodeFactory object at 0x04089E10> : "read_micrometeo"',
          'hide': True,
@@ -606,7 +403,6 @@ micrometeo = CompositeNodeFactory(name='micrometeo',
    '__out__': []},
                              elt_ad_hoc={  2: {  'position': [-78.0, -29.0], 'useUserColor': False, 'userColor': None},
    3: {  'position': [-61.0, -177.0], 'useUserColor': False, 'userColor': None},
->>>>>>> .r1756
    '__in__': {  'position': [0, 0], 'useUserColor': True, 'userColor': None},
    '__out__': {  'position': [0, 0], 'useUserColor': True, 'userColor': None}},
                              lazy=True,
@@ -616,11 +412,7 @@ micrometeo = CompositeNodeFactory(name='micrometeo',
 
 
 
-<<<<<<< .mine
 _68166576 = CompositeNodeFactory(name='RATP with MTG',
-=======
-_96940240 = CompositeNodeFactory(name='RATP with MTG',
->>>>>>> .r1756
                              description='',
                              category='Unclassified',
                              doc='',
@@ -1012,7 +804,6 @@ _96940240 = CompositeNodeFactory(name='RATP with MTG',
           (10, '3')],
    '__in__': [],
    '__out__': []},
-<<<<<<< .mine
                              elt_ad_hoc={  2: {  'position': [121.33245339436323, -88.179125106769206],
          'useUserColor': False,
          'userColor': None},
@@ -1072,67 +863,6 @@ _96940240 = CompositeNodeFactory(name='RATP with MTG',
           'userColor': None},
    '__in__': {  'position': [0, 0], 'useUserColor': True, 'userColor': None},
    '__out__': {  'position': [0, 0], 'useUserColor': True, 'userColor': None}},
-=======
-                             elt_ad_hoc={  2: {  'position': [121.33245339436323, -88.1791251067692],
-         'useUserColor': False,
-         'userColor': None},
-   3: {  'position': [114.42987856824675, -259.1760843519193],
-         'useUserColor': False,
-         'userColor': None},
-   4: {  'position': [-230.9397924388836, -143.7360145901881],
-         'useUserColor': False,
-         'userColor': None},
-   5: {  'position': [-417.08606154618417, -305.863111800535],
-         'useUserColor': False,
-         'userColor': None},
-   6: {  'position': [-393.4872457258339, -67.77085929529741],
-         'useUserColor': False,
-         'userColor': None},
-   7: {  'position': [-310.7426672558384, -217.08569568771145],
-         'useUserColor': False,
-         'userColor': None},
-   8: {  'position': [-286.68422229815326, -262.40253923031554],
-         'useUserColor': False,
-         'userColor': None},
-   9: {  'position': [-110.90805878203894, -88.2462720647259],
-         'useUserColor': False,
-         'userColor': None},
-   10: {  'position': [-125.61332537515585, -261.59861163522635],
-          'useUserColor': False,
-          'userColor': None},
-   11: {  'position': [-388.07137900384095, -217.00564651460886],
-          'useUserColor': False,
-          'userColor': None},
-   12: {  'position': [19.016597876350872, -89.92568072637087],
-          'useUserColor': False,
-          'userColor': None},
-   13: {  'position': [14.727865882050509, -259.02907403079763],
-          'useUserColor': False,
-          'userColor': None},
-   14: {  'position': [-84.66055627308216, 68.51314165651011],
-          'useUserColor': False,
-          'userColor': None},
-   15: {  'position': [-412.85475367542574, -166.83442461847366],
-          'useUserColor': False,
-          'userColor': None},
-   16: {  'position': [-390.34765104610835, -263.6094458480818],
-          'useUserColor': False,
-          'userColor': None},
-   17: {  'position': [-183.5924740673217, 97.99868548188117],
-          'useUserColor': False,
-          'userColor': None},
-   18: {  'position': [-16.670528327347412, 101.17599218883879],
-          'useUserColor': False,
-          'userColor': None},
-   19: {  'position': [-171.1874420161406, 172.53579357330256],
-          'useUserColor': False,
-          'userColor': None},
-   20: {  'position': [-107.23893306926742, 215.16813287121798],
-          'useUserColor': False,
-          'userColor': None},
-   '__in__': {  'position': [0, 0], 'useUserColor': True, 'userColor': None},
-   '__out__': {  'position': [0, 0], 'useUserColor': True, 'userColor': None}},
->>>>>>> .r1756
                              lazy=True,
                              eval_algo='LambdaEvaluation',
                              )
