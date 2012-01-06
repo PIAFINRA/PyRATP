@@ -1,5 +1,5 @@
 
-# This file has been generated at Tue Dec 20 14:56:47 2011
+# This file has been generated at Tue Dec 06 08:45:04 2011
 
 from openalea.core import *
 
@@ -14,25 +14,10 @@ __alias__ = []
 __version__ = '0.9.0'
 __authors__ = ''
 __institutes__ = None
-__icon__ = 'icon.png'
+__icon__ = ''
 
 
-__all__ = ['ratp_can2riri', 'ExtractLight_ExtractLight', 'ratp_read_grid', 'ExtractVar_ExtractVar', 'ratp_DoAll', 'ratp_fill_grid', 'ratp_DoIrradiation', 'Plot3DRATP_Plot3DRATP', 'ratp_read_vgx', 'ratp_ExtractTime', 'ratp_extract_leaves', 'ratp_read_vegetation', 'ratp_read_micrometeo', 'ratp_read_skyvault']
-
-
-
-ratp_can2riri = Factory(name='can2riri',
-                authors=' (wralea authors)',
-                description='can2riri',
-                category='simulation, ecophysiology',
-                nodemodule='ratp',
-                nodeclass='can2riri',
-                inputs=[{'interface': IFileStr(filter="*.can", save=False), 'name': 'filename', 'value': None, 'desc': '3D can file'}],
-                outputs=[{'interface': IInt, 'name': 'entity', 'desc': ''}, {'interface': IFloat, 'name': 'x', 'desc': ''}, {'interface': IFloat, 'name': 'y', 'desc': ''}, {'interface': IFloat, 'name': 'z', 'desc': ''}, {'interface': IFloat, 'name': 's', 'desc': ''}, {'interface': IFloat, 'name': 'n', 'desc': ''}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
+__all__ = ['ExtractLight_ExtractLight', 'ratp_read_micrometeo', 'ratp_read_grid', 'ratp_DoAll', 'ratp_fill_grid', 'ratp_DoIrradiation', 'ratp_read_vgx', 'ratp_ExtractTime', 'ratp_extract_leaves', 'ratp_read_vegetation', 'ratp_can2riri', 'ratp_read_skyvault']
 
 
 
@@ -42,8 +27,23 @@ ExtractLight_ExtractLight = Factory(name='ExtractLight',
                 category='data processing',
                 nodemodule='ExtractLight',
                 nodeclass='ExtractLight',
-                inputs=[{'interface': None, 'name': 'Elt2Voxel', 'value': None, 'desc': ''}, {'interface': None, 'name': 'RATPOutput', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Day', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Hour', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Variable', 'value': None, 'desc': 'Numero colonne de la variable choisie'}],
+                inputs=[{'interface': None, 'name': 'Elt2Voxel', 'value': None, 'desc': ''}, {'interface': None, 'name': 'RATPOutput', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Day', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Hour', 'value': None, 'desc': ''}],
                 outputs=[{'interface': None, 'name': 'PAR', 'desc': ''}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
+ratp_read_micrometeo = Factory(name='read_micrometeo',
+                authors=' (wralea authors)',
+                description='read the micrometeo files',
+                category='Unclassified',
+                nodemodule='ratp',
+                nodeclass='read_micrometeo',
+                inputs=[{'interface': IFileStr(filter="*.mto", save=False), 'name': 'filename', 'value': None, 'desc': 'Micrometeo file'}],
+                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -59,21 +59,6 @@ ratp_read_grid = Factory(name='read grid',
                 nodeclass='read_grid',
                 inputs=[{'interface': IFileStr(filter="*.grd", save=False), 'name': 'filename', 'value': None, 'desc': '3d Grid file'}],
                 outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
-ExtractVar_ExtractVar = Factory(name='ExtractVar',
-                authors=' (wralea authors)',
-                description='',
-                category='data processing',
-                nodemodule='ExtractVar',
-                nodeclass='ExtractVar',
-                inputs=[],
-                outputs=[],
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -126,21 +111,6 @@ ratp_DoIrradiation = Factory(name='ratp_radiation',
 
 
 
-Plot3DRATP_Plot3DRATP = Factory(name='Plot3DRATP',
-                authors=' (wralea authors)',
-                description='',
-                category='visualisation',
-                nodemodule='Plot3DRATP',
-                nodeclass='Plot3DRATP',
-                inputs=[{'interface': ISequence, 'name': 'Scene', 'value': None, 'desc': ''}, {'interface': ISequence, 'name': 'Color', 'value': None, 'desc': ''}],
-                outputs=[{'interface': ISequence, 'name': 'Scene', 'desc': 'Colored Scene  '}],
-                widgetmodule=None,
-                widgetclass=None,
-               )
-
-
-
-
 ratp_read_vgx = Factory(name='plant from vegestar',
                 authors=' (wralea authors)',
                 description='',
@@ -152,7 +122,6 @@ ratp_read_vgx = Factory(name='plant from vegestar',
                 widgetmodule=None,
                 widgetclass=None,
                )
-
 
 
 
@@ -201,14 +170,14 @@ ratp_read_vegetation = Factory(name='read_vegetation',
 
 
 
-ratp_read_micrometeo = Factory(name='read_micrometeo',
+ratp_can2riri = Factory(name='can2riri',
                 authors=' (wralea authors)',
-                description='read the micrometeo files',
-                category='Unclassified',
+                description='can2riri',
+                category='simulation, ecophysiology',
                 nodemodule='ratp',
-                nodeclass='read_micrometeo',
-                inputs=[{'interface': IFileStr(filter="*.mto", save=False), 'name': 'filename', 'value': None, 'desc': 'Micrometeo file'}],
-                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
+                nodeclass='can2riri',
+                inputs=[{'interface': IFileStr(filter="*.can", save=False), 'name': 'filename', 'value': None, 'desc': '3D can file'}],
+                outputs=[{'interface': IInt, 'name': 'entity', 'desc': ''}, {'interface': IFloat, 'name': 'x', 'desc': ''}, {'interface': IFloat, 'name': 'y', 'desc': ''}, {'interface': IFloat, 'name': 'z', 'desc': ''}, {'interface': IFloat, 'name': 's', 'desc': ''}, {'interface': IFloat, 'name': 'n', 'desc': ''}],
                 widgetmodule=None,
                 widgetclass=None,
                )

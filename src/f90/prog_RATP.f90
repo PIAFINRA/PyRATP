@@ -300,12 +300,12 @@ subroutine do_all
   ntime=ntime+1
   write(*,*) '...Iteration : ',ntime,nbli
   call mm_read(ntime,nbli)  ! Read micrometeo data (line #ntime in file mmeteo.<spec>)
-  write(*,*) '...mm_read : '
+  !write(*,*) '...mm_read : '
   call swrb_doall     ! Compute short wave radiation balance
 
   call eb_doall
   call ps_doall
-  write(*,*) '...swrb_doall : '
+  !write(*,*) '...swrb_doall : '
   do jent=1,nent
    itertree = itertree +1
    out_time_tree(itertree,1) = ntime

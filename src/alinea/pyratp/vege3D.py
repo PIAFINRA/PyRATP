@@ -118,7 +118,7 @@ class Vege3D(object):
             X = (liste[listEntete.index("TransX")])
             Y = (liste[listEntete.index("TransY")])
             Z = (liste[listEntete.index("TransZ")])
-
+            typeV =0
             tabTypeVege= np.append(tabTypeVege,typeV)
             tabX= np.append(tabX,X)
             tabY= np.append(tabY,Y)

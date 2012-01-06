@@ -1,7 +1,7 @@
-def ExtractLight(d_e2v, riri_out, day, hour):
+def ExtractLight(d_e2v, riri_out, day, hour,col):
     '''    Extract PAR from RATP output
     '''
-    ls_id = [2,3]
+    ls_id = [1,2]
     ls_vals = [day, hour]
     dat = extract_list(riri_out, ls_id, ls_vals)
     dat = t_list(dat)
@@ -10,9 +10,9 @@ def ExtractLight(d_e2v, riri_out, day, hour):
     nmax = max(d_e2v.keys())
     for i in range(nmax+1):
         try :
-            irradiance_e.append(dat[5][d_e2v[i]])
+            irradiance_e.append(dat[col][d_e2v[i]])
         except:
-            irradiance_e.append(0)#!!! Recupere pas toutes les entites dans d_e2v!!? : Acause de traingles en z negatif!
+            irradiance_e.append(0)#!!! Recupere pas toutes les entites dans d_e2v!!? : A cause de triangles en z negatif!
 
 
     return irradiance_e#,dat[5]#
@@ -25,7 +25,7 @@ def extract_list(dat, ls_id, ls_vals):
     """ extrait avec un ET les lignes pour les quelles les colonnes numerotees ls_id prennent les valeurs ls_vals"""
 
     res = []
-    for i in range(1, len(dat)):
+    for i in range(0, len(dat)):   #ATTENTION CHANGEMENT ON PART A 0. UN VOXEL ETAIT MANQUANT SINON !! 20/12/2011 MARC SAUDREAU
         bol = 1
         for j in range(len(ls_id)):
             if dat[i][ls_id[j]] == ls_vals[j]:

@@ -4,5 +4,5 @@
 44.00 0.  0.						! latitude, longitude timezone (hours)
 -27								! angle (°) between axis X+ and North
 0									! offset between canopy units along Y-axis
-3									! number of vegetation entities in the 3D grid
+1									! number of vegetation entities in the 3D grid
 2 0.075 0.20	! number of wavebands, soil reflectance for each waveband
