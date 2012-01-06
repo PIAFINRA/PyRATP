@@ -1,5 +1,5 @@
 
-# This file has been generated at Tue Dec 20 14:56:47 2011
+# This file has been generated at Thu Jan 05 10:33:01 2012
 
 from openalea.core import *
 
@@ -17,7 +17,7 @@ __institutes__ = None
 __icon__ = 'icon.png'
 
 
-__all__ = ['ratp_can2riri', 'ExtractLight_ExtractLight', 'ratp_read_grid', 'ExtractVar_ExtractVar', 'ratp_DoAll', 'ratp_fill_grid', 'ratp_DoIrradiation', 'Plot3DRATP_Plot3DRATP', 'ratp_read_vgx', 'ratp_ExtractTime', 'ratp_extract_leaves', 'ratp_read_vegetation', 'ratp_read_micrometeo', 'ratp_read_skyvault']
+__all__ = ['ratp_can2riri', 'ExtractLight_ExtractLight', 'ratp_read_grid', 'ratp_read_skyvault', 'ratp_DoAll', 'ratp_fill_grid', 'ratp_DoIrradiation', 'Plot3DRATP_Plot3DRATP', 'ratp_read_vgx', 'ratp_ExtractTime', 'ratp_extract_leaves', 'ratp_read_vegetation', 'ratp_read_micrometeo', 'ExtractVar_ExtractVar', 'RATP2VTK_RATP2VTK']
 
 
 
@@ -66,14 +66,14 @@ ratp_read_grid = Factory(name='read grid',
 
 
 
-ExtractVar_ExtractVar = Factory(name='ExtractVar',
+ratp_read_skyvault = Factory(name='read_skyvault',
                 authors=' (wralea authors)',
-                description='',
-                category='data processing',
-                nodemodule='ExtractVar',
-                nodeclass='ExtractVar',
-                inputs=[],
-                outputs=[],
+                description='read the skyvault file',
+                category='Unclassified',
+                nodemodule='ratp',
+                nodeclass='read_skyvault',
+                inputs=[{'interface': IFileStr(filter="*.skv", save=False), 'name': 'filename', 'value': None, 'desc': 'Skywvault file'}],
+                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -216,14 +216,29 @@ ratp_read_micrometeo = Factory(name='read_micrometeo',
 
 
 
-ratp_read_skyvault = Factory(name='read_skyvault',
+ExtractVar_ExtractVar = Factory(name='ExtractVar',
                 authors=' (wralea authors)',
-                description='read the skyvault file',
-                category='Unclassified',
-                nodemodule='ratp',
-                nodeclass='read_skyvault',
-                inputs=[{'interface': IFileStr(filter="*.skv", save=False), 'name': 'filename', 'value': None, 'desc': 'Skywvault file'}],
-                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
+                description='',
+                category='data i/o',
+                nodemodule='ExtractVar',
+                nodeclass='ExtractVar',
+                inputs=[{'interface': ISlice, 'name': 'IN1', 'value': None, 'desc': 'dfgd'}, {'interface': None, 'name': 'IN2', 'value': None, 'desc': 'dgdg'}],
+                outputs=[{'interface': IInt, 'name': 'Column', 'desc': 'dfgfd'}, {'interface': IStr, 'name': 'Name', 'desc': 'dfgdfg'}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+
+
+
+RATP2VTK_RATP2VTK = Factory(name='RATP2VTK',
+                authors=' (wralea authors)',
+                description='Paraview file',
+                category='data i/o',
+                nodemodule='RATP2VTK',
+                nodeclass='RATP2VTK',
+                inputs=[{'interface': ISequence, 'name': 'Scene', 'value': None, 'desc': ''}, {'interface': ISequence, 'name': 'Variable', 'value': None, 'desc': ''}, {'interface': IStr, 'name': 'VariableName', 'value': 'Variable', 'desc': ''}],
+                outputs=[{'interface': None, 'name': 'VTK File', 'desc': ''}],
                 widgetmodule=None,
                 widgetclass=None,
                )

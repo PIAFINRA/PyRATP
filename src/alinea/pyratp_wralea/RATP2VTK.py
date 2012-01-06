@@ -67,7 +67,7 @@ def RATP2VTK(scene, variable, varname="Variable"):
     f.write('CELL_DATA '+str(numTriangles)+'\n')
 
     f.write('FIELD FieldData 1 \n');
-    f.write('variable 1 '+str(numTriangles)+' float\n')
+    f.write(varname +' 1 '+str(numTriangles)+' float\n')
     for i in triangleColor:
           f.write(str(i).strip('[]')+'\n')
             
