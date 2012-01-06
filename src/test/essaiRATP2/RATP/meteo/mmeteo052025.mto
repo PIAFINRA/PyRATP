@@ -1,0 +1,4 @@
+day	hour	PARglob	PARdif	NIRglob	NIRdif	Ratmos	Tsol	Tair	Eair	CO2air	Wind	Ratmos2
+157	1	0	0	0	0	300	12.2	12.2	881	43	2.9	466
+157	2	0	0	0	0	296	11.6	11.6	850	43	2.9	463
+157	3	0	0	0	0	294	11.3	11.3	831	43	2.9	460

@@ -1,0 +1,9 @@
+Date du calcul: 30/9/2010
+Heure du calcul: 11:29:17
+Temps de calcul :  00:00:20
+Temps de calcul / Voxel / Iteration (en s): 0.00167000668003
+Fichier Digital: C:/essaiRATP2/RATP/digital/digitalAD2004.dgt (Mon Sep 06 09:15:31 2010)
+Fichier Grille: C:/essaiRATP2/RATP/grille/grid3Da_2004.grd (Mon Sep 06 09:18:39 2010)
+Fichier Meteo: C:/essaiRATP2/RATP/meteo/meteo.mfn (Mon Sep 06 09:18:55 2010)
+Fichier Vegetation: C:/essaiRATP2/RATP/vegetation/vegetationa_2004.vfn (Mon Sep 06 09:53:17 2010)
+Fichier Skyvault: C:/essaiRATP2/RATP/skyvault/skyvault46soc_2.skv (Tue Sep 07 14:35:49 2010)
