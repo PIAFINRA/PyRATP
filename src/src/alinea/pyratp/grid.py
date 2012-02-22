@@ -113,7 +113,7 @@ class Grid(object):
     @staticmethod
     def fill(entity, x, y, z, s, n ,grid):
         """ Filling the 3D Grid with points, area and nitrogen content.
-        lkjfkjrzelkrjzelrkjzer
+
         :Parameters:
             - `x`: an array of abscisse.
             - .
