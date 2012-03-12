@@ -47,7 +47,8 @@ def _read(f):
     l = f.readline()
     l= l.split('!')[0] # remove comments
     l= l.split('\n')[0] # remove chr(13)
-    l = l.split(' ')
+    #l = l.split(' ')
+    l = l.replace('\t',' ').split(' ') 
     l = filter(None,l)
     for j in range(len(l)):
         l[j]=np.float32(l[j])

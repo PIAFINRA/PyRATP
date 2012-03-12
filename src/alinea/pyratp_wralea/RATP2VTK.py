@@ -33,7 +33,7 @@ def RATP2VTK(scene, variable, varname="Variable"):
         # Works only with triangles P1 i.e. defined with 3 points
         #... Input:
             #... Triangles - self attribute
-            #... Variable to be plot - var
+            #... Variable to be plotted - var
             #... Corresponding variable name - varname
         #... Output:
             #... a VTK file - filename

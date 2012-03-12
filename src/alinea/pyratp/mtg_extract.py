@@ -30,7 +30,7 @@ def extract_leaves(g, factor=100, nitrogen=2, grid_definition=None):
         l = [v for v in g.components_at_scale(vid, scale=max_scale) if leaf_area.get(v,0)]
         klass = g.class_name(vid)
         length = len(l)
-        _entity = entity(klass, length)
+        _entity = 1 #entity(klass, length)
         leaf_type.update(dict((k,_entity) for k in l))
 
     # convert dict into array

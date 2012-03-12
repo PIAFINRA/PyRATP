@@ -1,21 +1,30 @@
-def ExtractLight(d_e2v, riri_out, day, hour,col):
-    '''    Extract PAR from RATP output
+def ExtractLight(d_e2v, data, day, hour,col):
+    '''    Extract a variable from RATP output for a given date (day and hour)
+    and attached extracted variable to leaves for 3D visualization.
+        Input::Parameters:
+            - d_e2v: connectivity table Leaf -> Voxel (list)
+            - data: a 2D array(real)
+            - day, hour: time to extract data      
+            - col: column corresponding to data to be extracted.
+            
+        Output:Parameters:  
+            - extractedvar: extracted data 
     '''
     ls_id = [1,2]
     ls_vals = [day, hour]
-    dat = extract_list(riri_out, ls_id, ls_vals)
+    dat = extract_list(data, ls_id, ls_vals)
     dat = t_list(dat)
 
-    irradiance_e = []
+    extractedvar = []
     nmax = max(d_e2v.keys())
     for i in range(nmax+1):
         try :
-            irradiance_e.append(dat[col][d_e2v[i]])
+            extractedvar.append(dat[col][d_e2v[i]])
         except:
-            irradiance_e.append(0)#!!! Recupere pas toutes les entites dans d_e2v!!? : A cause de triangles en z negatif!
+            extractedvar.append(0)#!!! Recupere pas toutes les entites dans d_e2v!!? : A cause de triangles en z negatif!
 
 
-    return irradiance_e#,dat[5]#
+    return extractedvar#,dat[5]#
 
 #rajouter calcul d'irradiance moyen
 

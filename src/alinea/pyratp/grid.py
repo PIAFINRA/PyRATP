@@ -21,7 +21,14 @@ class Grid(object):
 
     @staticmethod
     def read(filename):
-        """ Creating the 3D grid from  input file. """
+        """ Creating the 3D grid from input file *.grd
+
+        Input:Parameters:
+            - a grid file ! *.grd
+            
+        Output:Parameters:
+            - grid3d: object grid updated (size, number of voxels)     
+        """
 
         grid3d = pyratp.grid3d
 
@@ -100,24 +107,35 @@ class Grid(object):
 
     @staticmethod
     def readVgx(filename):
-        """ Filling the 3D Grid with points, area and nitrogen content.
+        """ Reading the foliage distribution.
 
-        :Parameters:
-            - `x`: an array of abscisse.
-            - .
+        Input:Parameters:
+            - a VegeSTAR file
+            
+        Output:Parameters:
+            - v: array of vegettion type (integer) 
+            - x,y,z: arrays of 3D coordinates in m (real)
+            - s: array of leaf area in m2 (real)      
+            - n: array of nitrogen content in g/m2    (real)     
         """
-        tv,tx,ty,tz,ts,tn = vege3D.Vege3D.readVGX(filename,2)
-        return tv/100,tx/100,ty/100,-tz/100,ts/10000.,tn
+        v,x,y,z,s,n = vege3D.Vege3D.readVGX(filename,2)
+        return v,x/100,y/100,-z/100,s/10000.,n
 
 
     @staticmethod
     def fill(entity, x, y, z, s, n ,grid):
         """ Filling the 3D Grid with points, area and nitrogen content.
-        lkjfkjrzelkrjzelrkjzer
-        :Parameters:
-            - `x`: an array of abscisse.
-            - .
-##        """
+        Input::Parameters:
+            - entity: array of vegettion type (integer) 
+            - x,y,z: arrays of 3D coordinates in m (real)
+            - s: array of leaf area in m2 (real)      
+            - n: array of nitrogen content in g/m2    (real)
+            - grid: object grid (see readgrid method) 
+            
+        Output:Parameters:  
+            - grid: object grid updated (i.e. filled with leaves)  
+            - D_E2V: connectivity table Leaf -> Voxel
+        """
         x = x - grid.xorig
         y = y - grid.yorig
         z = z + grid.zorig
