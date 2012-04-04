@@ -383,6 +383,7 @@ subroutine do_all
 
 ! Deallocation des tableaux
 
+! DEBUG the deallocation
  !call g3d_destroy
  call sv_destroy
  call vt_destroy

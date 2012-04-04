@@ -7,6 +7,7 @@ from alinea.pyratp import micrometeo
 from alinea.pyratp import runratp
 from alinea.pyratp import mtg_extract 
 from alinea.pyratp import can2riri 
+from alinea.pyratp.RATP2VTK import RATP2VTK 
 
 
 read_grid = grid.Grid.read

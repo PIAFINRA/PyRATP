@@ -5,7 +5,7 @@
 
 .. module:: pyratp
 
-Alinea PyRATP documentation
+PyRATP documentation
 #########################################################################
 
 Module description
@@ -27,7 +27,7 @@ Documentation
 =============
 
 .. toctree::
-    :maxdepth: 2
+    :maxdepth: 1
 
     User Guide<user/index.rst>   
     Reference Guide<user/autosum.rst>

@@ -1,6 +1,6 @@
 .. _pyratp_user:
 
-£PROJECT_NAME.PyRATP User Guide
+PyRATP User Guide
 #######################################
 
 :Version: |version|

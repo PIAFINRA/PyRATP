@@ -41,6 +41,8 @@ contains
 !  Allocation et initialisation des tableaux de facteurs de forme
 
   call hi_destroy
+
+  !write(*,*) 'Destroy memory pass'
 !
 !  1- Sky_integrated STAR at different scales
 
@@ -72,6 +74,8 @@ contains
   allocate(ffcs(nsol))
 !  ffvs=0.
 !  ffcs=0.
+
+  !write(*,*) 'DEBUG: Allocation'
 
 !  Array initialisation
   do ks=1,nveg   ! source = vegetated voxels
@@ -106,20 +110,24 @@ contains
 
 !   Directional interception (includes computation of extinction coefficient, beam sampling, and exchange coefficients)
   do jdir=1,ndir
- !  write(*,*) 'jdir',jdir
+   write(*,*) 'jdir',jdir
+   !write(*,*) 'DEBUG: ARGS',hmoy(jdir)*180./pi 
+   !write(*,*) 'DEBUG: ARGS', azmoy(jdir)*180./pi 
+   !write(*,*) 'DEBUG: ARGS', omega(jdir),dpx0,dpy0,scattering,isolated_box
+
    call di_doall(hmoy(jdir)*180./pi, azmoy(jdir)*180./pi, omega(jdir),dpx0,dpy0,scattering,isolated_box)
 
 
 !   Sky-vault integration of incident diffuse radiation interception
-         do k=1,nveg
-            aa = pc(jdir) * riv(k)
-            do je=1,nje(k)
-               rdiv(je,k) = rdiv(je,k) + aa * share(je,k)
+    do k=1,nveg
+        aa = pc(jdir) * riv(k)
+        do je=1,nje(k)
+            rdiv(je,k) = rdiv(je,k) + aa * share(je,k)
+        end do
     end do
-   end do
-         do k=1,nsol
-            rdis(k) = rdis(k) + pc(jdir) * ris(k)
-   end do
+    do k=1,nsol
+        rdis(k) = rdis(k) + pc(jdir) * ris(k)
+    end do
 
 !   STAR computations (from coefficients riv and share)
 
