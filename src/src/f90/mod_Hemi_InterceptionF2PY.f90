@@ -35,7 +35,7 @@ contains
   scattering=.TRUE.
   isolated_box=ib0
 
-  !write(*,*) 'Computing interception of diffuse and scattered radiation ...'
+  write(*,*) 'Computing interception of diffuse and scattered radiation ...'
 
 !
 !  Allocation et initialisation des tableaux de facteurs de forme
@@ -72,6 +72,8 @@ contains
   allocate(ffcs(nsol))
 !  ffvs=0.
 !  ffcs=0.
+
+  write(*,*) 'Core Dump after'
 
 !  Array initialisation
   do ks=1,nveg   ! source = vegetated voxels
