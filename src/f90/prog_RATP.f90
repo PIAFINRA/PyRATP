@@ -100,7 +100,8 @@ contains
  endmeteo=.FALSE.
  call mm_initiate
 
-
+ itertree = 0
+ iterspatial = 0
  do while (.NOT.((endmeteo).OR.((nlarvaout+nlarvadead).ge.voxel_canopy(2))))
   ntime=ntime+1
  ! write(*,*) '...Iteration : ',ntime,nbli
@@ -223,8 +224,8 @@ contains
 ! Deallocation des tableaux
 
  !call g3d_destroy
- call sv_destroy
- call vt_destroy
+ !call sv_destroy
+ !call vt_destroy
  !call mm_destroy
  call di_destroy
  call hi_destroy
@@ -295,7 +296,8 @@ subroutine do_all
  endmeteo=.FALSE.
  call mm_initiate
 
-
+ itertree = 0
+ iterspatial = 0 
  do while (.NOT.((endmeteo)))
   ntime=ntime+1
   write(*,*) '...Iteration : ',ntime,nbli
@@ -385,8 +387,8 @@ subroutine do_all
 
 ! DEBUG the deallocation
  !call g3d_destroy
- call sv_destroy
- call vt_destroy
+ !call sv_destroy
+ !call vt_destroy
  !call mm_destroy
  call di_destroy
  call hi_destroy
@@ -434,6 +436,7 @@ subroutine do_all
  call mm_initiate
 
  allocate(out_rayt(nbli*nveg*nemax,9))
+ iterspatial = 0
  do while (.NOT.((endmeteo)))
   ntime=ntime+1
   write(*,*) '...Iteration : ',ntime,nbli
@@ -441,7 +444,8 @@ subroutine do_all
   !write(*,*) '...mm_read : '
   call swrb_doall     ! Compute short wave radiation balance
 
-
+ 
+ 
   do k=1,nveg 
   
    do je=1,nje(k)
@@ -475,8 +479,8 @@ subroutine do_all
 
 ! Deallocation des tableaux
 
- call sv_destroy
- call vt_destroy
+ !call sv_destroy
+ !call vt_destroy
  call di_destroy
  call hi_destroy
  call swrb_destroy

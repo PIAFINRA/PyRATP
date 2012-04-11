@@ -110,7 +110,7 @@ contains
 
 !   Directional interception (includes computation of extinction coefficient, beam sampling, and exchange coefficients)
   do jdir=1,ndir
-   write(*,*) 'jdir',jdir
+   !write(*,*) 'jdir',jdir
    !write(*,*) 'DEBUG: ARGS',hmoy(jdir)*180./pi 
    !write(*,*) 'DEBUG: ARGS', azmoy(jdir)*180./pi 
    !write(*,*) 'DEBUG: ARGS', omega(jdir),dpx0,dpy0,scattering,isolated_box
