@@ -29,7 +29,7 @@ class runRATP(object):
             shutil.rmtree(path)
         os.mkdir(path)
         os.mkdir(path+"/Resul")
-        print np.where(pyratp.vegetation_types.ismine==1)
+        ##print np.where(pyratp.vegetation_types.ismine==1)
         try:
             numeroMin = (np.where(pyratp.vegetation_types.ismine==1))[0][0] + 1
             blMin=np.where(pyratp.grid3d.nume==numeroMin)
