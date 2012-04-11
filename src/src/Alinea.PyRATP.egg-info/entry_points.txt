@@ -1,3 +1,0 @@
-[wralea]
-pyratp = alinea.pyratp_wralea
-
