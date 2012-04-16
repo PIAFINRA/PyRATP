@@ -19,5 +19,5 @@ def test_can():
     result = cn.node(15).get_output(0)
     
     assert len(result) == 230
-    assert result.shape == 230,9
+    assert result.shape == (230,9)
     assert 199 < result.mean() < 200
