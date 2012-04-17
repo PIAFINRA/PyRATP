@@ -10,7 +10,7 @@ def test_complet():
     factory = pm['pyratp.demo']['complet2']
     cn = factory.instantiate()
     for i in range(5):
-      cn.eval_as_expression(31)
+        cn.eval_as_expression(31)
 
 def test_can():
     factory = pm['pyratp.demo']['RATP with Can Files']
@@ -23,4 +23,4 @@ def test_can():
     assert 199 < result.mean() < 200
 
 
-test_complet()
+#test_complet()
