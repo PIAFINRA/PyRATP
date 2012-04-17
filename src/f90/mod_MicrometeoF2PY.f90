@@ -12,6 +12,7 @@ real :: day,hour    ! day and hour
 real, allocatable :: glob(:), diff(:), direct(:), dsg (:) ! global, diffuse and direction radiation in band iblo, D/G ratio in band iblo
 real :: ratmos      ! atmospheric radiation
 real :: tsol,taref,earef,caref ! soil temperature, air temperature, water vapour pressure in the air (Pa), CO2 partial pressure in the air (Pa)
+real :: HRsol         !Relative Soil Humidity   Ngao 02/2012 
 real, allocatable :: uref(:)  ! wind speed, in each horizontal layer (jz=1,njz)
 real, allocatable :: tabMeteo(:,:)  ! Meteo data
 
@@ -80,7 +81,8 @@ contains
     caref=tabMeteo(ntime,ii)
     ii = ii+1
     urefref=tabMeteo(ntime,ii)
-
+    ii = ii+2                       !Relative Soil Humidity   Ngao 02/2012 
+    HRsol=tabMeteo(ntime,ii)        !Relative Soil Humidity   Ngao 02/2012  set to 1 by default (no stress)
 
   ! write(*,*) 'day,hour =',day,hour ,(glob(iblo),diff(iblo),iblo=1,nblomin), ratmos,tsol,taref,earef,caref,urefref
 

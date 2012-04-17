@@ -27,9 +27,9 @@ class MicroMeteo(object):
         nbli = len(f.readlines())-1
         micrometeo.nbli=nbli
         f.close()
-        col = np.int32(13)
+        col = np.int32(14)
 
-        micrometeo.tabmeteo = np.zeros(micrometeo.nbli*col).reshape(micrometeo.nbli ,col)
+        micrometeo.tabmeteo = np.ones(micrometeo.nbli*col).reshape(micrometeo.nbli ,col)   #17/04/2012 NGAO Set to one for HRsol default value ! 
 
         f = open(filename)
         f.readline()

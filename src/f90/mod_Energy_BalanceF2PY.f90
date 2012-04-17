@@ -207,7 +207,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
 
     rss=10000.    ! Arbitrary high value
     !write(*,*) 'call Jarvis_stomata avant'
-    call Jarvis_stomata(jent,leaf_nitrogen,par_irrad,caref,leaf_temp,VPDair,ga,rsi,drsi)
+    call Jarvis_stomata(jent,leaf_nitrogen,par_irrad,caref,HRsol,leaf_temp,VPDair,ga,rsi,drsi)
     !write(*,*) 'call Jarvis_stomata apres'
 
 !    Total resistances, i.e. boundary layer + stomatal and 2 sides, in s m-1
@@ -471,7 +471,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   H_canopy = 0.      ! Sensible heat rate of canopy
   E = 0.
   Sts=0.
-
+!  write(*,*) 'fin init output'
 !  Allocation of local arrays
 
 
@@ -500,7 +500,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
    end do
   end do
   end do
-
+!  write(*,*) 'fin Rn balance'
 !-----------------------------!
 !  Starting energy balance !
 !-----------------------------!
@@ -516,7 +516,6 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   end do
   end do
   end do
-
 !
 !  Iterative solving of energy balance for each vegetation type in each voxel
 !
@@ -527,7 +526,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   do while (next_iter)
 
    niter=niter+1
-   !write(*,*) 'Iteration:',niter
+!   write(*,*) 'Iteration solve:'!,niter
 
    bilanmax=0.
    E_canopy=0. ! Pour essai Shuttleworth-Wallace (09 Dec 2002, avec FB)
@@ -538,16 +537,16 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
    do je=1,nje(k)    ! For each voxel, each vegetation type, shaded and sunlit area
 
    do joe=0,1
-   !write(*,*) 'joe:',joe
+!   write(*,*) 'joe:',joe
 
     jent=nume(je,k)
-    !write(*,*) 'jent:',jent
+!    write(*,*) 'jent:',jent
     leaf_nitrogen = N_detailed(je,k)
     par_irrad=PARirrad(joe,je,k)
     leaf_temp=ts(joe,je,k)
     esair=610.78*exp((17.27*taref)/(237.3+taref))
     VPDair=esair-earef
-    !write(*,*) 'VPDair:',VPDair
+!    write(*,*) 'VPDair:',VPDair
 !    Leaf boundary resistance / conductance
 !
 !    ra : one-side resistance, in s.m-1
@@ -556,7 +555,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
     !write(*,*) 'uref(numz(k))',uref(numz(k))
     ga=Aga(jent,1)*uref(numz(k))+Aga(jent,2)
 
-    !write(*,*) 'ga',ga
+ !   write(*,*) 'ga',ga
     ra=1./ga
 
 !    Saturating water vapor pressure, es, at temperature ts: Tetens' formula (1930), en Pa
@@ -573,7 +572,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
 
     rss=10000.    ! Arbitrary high value
     !write(*,*) 'call Jarvis_stomata avant'
-    call Jarvis_stomata(jent,leaf_nitrogen,par_irrad,caref,leaf_temp,VPDair,ga,rsi,drsi)
+    call Jarvis_stomata(jent,leaf_nitrogen,par_irrad,caref,HRsol,leaf_temp,VPDair,ga,rsi,drsi)
     !write(*,*) 'call Jarvis_stomata apres'
 
 !    Total resistances, i.e. boundary layer + stomatal and 2 sides, in s m-1
@@ -585,7 +584,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
      drv=0.
      else
      rv=(rss+ra)*(rsi+ra)/(rss+rsi+2.*ra)
-     drv=drsi*((rss+ra)/(rss+rsi+2*ra))**2
+     drv=((rss+ra)/(rss+rsi+2*ra))**2*drsi
     endif
 
     rh=ra/2.
@@ -605,6 +604,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
     end do
     end do
     rn=rn-rayirt(joe,je,k)/S_detailed(joe,je,k)
+    !write(*,*) 'Rn',rn
 
 !    1'- Derivative of net radiation with regard to leaf temperature: drn
 
@@ -736,7 +736,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
  end subroutine eb_doall
 !------------------------------------------------------------------end  eb_doall
 
- subroutine Jarvis_stomata(jent,leaf_nitrogen,par_irrad,ca,leaf_temp, VPDair,ga,rsi,drsi)
+ subroutine Jarvis_stomata(jent,leaf_nitrogen,par_irrad,ca,HRsol,leaf_temp,VPDair,ga,rsi,drsi)
 
  use vegetation_types
 
@@ -747,12 +747,15 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   integer :: jent  ! Vegetation type #, needed to get the suitable gs response parameters.
   real  :: leaf_nitrogen ! leaf nitrogen content Na (g m-2)
   real  :: par_irrad, ca, leaf_temp, VPDair, ga ! microclimate variables sensed by the leaf, plus leaf boundary conductance as needed in solving coupling between gs and VPD
-
+  real  :: HRsol   !Relative Soil Humidity   Ngao 02/2012 
   real  :: VPDthreshold ! VPD value below which fgsVPD = cte = fgsVPD(VPDthreshold)
 
 !  Output variables: stomatal conductance (m s-1) / resistance (s m-1), and derivatives with regard to leaf temperature
   real  :: gsi, rsi, dgsi, drsi
-
+  
+  
+  real  :: gsHRsol  ! response function of gs to HRsol  - Ngao 02/2012
+  real  :: aHRsol,bHRsol    ! coeffs response function of gs to HRsol  - Ngao 02/2012
   real  :: gsmax    ! Maximum gs (m s-1), as a function of leaf nitrogen content Na (g m-2)
   real  :: fgsPAR   ! Reducing factor of PAR irradiance on gs
   real  :: fgsCA    ! Reducing factor of air CO2 partial pressure on gs
@@ -888,7 +891,20 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   fgsVPDair = amin1(amax1(AgsVPD(jent,1) * VPDair + AgsVPD(jent,2) , 0.05), fgsVPDt)
   gsVPDair = gsmax * fgsPAR * fgsCA * fgsLT * fgsVPDair
 
-  gsi=0.5*(sqrt((ga-gsVPD0)**2+4.*ga*gsVPDair) - (ga-gsVPD0) )
+!Ngao 02/2012: Adding effect of soil humidity on gs
+  gsHRsol = 0.00
+  aHRsol = 0.9688
+  bHRsol = -0.4022
+  if (HRsol.le.abs(bHRsol/aHRsol)) then
+      gsHRsol = aHRsol*HRsol+bHRsol
+  endif
+  
+  gsi=0.5*(sqrt((ga-gsVPD0)**2+4.*ga*gsVPDair) - (ga-gsVPD0) ) + gsHRsol
+!  write(500,*) HRsol,gsHRsol, gsi
+  
+!Ngao 02/2012: Adding effect of soil humidity on gs  
+  if (gsi.lt.0) gsi=10e-8
+!  gsi=0.5*(sqrt((ga-gsVPD0)**2+4.*ga*gsVPDair) - (ga-gsVPD0) )
   rsi=1/gsi
 
 
