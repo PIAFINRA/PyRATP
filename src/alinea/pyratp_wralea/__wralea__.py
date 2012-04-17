@@ -59,8 +59,8 @@ ratp_read_grid = Factory(name='read grid',
                 nodeclass='read_grid',
                 inputs=[{'interface': IFileStr(filter="*.grd", save=False), 'name': 'filename', 'value': None, 'desc': '3d Grid file'}],
                 outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
-                widgetmodule=None,
-                widgetclass=None,
+                widgetmodule='UI_RATP',
+                widgetclass='Ui_UI_RATP',
                )
 
 
