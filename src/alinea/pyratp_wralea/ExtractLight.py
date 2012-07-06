@@ -50,11 +50,12 @@ def extract_list(dat, ls_id, ls_vals):
 def t_list(tab):
     """transpose tab"""
     res = []
-    for j in range(len(tab[0])):
-        v = []
-        for i in range(len(tab)):
-            v.append(tab[i][j])
+    if tab:
+        for j in range(len(tab[0])):
+            v = []
+            for i in range(len(tab)):
+                v.append(tab[i][j])
         
-        res.append(v)
+            res.append(v)
 
     return res

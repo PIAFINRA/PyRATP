@@ -186,6 +186,7 @@ python module pyratp ! in
             real allocatable,dimension(:,:) :: tabmeteo
             real :: earef
             real :: hour
+            real :: hrsol
             real :: ratmos
             real :: day
             real :: caref
@@ -288,12 +289,13 @@ python module pyratp ! in
                 use skyvault
                 use hemi_interception
             end subroutine eb_doall
-            subroutine jarvis_stomata(jent,leaf_nitrogen,par_irrad,ca,leaf_temp,vpdair,ga,rsi,drsi) ! in :pyratp:mod_Energy_BalanceF2PY.f90:energy_balance
+            subroutine jarvis_stomata(jent,leaf_nitrogen,par_irrad,ca,hrsol,leaf_temp,vpdair,ga,rsi,drsi) ! in :pyratp:mod_Energy_BalanceF2PY.f90:energy_balance
                 use vegetation_types
                 integer :: jent
                 real :: leaf_nitrogen
                 real :: par_irrad
                 real :: ca
+                real :: hrsol
                 real :: leaf_temp
                 real :: vpdair
                 real :: ga
