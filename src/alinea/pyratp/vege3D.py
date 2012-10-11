@@ -123,7 +123,7 @@ class Vege3D(object):
             tabX= np.append(tabX,X)
             tabY= np.append(tabY,Y)
             tabZ= np.append(tabZ,Z)
-            AREA = (liste[listEntete.index("EchX")])*(liste[listEntete.index("EchY")])*0.7
+            AREA = (liste[listEntete.index("EchX")])*(liste[listEntete.index("EchY")])*0.75
             tabS= np.append(tabS,AREA)
             tabN= np.append(tabN,Azote)
 

@@ -5,9 +5,10 @@ from alinea.pyratp import grid
 from alinea.pyratp import vegetation
 from alinea.pyratp import micrometeo
 from alinea.pyratp import runratp
-from alinea.pyratp import mtg_extract 
-from alinea.pyratp import can2riri 
-from alinea.pyratp.RATP2VTK import RATP2VTK 
+from alinea.pyratp import mtg_extract
+from alinea.pyratp import can2riri
+from alinea.pyratp.RATP2VTK import RATP2VTK
+
 
 
 read_grid = grid.Grid.read
@@ -18,7 +19,7 @@ read_skyvault = skyvault.Skyvault.read
 read_vegetation = vegetation.Vegetation.read
 read_micrometeo = micrometeo.MicroMeteo.read
 
-DoAll = runratp.runRATP.DoAll  
+DoAll = runratp.runRATP.DoAll
 DoIrradiation = runratp.runRATP.DoIrradiation
 extract_leaves = mtg_extract.extract_leaves
 can2riri = can2riri.can2riri
@@ -28,14 +29,14 @@ class ExtractColumn( Node ):
     """
     header = ['']
     index = [0]
-    
+
     def __init__(self):
-    
+
         Node.__init__(self)
 
         funs= self.header
-        self.add_input( name = "column", interface = IEnumStr(funs), value = funs[0]) 
-        self.add_input( name = "array" ) 
+        self.add_input( name = "column", interface = IEnumStr(funs), value = funs[0])
+        self.add_input( name = "array" )
         self.add_output( name = "array", interface = None)
 
     def __call__(self, inputs):
@@ -59,9 +60,9 @@ class ExtractTime(ExtractColumn):
     """.split('\n')
     index = [0,1,2,3,4,50, 96, 97]
     def __init__(self):
-    
+
         ExtractColumn.__init__(self)
-    
+
 
 class ExtractSpatial(ExtractColumn):
     header = """iteration

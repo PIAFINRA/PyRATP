@@ -1,3 +1,11 @@
-The text in this box is a short overview of your package
-that is written in ./doc/user/overview.txt and should be 
-compatible with restructured format
+The model PyRATP was designed to simulate the spatial distribution of radiation and leaf-gas 
+exchanges within vegetation canopies as a function of canopy structure, 
+canopy microclimate within the canopy and physical and physiological leaf 
+properties. The model uses a 3D representation of the canopy (i.e. an array 
+of 3D voxels, each characterised by a leaf area density) and allows several 
+vegetation types to be input at voxel scale.
+Radiation transfer is computed by a turbid medium analogy, transpiration by 
+the leaf energy budget approach, and photosynthesis by the Farquhar model, 
+each applied for sunlit and shaded leaves at the individual 3D cell-scale. 
+Principes and main equations of the RATP model are given in: Sinoquet et al.,
+2001, Plant Cell and Environment, 24, 395-406.

@@ -18,7 +18,6 @@ module RATP
  integer :: val = 1
  integer :: iterspatial = 0
  integer :: itertree = 0
-
  character*200 fname
 
  character(len=17):: pathResult
@@ -26,7 +25,7 @@ module RATP
  integer :: nbvoxelveg = 1
  integer :: nbiter = 0
 
- character*2 hhx, hhy, hhz
+ !character*2 hhx, hhy, hhz
 
  real, allocatable :: out_time_spatial(:,:), out_time_tree(:,:),out_rayt(:,:)
 
@@ -61,9 +60,19 @@ contains
  dpx=dx/5.
  dpy=dy/5.
 
- scattering=.FALSE.
- isolated_box=.FALSE.
-
+ if (int_scattering.eq.1)  then
+  scattering=.TRUE.
+ else
+  scattering=.FALSE.
+ end if
+ !write(*,*) "scattering", scattering
+ 
+ if (int_isolated_box.eq.1)  then
+  isolated_box=.TRUE.
+ else
+  isolated_box=.FALSE.
+ end if
+ !write(*,*) "isolated", isolated_box
  call Farquhar_parameters_set
  !write(*,*) 'doall'
 
@@ -268,14 +277,24 @@ subroutine do_all
  dpx=dx/5.
  dpy=dy/5.
 
- scattering=.FALSE.
- isolated_box=.FALSE.
+ if (int_scattering.eq.1)  then
+  scattering=.TRUE.
+ else
+  scattering=.FALSE.
+ end if
+ !write(*,*) "scattering", scattering
+ 
+ if (int_isolated_box.eq.1)  then
+  isolated_box=.TRUE.
+ else
+  isolated_box=.FALSE.
+ end if
+ !write(*,*) "isolated", isolated_box
 
  call Farquhar_parameters_set
- !write(*,*) 'doall'
 
  call hi_doall(dpx,dpy,isolated_box)  ! Compute interception of diffuse and scattering radiation, ie exchange coefficients
-
+          
  !pathResult = 'c:/tmpRATP/Resul/'
  pathResult = '/tmp/tmpRATP/Resul/'
  fname=pathResult//'output_PARclasses.dat'
@@ -295,9 +314,9 @@ subroutine do_all
  ntime=0
  endmeteo=.FALSE.
  call mm_initiate
-
+    
  itertree = 0
- iterspatial = 0 
+ iterspatial = 0
  do while (.NOT.((endmeteo)))
   ntime=ntime+1
   write(*,*) '...Iteration : ',ntime,nbli
@@ -386,7 +405,7 @@ subroutine do_all
 ! Deallocation des tableaux
 
 ! DEBUG the deallocation
- !call g3d_destroy
+ ! call g3d_destroy
  !call sv_destroy
  !call vt_destroy
  !call mm_destroy
@@ -428,8 +447,19 @@ subroutine do_all
  dpx=dx/5.
  dpy=dy/5.
 
- scattering=.FALSE.
- isolated_box=.FALSE.
+ if (int_scattering.eq.1)  then
+  scattering=.TRUE.
+ else
+  scattering=.FALSE.
+ end if
+ !write(*,*) "scattering", scattering
+ 
+ if (int_isolated_box.eq.1)  then
+  isolated_box=.TRUE.
+ else
+  isolated_box=.FALSE.
+ end if
+ !write(*,*) "isolated", isolated_box
  call hi_doall(dpx,dpy,isolated_box)  ! Compute interception of diffuse and scattering radiation, ie exchange coefficients
  ntime=0
  endmeteo=.FALSE.
@@ -444,14 +474,14 @@ subroutine do_all
   !write(*,*) '...mm_read : '
   call swrb_doall     ! Compute short wave radiation balance
 
- 
- 
-  do k=1,nveg 
-  
+
+
+  do k=1,nveg
+
    do je=1,nje(k)
      iterspatial = iterspatial +1
      jent=nume(je,k)
-      
+
     ! Sortie rayonnement
        out_rayt(iterspatial,1) = jent
        out_rayt(iterspatial,2) = ntime
@@ -466,7 +496,7 @@ subroutine do_all
 
        !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(1,1,k), taref
    end do
-  end do  
+  end do
   !end if
 
   if (ntime.eq.nbli) then
@@ -491,8 +521,8 @@ subroutine do_all
  subroutine out_rayt_destroy
   !write(*,*) 'destroy out_rayt'
   if (allocated(out_rayt))  deallocate(out_rayt)
- end subroutine out_rayt_destroy 
-	
- 
+ end subroutine out_rayt_destroy
+
+
 end module RATP
 

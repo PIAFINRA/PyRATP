@@ -16,7 +16,10 @@ class Grid(object):
         """
 
         """
-        pass
+
+
+
+
 
 
     @staticmethod
@@ -25,9 +28,9 @@ class Grid(object):
 
         Input:Parameters:
             - a grid file ! *.grd
-            
+
         Output:Parameters:
-            - grid3d: object grid updated (size, number of voxels)     
+            - grid3d: object grid updated (size, number of voxels)
         """
 
         grid3d = pyratp.grid3d
@@ -71,39 +74,10 @@ class Grid(object):
         f.close()
 
         # definition of aliases
-        njx, njy, njz = grid3d.njx, grid3d.njy, grid3d.njz
-        dx, dy = grid3d.dx, grid3d.dy
-        kxyz = grid3d.kxyz
-
-        nent = grid3d.nent
-        nvegmax = njx * njy * njz
-
-        xrang = njx * dx
-        yrang = njy * dy
-        grid3d.total_ground_area=xrang*yrang
-
-        grid3d.kxyz = np.zeros(njx*njy*(njz+1)).reshape((njx, njy, njz+1))
-        grid3d.numx = np.zeros(nvegmax)
-        grid3d.numy = np.zeros(nvegmax)
-        grid3d.numz = np.zeros(nvegmax)
-        grid3d.nje = np.zeros(nvegmax)
-
-        grid3d.leafareadensity= np.zeros(nent*nvegmax).reshape(nent, nvegmax)
-        grid3d.n_detailed = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
-##        grid3d.toto = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
-        grid3d.nume = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
-
-        # Leaf area (m^2) per voxel and vegetation type
-        grid3d.s_vt_vx =  np.zeros(nent*nvegmax).reshape(nent, nvegmax)
-        # Leaf area (m^2) per voxel
-        grid3d.s_vx = np.zeros(nvegmax)
-        # Leaf area (m^2) per vegetation type
-        grid3d.s_vt = np.zeros(nent)
-
-        grid3d.volume_canopy = np.zeros(nent+1)
-        grid3d.voxel_canopy = np.zeros(nent)
-        print 'GRILLE OK'
+        initParam(grid3d)
         return grid3d
+
+##    @staticmethod
 
     @staticmethod
     def readVgx(filename):
@@ -111,12 +85,12 @@ class Grid(object):
 
         Input:Parameters:
             - a VegeSTAR file
-            
+
         Output:Parameters:
-            - v: array of vegettion type (integer) 
+            - v: array of vegettion type (integer)
             - x,y,z: arrays of 3D coordinates in m (real)
-            - s: array of leaf area in m2 (real)      
-            - n: array of nitrogen content in g/m2    (real)     
+            - s: array of leaf area in m2 (real)
+            - n: array of nitrogen content in g/m2    (real)
         """
         v,x,y,z,s,n = vege3D.Vege3D.readVGX(filename,2)
         return v,x/100,y/100,-z/100,s/10000.,n
@@ -126,20 +100,21 @@ class Grid(object):
     def fill(entity, x, y, z, s, n ,grid):
         """ Filling the 3D Grid with points, area and nitrogen content.
         Input::Parameters:
-            - entity: array of vegettion type (integer) 
+            - entity: array of vegettion type (integer)
             - x,y,z: arrays of 3D coordinates in m (real)
-            - s: array of leaf area in m2 (real)      
+            - s: array of leaf area in m2 (real)
             - n: array of nitrogen content in g/m2    (real)
-            - grid: object grid (see readgrid method) 
-            
-        Output:Parameters:  
-            - grid: object grid updated (i.e. filled with leaves)  
+            - grid: object grid (see readgrid method)
+
+        Output:Parameters:
+            - grid: object grid updated (i.e. filled with leaves)
             - D_E2V: connectivity table Leaf -> Voxel
         """
+        initParam(grid)
         x = x - grid.xorig
         y = y - grid.yorig
         z = z + grid.zorig
-        s = s           
+        s = s
 
         lneg=np.where(z<0) #suppression de feuilles ayant un z<0
         entity=np.delete(entity,lneg[0])
@@ -176,7 +151,7 @@ class Grid(object):
         for i in range(np.alen(dz)):
             dh=np.append(dh,dz[:i+1].sum())
         dh=np.delete(dh,0)
-        
+
         #Relation Voxel2entite
         d_E2V = {} #entity id to voxel id
 
@@ -246,11 +221,59 @@ class Grid(object):
                 if  grid.s_vt_vx[je,k]> 0. :
                  grid.volume_canopy[grid.nume[je,k]-1]=grid.volume_canopy[grid.nume[je,k]-1]+dx*dy*dz[grid.numz[k]-1]
                  grid.voxel_canopy[grid.nume[je,k]-1]=grid.voxel_canopy[grid.nume[je,k]-1]+1
-##            print 'numx[k],numy[k],numz[k]',grid.numx[k],grid.numy[k],grid.numz[k]
-##
+##        print 'GRILLE Fillgrid'
+##        fichier = open("c:/xxx.txt", "a")
+##        fichier.write(str( grid.kxyz)+"\n")
+##        fichier.write(str( grid.numx)+"\n")
+##        fichier.write(str( grid.numy)+"\n")
+##        fichier.write(str( grid.numz)+"\n")
+##        fichier.write(str( grid.nje)+"\n")
+##        fichier.write(str( grid.leafareadensity)+"\n")
+##        fichier.write(str( grid.n_detailed)+"\n")
+##        fichier.write(str( grid.nume)+"\n")
+##        fichier.write(str( grid.s_vt_vx)+"\n")
+##        fichier.write(str( grid.s_vx)+"\n")
+##        # Leaf area (m^2) per vegetation type
+##        fichier.write(str( grid.s_vt)+"\n")
+##        fichier.write(str( grid.volume_canopy)+"\n")
+##        fichier.write(str( grid.voxel_canopy)+"\n")
+##        fichier.close()
         return grid, d_E2V
 
+def initParam(grid3d):
+##        print 'GRILLE OK debut'
+        njx, njy, njz = grid3d.njx, grid3d.njy, grid3d.njz
+        dx, dy = grid3d.dx, grid3d.dy
+        kxyz = grid3d.kxyz
 
+        nent = grid3d.nent
+        nvegmax = njx * njy * njz
+
+        xrang = njx * dx
+        yrang = njy * dy
+        grid3d.total_ground_area=xrang*yrang
+
+        grid3d.kxyz = np.zeros(njx*njy*(njz+1)).reshape((njx, njy, njz+1))
+        grid3d.numx = np.zeros(nvegmax)
+        grid3d.numy = np.zeros(nvegmax)
+        grid3d.numz = np.zeros(nvegmax)
+        grid3d.nje = np.zeros(nvegmax)
+
+        grid3d.leafareadensity= np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+        grid3d.n_detailed = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+##        grid3d.toto = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+        grid3d.nume = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+
+        # Leaf area (m^2) per voxel and vegetation type
+        grid3d.s_vt_vx =  np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+        # Leaf area (m^2) per voxel
+        grid3d.s_vx = np.zeros(nvegmax)
+        # Leaf area (m^2) per vegetation type
+        grid3d.s_vt = np.zeros(nent)
+
+        grid3d.volume_canopy = np.zeros(nent+1)
+        grid3d.voxel_canopy = np.zeros(nent)
+##        print 'GRILLE OK'
 
 def _read(f, *args):
     l = f.readline()

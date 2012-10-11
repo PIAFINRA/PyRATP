@@ -22,6 +22,7 @@ class Vegetation(object):
 
     @staticmethod
     def read(filename):
+##        print 'VEGETATION OK'
         chemin=str(os.path.dirname(filename))
         vegetation = pyratp.vegetation_types
         listVegeNom = []
@@ -111,8 +112,9 @@ class Vegetation(object):
             vegetation.epm[jent]=varEpm
             jent +=1
             fVeg.close()
-            print 'VEGETATION OK'
 
+
+        return vegetation
 
 def _read(f, *args):
     l = f.readline()

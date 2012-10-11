@@ -59,8 +59,10 @@ ratp_read_grid = Factory(name='read grid',
                 nodeclass='read_grid',
                 inputs=[{'interface': IFileStr(filter="*.grd", save=False), 'name': 'filename', 'value': None, 'desc': '3d Grid file'}],
                 outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
-                widgetmodule='UI_RATP',
-                widgetclass='Ui_UI_RATP',
+##                widgetmodule=None,
+##                widgetclass=None,
+                widgetmodule='WidgetUiRATP_Grid',
+                widgetclass='ClassUiRATP_Grid',
                )
 
 
@@ -194,8 +196,10 @@ ratp_read_vegetation = Factory(name='read_vegetation',
                 nodeclass='read_vegetation',
                 inputs=[{'interface': IFileStr(filter="*.vfn", save=False), 'name': 'filename', 'value': None, 'desc': 'Vegetation file'}],
                 outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}],
-                widgetmodule=None,
-                widgetclass=None,
+##                widgetmodule=None,
+##                widgetclass=None,
+                widgetmodule='WidgetUiRATP_Vege',
+                widgetclass='ClassUiRATP_Vege',
                )
 
 

@@ -1,5 +1,5 @@
 
-# This file has been generated at Tue Apr 17 11:46:23 2012
+# This file has been generated at Wed Jun 06 15:31:46 2012
 
 from openalea.core import *
 
@@ -17,220 +17,101 @@ __institutes__ = ''
 __icon__ = ''
 
 
-__all__ = ['_73139248', '_73139184', '_73139344', '_73139088', '_73138640', '_73138704', '_73138480', '_73138768', '_73138608', '_73138672', '_73139056', '_73138448', '_73138832', '_73138384', '_73139312', '_73139408', '_73138416', '_73139216', '_73138544', '_73139440', '_73138992', '_73138896', '_73138736', '_73139152', '_73139376', '_73138960', '_73139120', '_73138800', '_73138864', '_73139280', '_73139024', '_73138512', '_73138576', '_73138928']
+__all__ = ['_71755984', '_71755760', '_71756432', '_71755888', '_71756048', '_71755792', '_71755664', '_71756080', '_71756272', '_71756144', '_71756400', '_71756464', '_71755856', '_71755952', '_110921744', '_71755632', '_71755696', '_71756016', '_71756336', '_71756112', '_71756176', '_71756208', '_71755824', '_71755728', '_71756240', '_71756304', '_71756368', '_71755920']
 
 
-_73139248 = DataFactory(name='grid3Da_2011.grd',
+_71755984 = DataFactory(name='vegetation2011_P3.vfn',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73139184 = DataFactory(name='Jubile_P10.vgx',
+_71755760 = DataFactory(name='datameteo2011B.mto',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73139344 = DataFactory(name='Pommier2011_test4_P8.veg',
+_71756432 = DataFactory(name='grid3Da_2012.grd',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73139088 = DataFactory(name='Pommier2011_test4_P7.veg',
+_71755888 = DataFactory(name='datameteo2011A.mto',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73138640 = DataFactory(name='datameteo2011_short_HRsol2.mto',
+_71756048 = DataFactory(name='vegetation2011_P10.vfn',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73138704 = DataFactory(name='vegetation2011_P10.vfn',
+_71755792 = DataFactory(name='vegetation2011_P8.vfn',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73138480 = DataFactory(name='Jubile_P10_cent.vgx',
+_71755664 = DataFactory(name='grid3Da_2011.grd',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73138768 = DataFactory(name='vegetation2011_P7.vfn',
+_71756080 = DataFactory(name='grid3Da_2011B.grd',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73138608 = DataFactory(name='vegetation2011_P8.vfn',
+_71756272 = DataFactory(name='Jubile_P3_cent_avantstress.vgx',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73138672 = DataFactory(name='Pommier2011_test4_P3.veg',
+_71756144 = DataFactory(name='datameteo2011_veryshort.mto',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73139056 = DataFactory(name='datameteo2011_short_HRsol3.mto',
+_71756400 = DataFactory(name='Pommier2011_test4_P10.veg',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73138448 = DataFactory(name='grid3Da_2011B.grd',
+_71756464 = DataFactory(name='datameteo2011_short_sans HRsol3.mto',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73138832 = DataFactory(name='Jubile_P8_cent.vgx',
+_71755856 = DataFactory(name='Jubile_P10_cent.vgx',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73138384 = DataFactory(name='testP10.mto',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73139312 = DataFactory(name='meteopommier1c.mto',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73139408 = DataFactory(name='grid3Da_2011C.grd',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73138416 = DataFactory(name='datameteo2011B.mto',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73139216 = DataFactory(name='grid3Da_2004.grd',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73138544 = DataFactory(name='Jubile_P7_cent.vgx',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73139440 = DataFactory(name='vegetationb_2004.vfn',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73138992 = DataFactory(name='datameteo2011_OK.mto',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73138896 = DataFactory(name='datameteo2011_short.mto',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73138736 = DataFactory(name='meteopommier1c2.mto',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73139152 = DataFactory(name='datameteo2011_short_sans HRsol3.mto',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73139376 = DataFactory(name='Jubile_P7.vgx',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73138960 = DataFactory(name='vegetation2011_P3.vfn',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73139120 = DataFactory(name='Pommier2011_test4_P10.veg',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73138800 = DataFactory(name='digitalAA2004.vgx',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73138864 = DataFactory(name='grid3Da_2012.grd',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73139280 = DataFactory(name='datameteo2011A.mto',
-                    description='',
-                    editors=None,
-                    includes=None,
-                    )
-
-
-_73139024 = DataFactory(name='datameteo2011_veryshort.mto',
+_71755952 = DataFactory(name='grid3Da_2011C.grd',
                     description='',
                     editors=None,
                     includes=None,
@@ -238,7 +119,81 @@ _73139024 = DataFactory(name='datameteo2011_veryshort.mto',
 
 
 
-_73138512 = CompositeNodeFactory(name='pyRATP_complet',
+_110921744 = CompositeNodeFactory(name='pyRATP_complet2',
+                             description='',
+                             category='Unclassified',
+                             doc='',
+                             inputs=(),
+                             outputs=(),
+                             elt_factory={  },
+                             elt_connections={  },
+                             elt_data={  },
+                             elt_value={  },
+                             elt_ad_hoc={  },
+                             lazy=True,
+                             eval_algo='LambdaEvaluation',
+                             )
+
+
+
+_71755632 = DataFactory(name='datameteo2011B2.mto',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_71755696 = DataFactory(name='PommierSuisse2004.veg',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_71756016 = DataFactory(name='Pommier2011_test4_P8.veg',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_71756336 = DataFactory(name='vegetationb_2004.vfn',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_71756112 = DataFactory(name='datameteo2011_short_HRsol3.mto',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_71756176 = DataFactory(name='Pommier2011_test4_P7.veg',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_71756208 = DataFactory(name='vegetation2011_P7.vfn',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_71755824 = DataFactory(name='digitalAA2004.vgx',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+
+_71755728 = CompositeNodeFactory(name='pyRATP_complet',
                              description='',
                              category='model',
                              doc='',
@@ -829,14 +784,28 @@ _73138512 = CompositeNodeFactory(name='pyRATP_complet',
 
 
 
-_73138576 = DataFactory(name='PommierSuisse2004.veg',
+_71756240 = DataFactory(name='Jubile_P7_cent.vgx',
                     description='',
                     editors=None,
                     includes=None,
                     )
 
 
-_73138928 = DataFactory(name='Jubile_P3_cent_avantstress.vgx',
+_71756304 = DataFactory(name='Pommier2011_test4_P3.veg',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_71756368 = DataFactory(name='grid3Da_2004.grd',
+                    description='',
+                    editors=None,
+                    includes=None,
+                    )
+
+
+_71755920 = DataFactory(name='Jubile_P8_cent.vgx',
                     description='',
                     editors=None,
                     includes=None,

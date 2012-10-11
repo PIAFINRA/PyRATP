@@ -45,8 +45,32 @@ integer, allocatable :: nje(:)   ! number of vegetation types in voxel (as a fun
 integer, allocatable :: nume(:,:)   ! type # of each vegetation type in each voxel
 real, allocatable    :: leafareadensity(:,:)   ! leaf area density of each vegetation type in each voxel
 real, allocatable    :: N_detailed(:,:)   ! nitrogen content (g m-2) of each vegetation type in each voxel
+integer :: int_scattering
+integer :: int_isolated_box
+logical :: scattering   ! TRUE if scattering variables must be computed
+logical :: isolated_box   ! TRUE if isolated array of voxels (and FALSE if the array of voxels is surrounded with similar arrays, ie infinite canopy)
+
+contains
+ subroutine g3d_destroy
+    if (allocated(dz))						deallocate(dz)
+		if (allocated(kxyz))						deallocate(kxyz)
+		if (allocated(numx))						deallocate(numx)
+		if (allocated(numy))						deallocate(numy)
+		if (allocated(numz))						deallocate(numz)
+		if (allocated(nje))						deallocate(nje)
+		if (allocated(leafareadensity))		deallocate(leafareadensity)
+		if (allocated(N_detailed))				deallocate(N_detailed)
+		if (allocated(nume))						deallocate(nume)
+
+		if (allocated(S_vt_vx))					deallocate(S_vt_vx)
+		if (allocated(S_vx))						deallocate(S_vx)
+		if (allocated(S_vt))						deallocate(S_vt)
+		if (allocated(volume_canopy))			deallocate(volume_canopy)
 
 
+		if (allocated(rs))						deallocate(rs)
+
+ end subroutine g3d_destroy
 end module grid3D
 
 !------------------------------------------------------------------------------

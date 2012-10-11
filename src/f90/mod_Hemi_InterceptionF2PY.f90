@@ -106,7 +106,7 @@ contains
 
 
 !     For each sky direction jdir, jdir=1,ndir
-!  write(*,*) 'ndir',ndir
+  !write(*,*) 'ndir',ndir
 
 !   Directional interception (includes computation of extinction coefficient, beam sampling, and exchange coefficients)
   do jdir=1,ndir

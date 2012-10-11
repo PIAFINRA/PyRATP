@@ -1,4 +1,5 @@
 * Herve Sinoquet
 * Marc Saudreau
-* and much more
+* Jerome Ngao
+* Boris Adam
 

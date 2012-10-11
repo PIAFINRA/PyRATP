@@ -24,8 +24,8 @@ real, allocatable :: ffcvb(:)  ! Exchange coeff between vegetated voxels and sky
 real, allocatable :: ffvsb(:,:) ! Exchange coeff between soil surface and vegetated voxels
 real, allocatable :: ffcsb(:)  ! Exchange coeff between soil surface and sky
 
-logical :: scattering   ! TRUE if scattering variables must be computed
-logical :: isolated_box   ! TRUE if isolated array of voxels (and FALSE if the array of voxels is surrounded with similar arrays, ie infinite canopy)
+
+!logical :: isolated_box   ! TRUE if isolated array of voxels (and FALSE if the array of voxels is surrounded with similar arrays, ie infinite canopy)
 
 
 contains
