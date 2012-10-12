@@ -74,7 +74,9 @@ class Grid(object):
         f.close()
 
         # definition of aliases
+
         initParam(grid3d)
+
         return grid3d
 
 ##    @staticmethod
@@ -169,7 +171,7 @@ class Grid(object):
             if y[i]<=0:jy = grid.njy-jy-1
 
             jz = np.where(dh>z[i])[0][0]
-            jz = grid.njz-jz-1 # -1 compatibilite F90-python
+            jz = grid.njz-jz
 ##            print i, jx, jy, jz,x[i],y[i],z[i]
             # TO CONTINUE (line 318)
          #Cas ou il n'y avait encore rien dans la cellule (jx,jy,jz)
@@ -238,6 +240,7 @@ class Grid(object):
 ##        fichier.write(str( grid.volume_canopy)+"\n")
 ##        fichier.write(str( grid.voxel_canopy)+"\n")
 ##        fichier.close()
+        #gridToVGX(grid) #Grille dans vegestar
         return grid, d_E2V
 
 def initParam(grid3d):
@@ -274,6 +277,28 @@ def initParam(grid3d):
         grid3d.volume_canopy = np.zeros(nent+1)
         grid3d.voxel_canopy = np.zeros(nent)
 ##        print 'GRILLE OK'
+
+def gridToVGX(grid):
+
+    echX= grid.dx *100
+    echY= grid.dy *100
+    fichier = open( "c:\grille.vgx","w")
+    fichier.write( "Obj\tEchX\tEchY\tEchZ\tTransX\tTransY\tTransZ\tRotX\tRotY\tRotZ")
+    fichier.write("\n")
+
+    for k in range(0,grid.nveg):
+        dh=grid.dz[(grid.numz[k]):].sum()
+        transX = (grid.numx[k]-1)*grid.dx*100
+        transY = (grid.numy[k]-0.5)*grid.dy*100
+        transZ = -(grid.dz[grid.numz[k]]*0.5+dh)*100
+        echZ= grid.dz[grid.numz[k]]*100
+        fichier.write("35\t"+str(echX) +"\t"+ str(echY)+"\t"+str(echZ)+"\t"+str(transX)+"\t"+str(transY)+"\t"+str(transZ)+"\t0\t0\t0")
+        fichier.write("\n")
+    fichier.close()
+
+
+
+
 
 def _read(f, *args):
     l = f.readline()
