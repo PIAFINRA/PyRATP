@@ -113,10 +113,7 @@ class Grid(object):
             - D_E2V: connectivity table Leaf -> Voxel
         """
         initParam(grid)
-        x = x - grid.xorig
-        y = y - grid.yorig
-        z = z + grid.zorig
-        s = s
+
 
         lneg=np.where(z<0) #suppression de feuilles ayant un z<0
         entity=np.delete(entity,lneg[0])
@@ -125,6 +122,11 @@ class Grid(object):
         z=np.delete(z,lneg[0])
         s=np.delete(s,lneg[0])
         n=np.delete(n,lneg[0])
+
+        x = x - grid.xorig
+        y = y - grid.yorig
+        z = z + grid.zorig
+        s = s
 ##        if z.min() < 0.:
 ##                raise ValueError('Some elements have a negative Z value.')
 
@@ -151,7 +153,7 @@ class Grid(object):
         #dh: tableau des hauteurs z
         dh = np.array(0)
         for i in range(np.alen(dz)):
-            dh=np.append(dh,dz[:i+1].sum())
+            dh=np.append(dh,dz[:i].sum())
         dh=np.delete(dh,0)
 
         #Relation Voxel2entite
@@ -162,6 +164,7 @@ class Grid(object):
           # Compute the coord of each element in the grid.
             # modulo is used to build a toric scene.
             #------------------------------------------ Attention au decalage de 1--------------------------------
+
             jx = int((abs(x[i])/dx))
             jx=(jx)%grid.njx
             if x[i]<=0:jx = grid.njx-jx-1
@@ -171,8 +174,8 @@ class Grid(object):
             if y[i]<=0:jy = grid.njy-jy-1
 
             jz = np.where(dh>z[i])[0][0]
-            jz = grid.njz-jz
-##            print i, jx, jy, jz,x[i],y[i],z[i]
+            jz = grid.njz-jz+1
+
             # TO CONTINUE (line 318)
          #Cas ou il n'y avait encore rien dans la cellule (jx,jy,jz)
             if grid.kxyz[jx,jy,jz]==0 :
@@ -240,8 +243,8 @@ class Grid(object):
 ##        fichier.write(str( grid.volume_canopy)+"\n")
 ##        fichier.write(str( grid.voxel_canopy)+"\n")
 ##        fichier.close()
-        #gridToVGX(grid) #Grille dans vegestar
-        return grid, d_E2V
+         #Grille dans vegestar
+        return grid, d_E2V #, gridToVGX(grid)
 
 def initParam(grid3d):
 ##        print 'GRILLE OK debut'
@@ -282,7 +285,8 @@ def gridToVGX(grid):
 
     echX= grid.dx *100
     echY= grid.dy *100
-    fichier = open( "c:\grille.vgx","w")
+    chemin = "c:\grille.vgx"
+    fichier = open( chemin,"w")
     fichier.write( "Obj\tEchX\tEchY\tEchZ\tTransX\tTransY\tTransZ\tRotX\tRotY\tRotZ")
     fichier.write("\n")
 
@@ -292,11 +296,11 @@ def gridToVGX(grid):
         transY = (grid.numy[k]-0.5)*grid.dy*100
         transZ = -(grid.dz[grid.numz[k]]*0.5+dh)*100
         echZ= grid.dz[grid.numz[k]]*100
-        fichier.write("35\t"+str(echX) +"\t"+ str(echY)+"\t"+str(echZ)+"\t"+str(transX)+"\t"+str(transY)+"\t"+str(transZ)+"\t0\t0\t0")
+        fichier.write("3\t"+str(echX) +"\t"+ str(echY)+"\t"+str(echZ)+"\t"+str(transX)+"\t"+str(transY)+"\t"+str(transZ)+"\t0\t0\t0")
         fichier.write("\n")
     fichier.close()
 
-
+    return chemin
 
 
 
