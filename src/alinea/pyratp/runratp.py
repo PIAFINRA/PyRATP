@@ -23,7 +23,7 @@ class runRATP(object):
         ratp = pyratp.ratp
         pyratp.dir_interception.scattering = False
         ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*14*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,14)
-        ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*98*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,98)
+        ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*8*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,8)
 
         path = 'c:/tmpRATP' if platform.system() == 'Windows' else '/tmp/tmpRATP'
         if os.path.isdir(path):

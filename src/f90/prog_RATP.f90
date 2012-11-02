@@ -333,16 +333,20 @@ subroutine do_all
    out_time_tree(itertree,2) = day
    out_time_tree(itertree,3) = hour
    out_time_tree(itertree,4) = jent
-   out_time_tree(itertree,5) = glob(ntime)*2.02/0.48
-   do class = 1,45
-    out_time_tree(itertree,class+5) = Spar(jent,class)/S_vt(jent)
-   end do
-   out_time_tree(itertree,51) = taref
-   do class = 1,45
-    out_time_tree(itertree,class+51) = Sts(jent,class)/S_vt(jent)
-   end do
-   out_time_tree(itertree,97) = A_canopy
-   out_time_tree(itertree,98) = E_canopy
+   out_time_tree(itertree,5) = glob(1)+glob(2)
+   !do class = 1,45
+    !out_time_tree(itertree,class+5) = Spar(jent,class)/S_vt(jent)
+   !end do
+   !out_time_tree(itertree,51) = taref
+   !do class = 1,45
+    !out_time_tree(itertree,class+51) = Sts(jent,class)/S_vt(jent)
+   !end do
+   !out_time_tree(itertree,97) = A_canopy
+   !out_time_tree(itertree,98) = E_canopy
+   out_time_tree(itertree,6) = taref
+   out_time_tree(itertree,7) = A_canopy
+   out_time_tree(itertree,8) = E_canopy
+   
    !write(2,20) ntime, day, hour, jent, glob(1)*2.02/0.48, (Spar(jent,class)/S_vt(jent), class=1,45) ! %SF per irradiance class
    !write(3,30) ntime, day, hour, jent, taref, (Sts(jent,class)/S_vt(jent), class=10,45)
   end do

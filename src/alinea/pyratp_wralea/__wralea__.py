@@ -105,7 +105,7 @@ ratp_fill_grid = Factory(name='fill grid',
                 nodemodule='ratp',
                 nodeclass='fill_grid',
                 inputs=[{'interface': IInt, 'name': 'entity', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'x', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'y', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'z', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 's', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'n', 'value': None, 'desc': ''}, {'interface': None, 'name': 'grid', 'value': None, 'desc': ''}],
-                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}, {'interface': None, 'name': 'Elt2Voxels', 'desc': ''}],
+                outputs=[{'interface': None, 'name': 'grid', 'desc': 'No output for the moment'}, {'interface': None, 'name': 'Elt2Voxels', 'desc': ''},{'interface': ISequence, 'name': 'Scene', 'desc': 'Colored Scene  '}],
                 widgetmodule=None,
                 widgetclass=None,
                )

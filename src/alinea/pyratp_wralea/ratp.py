@@ -58,7 +58,7 @@ class ExtractTime(ExtractColumn):
     Photosynthesis
     Transpiration
     """.split('\n')
-    index = [0,1,2,3,4,50, 96, 97]
+    index = [0,1,2,3,4,5,6, 7]
     def __init__(self):
 
         ExtractColumn.__init__(self)
