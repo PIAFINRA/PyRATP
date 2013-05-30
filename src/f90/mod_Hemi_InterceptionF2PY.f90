@@ -29,7 +29,7 @@ contains
  real :: aa, rtot
  real :: dpx0, dpy0
  logical :: ib0    ! TRUE if isolated box
-
+ integer :: AllocateStatus
 
 
   scattering=.TRUE.
@@ -63,7 +63,8 @@ contains
 
 !  3- Facteurs de forme pour le rayonnement rediffuse
 !             Source = vegetation
-  allocate(ffvv(nveg,nemax,nveg,nemax))
+  allocate(ffvv(nveg,nemax,nveg,nemax),stat=AllocateStatus)
+  if (AllocateStatus /= 0) stop "*** Sorry, Not enough memory for allocating ffvv table***"
   allocate(ffsv(nsol,nveg,nemax))
   allocate(ffcv(nveg,nemax))
 !  ffsv=0.

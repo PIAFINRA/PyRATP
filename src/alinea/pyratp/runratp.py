@@ -26,7 +26,7 @@ class runRATP(object):
         ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*8*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,8)
 
         path = 'c:/tmpRATP' if platform.system() == 'Windows' else '/tmp/tmpRATP'
-        if os.path.isdir(path):
+        if os.path.exists(path):
             shutil.rmtree(path)
         os.mkdir(path)
         os.mkdir(path+"/Resul")
@@ -134,7 +134,7 @@ class runRATP(object):
         ratp.out_rayt = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*9*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,9)
 
         path = 'c:/tmpRATP' if platform.system() == 'Windows' else '/tmp/tmpRATP'
-        if os.path.isdir(path):
+        if os.path.exists(path):
             shutil.rmtree(path)
         os.mkdir(path)
         os.mkdir(path+"/Resul")
