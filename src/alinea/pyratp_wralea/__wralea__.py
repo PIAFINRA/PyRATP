@@ -164,10 +164,6 @@ ratp_ExtractTime = Factory(name='extract time',
                 category='Mtg, light',
                 nodemodule='ratp',
                 nodeclass='ExtractTime',
-                inputs=None,
-                outputs=None,
-                widgetmodule=None,
-                widgetclass=None,
                )
 
 

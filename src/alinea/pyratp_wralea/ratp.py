@@ -40,12 +40,19 @@ class ExtractColumn( Node ):
         self.add_output( name = "array", interface = None)
 
     def __call__(self, inputs):
-        col= self.get_input("column")
-        a = self.get_input("array")
-        i = self.index[self.header.index(col)]
-
-        self.set_caption(col)
-
+        col= inputs[0]
+        a = inputs[1]
+        print 'col ', col
+        try:
+            i = self.index[self.header.index(col)]
+            self.set_caption(col)
+        except Exception, e:
+            if col.isdigit():
+                i = int(col)
+                col = self.header[i]
+                self.set_caption(col)
+            else:
+                raise e
         return a[:,i],
 
 class ExtractTime(ExtractColumn):
@@ -58,12 +65,10 @@ class ExtractTime(ExtractColumn):
     Photosynthesis
     Transpiration
     """.split('\n')
-    index = [0,1,2,3,4,5,6, 7]
-    def __init__(self):
+    header = [x.strip() for x in header]
+    index = range(len(header))
 
-        ExtractColumn.__init__(self)
-
-
+        
 class ExtractSpatial(ExtractColumn):
     header = """iteration
     day
@@ -79,18 +84,7 @@ class ExtractSpatial(ExtractColumn):
     Leaf surface (shaded)
     Leaf surface (sunlit)
     """.split('\n')
+    header = [x.strip() for x in header]
     index = range(len(header))
 
-    def __init__(self):
-        ExtractColumn.__init__(self)
-
-    def __call__(self, inputs):
-        col= self.get_input("column")
-        a = self.get_input("array")
-        i = self.index[self.header.index(col)]
-
-        self.set_caption(col)
-
-        # TODO extract the values for each voxel
-        return a[:,i],
 
