@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+import platform
 bn = os.path.basename
 abspath = os.path.abspath
 
@@ -13,21 +14,39 @@ lib_env = env.Clone(F90PATH='#/build-scons/src/f90',
                     ENV={'PATH' : os.environ['PATH']},
                     )
 
-sources = Split("""
-pyratp.pyf
-mod_Cocnstant_ValuesF2PY.f90 
-mod_Grid3DF2PY.f90 
-mod_SkyvaultF2PY.f90 
-mod_Vegetation_TypesF2PY.f90 
-mod_Dir_InterceptionF2PY.f90 
-mod_Hemi_InterceptionF2PY.f90 
-mod_MicrometeoF2PY.f90 
-mod_Shortwave_BalanceF2PY.f90 
-mod_Energy_BalanceF2PY.f90 
-mod_PhotosynthesisF2PY.f90 
-mod_MinerPhenoF2PY.f90 
-prog_RATP.f90
-""")
+if platform.machine().endswith('64'):
+    sources = Split("""
+    pyratp.pyf
+    mod_Cocnstant_ValuesF2PY.f90 
+    mod_Grid3DF2PY_64bit.f90 
+    mod_SkyvaultF2PY.f90 
+    mod_Vegetation_TypesF2PY.f90 
+    mod_Dir_InterceptionF2PY.f90 
+    mod_Hemi_InterceptionF2PY.f90 
+    mod_MicrometeoF2PY.f90 
+    mod_Shortwave_BalanceF2PY.f90 
+    mod_Energy_BalanceF2PY.f90 
+    mod_PhotosynthesisF2PY.f90 
+    mod_MinerPhenoF2PY.f90 
+    prog_RATP.f90
+    """)
+else:
+     sources = Split("""
+    pyratp.pyf
+    mod_Cocnstant_ValuesF2PY.f90 
+    mod_Grid3DF2PY.f90 
+    mod_SkyvaultF2PY.f90 
+    mod_Vegetation_TypesF2PY.f90 
+    mod_Dir_InterceptionF2PY.f90 
+    mod_Hemi_InterceptionF2PY.f90 
+    mod_MicrometeoF2PY.f90 
+    mod_Shortwave_BalanceF2PY.f90 
+    mod_Energy_BalanceF2PY.f90 
+    mod_PhotosynthesisF2PY.f90 
+    mod_MinerPhenoF2PY.f90 
+    prog_RATP.f90
+    """)
+   
 
 #objs = env.Object(sources)
 #wrapper_src = env.F2py('pyRATP_module.c', sources)
