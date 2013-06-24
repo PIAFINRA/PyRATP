@@ -185,6 +185,7 @@ class Grid(object):
                  grid.numz[k]=jz + 1 #ajouter 1 pour utilisation f90
                  grid.nje[k]=1
                  grid.nume[0,k]=entity[i]+1
+                         
                  grid.leafareadensity[0,k]=s[i]/(dx*dy*dz[jz])
                  grid.s_vt_vx[0,k]=s[i]
                  grid.s_vx[k]=s[i]
@@ -199,7 +200,7 @@ class Grid(object):
                 je=0
                 while (grid.nume[je,kk]!= (entity[i]+1) and (je+1)<=grid.nje[kk]):
                     je=je+1
-
+                    
                 grid.leafareadensity[je,kk]=grid.leafareadensity[je,kk]+s[i]/(dx*dy*dz[jz])
 
                 grid.n_detailed[je,kk]=(grid.n_detailed[je,kk]*grid.s_vt_vx[je,kk]+n[i]*s[i])/(grid.s_vt_vx[je,kk]+s[i])
@@ -244,6 +245,7 @@ class Grid(object):
 ##        fichier.write(str( grid.voxel_canopy)+"\n")
 ##        fichier.close()
          #Grille dans vegestar
+        
         return grid, d_E2V #, gridToVGX(grid)
 
 def initParam(grid3d):

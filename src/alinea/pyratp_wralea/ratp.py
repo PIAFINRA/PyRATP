@@ -8,6 +8,7 @@ from alinea.pyratp import runratp
 from alinea.pyratp import mtg_extract
 from alinea.pyratp import can2riri
 from alinea.pyratp.RATP2VTK import RATP2VTK
+from alinea.pyratp import Nallocate
 
 
 
@@ -23,6 +24,7 @@ DoAll = runratp.runRATP.DoAll
 DoIrradiation = runratp.runRATP.DoIrradiation
 extract_leaves = mtg_extract.extract_leaves
 can2riri = can2riri.can2riri
+Nallocate = Nallocate.Nallocate.N_distrib
 
 class ExtractColumn( Node ):
     """ Extract column based on str

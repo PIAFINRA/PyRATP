@@ -1,6 +1,7 @@
 from openalea.plantgl import *
+import numpy as np
 
-def RATP2VTK(scene, variable, varname="Variable"):
+def RATP2VTK(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"):
     '''    Paraview file
            variable = liste de float
            scene  = scene plant GL  
@@ -9,7 +10,15 @@ def RATP2VTK(scene, variable, varname="Variable"):
             T.result
             
 
-    ''' 
+    '''      
+#    print 'len(scene)', len(scene) 
+#    print 'len(variable)', len(variable)
+#    print "varname",varname 
+#    print 'variable', variable
+    if len(variable)<len(scene):
+      variable=np.zeros(len(scene))
+#    print 'variable', variable
+      
     T = all.Tesselator()
     VertexCoords=[]
     TrianglesVertexIDs=[]
@@ -37,8 +46,8 @@ def RATP2VTK(scene, variable, varname="Variable"):
             #... Corresponding variable name - varname
         #... Output:
             #... a VTK file - filename
-
-    f=open('C:/tmpRATP/RATPOUT.vtk','w')
+    print nomfich
+    f=open(nomfich,'w')
     # Set the header
     f.write('# vtk DataFile Version 3.0\n')
     f.write('vtk output\n')

@@ -128,7 +128,7 @@ contains
 
   real :: day, hour
 
-  !write(*,*) 'Computing interception of direct radiation ...'
+  write(*,*) 'Computing interception of direct radiation ...'
 
   call sundirection(hdeg,azdeg,latitude,longitude,timezone,day,hour)
 
@@ -292,7 +292,7 @@ contains
   end do
 
 
-!  PARirrad: PAR leaf irradiance (µmol m-2 s-1)
+!  write(*,*) 'PARirrad: PAR leaf irradiance (µmol m-2 s-1)'     
 !  - utilise pour calcul de J (flux d'electrons)
 !  - utilise pour conductance stomatique
 
@@ -301,8 +301,13 @@ contains
    do je=1,nje(k)
     jent=nume(je,k)
     do joe=0,1
+<<<<<<< .mine
+     PARirrad(joe,je,k)=RA_detailed(1,joe,je,k)*2.02/0.48/(1.-2.*rf(jent,iblo))           !11/06/2012 A PRIORI ERREUR NE PAS DIVISER PAR 0.48 CAR iblo =1 EST DEJA DANS LE PAR !
+     !PARirrad(joe,je,k)=RA_detailed(1,joe,je,k)*2.02/(1.-2.*rf(jent,iblo)) 
+=======
      !PARirrad(joe,je,k)=RA_detailed(1,joe,je,k)*2.02/0.48/(1.-2.*rf(jent,iblo))           !11/06/2012 A PRIORI ERREUR NE PAS DIVISER PAR 0.48 CAR iblo =1 EST DEJA DANS LE PAR (ie RA est en Watt PAR)!
      PARirrad(joe,je,k)=RA_detailed(1,joe,je,k)*4.6/(1.-2.*rf(jent,iblo))                  !23/05/2013 Erreur, le coefficient de conversion WattPAR -> micromol est 4.6, 
+>>>>>>> .r2892
      parclass=int(PARirrad(joe,je,k)/50.)+1
      if (parclass.gt.50) then
       !write (*,*) k, nume(je,k), joe, glob(iblo), PARirrad(joe,je,k), RA_detailed(1,joe,je,k), rf(jent,iblo)

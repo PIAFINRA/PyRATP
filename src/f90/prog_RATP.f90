@@ -167,7 +167,9 @@ contains
        out_time_spatial(iterspatial,10) = E(0,je,k)
        out_time_spatial(iterspatial,11) = E(1,je,k)
        out_time_spatial(iterspatial,12) = S_detailed(0,je,k)
-       out_time_spatial(iterspatial,13) = S_detailed(1,je,k)
+       out_time_spatial(iterspatial,13) = S_detailed(1,je,k) 
+       out_time_spatial(iterspatial,14) = gs(0,je,k)
+       out_time_spatial(iterspatial,15) = gs(1,je,k)
 
 !      if (larvadeath(k).gt.0) then
        !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, 1000 + ntime + .0
@@ -372,8 +374,11 @@ subroutine do_all
        out_time_spatial(iterspatial,10) = E(0,je,k)
        out_time_spatial(iterspatial,11) = E(1,je,k)
        out_time_spatial(iterspatial,12) = S_detailed(0,je,k)
-       out_time_spatial(iterspatial,13) = S_detailed(1,je,k)
-
+       out_time_spatial(iterspatial,13) = S_detailed(1,je,k) 
+       out_time_spatial(iterspatial,14) = gs(0,je,k)
+       out_time_spatial(iterspatial,15) = gs(1,je,k)
+       out_time_spatial(iterspatial,16) = N_detailed(je,k)      !ajout N foliaire, ngao 05/06/2013
+       
        !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(1,1,k), taref
    end do
   end do
@@ -430,7 +435,7 @@ subroutine do_all
  !write(*,*)
  !write(*,*)  ' Spatial distribution in a 3D grid of voxels'
  !write(*,*)
- !write(*,*)  '                July 2003'
+ write(*,*)  '                July 2003 - December 2012  '
  !write(*,*)
 
  !write(*,*)
@@ -496,7 +501,8 @@ subroutine do_all
        out_rayt(iterspatial,6) = PARirrad(0,je,k)
        out_rayt(iterspatial,7) = PARirrad(1,je,k)
        out_rayt(iterspatial,8) = S_detailed(0,je,k)
-       out_rayt(iterspatial,9) = S_detailed(1,je,k)
+       out_rayt(iterspatial,9) = S_detailed(1,je,k) 
+ !      out_rayt(iterspatial,10) = N_detailed(je,k)
 
        !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(1,1,k), taref
    end do

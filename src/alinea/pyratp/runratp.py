@@ -22,9 +22,9 @@ class runRATP(object):
     def DoAll(*args):
         ratp = pyratp.ratp
         pyratp.dir_interception.scattering = False
-        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*14*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,14)
+        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*16*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,16)
         ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*8*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,8)
-
+        #Ajout 1 colonne pour N foliaire, ngao 05/06/2013
         path = 'c:/tmpRATP' if platform.system() == 'Windows' else '/tmp/tmpRATP'
         if os.path.exists(path):
             shutil.rmtree(path)
@@ -41,9 +41,18 @@ class runRATP(object):
         except:
             pyratp.ratp.do_all()
 
-
-        np.savetxt(path+"/Resul"+'/spacial.txt',ratp.out_time_spatial,'%.6e')
-        np.savetxt(path+"/Resul"+'/tree.txt',ratp.out_time_tree,'%.6e')
+        #print 'dz,', pyratp.grid3d.dz 
+        fspatial = open(path+"/Resul"+'/spatial.txt','w')
+        fspatial.write('ntime  day   hour  AirTemperature  VoxelId  ShadedTemp  SunlitTemp  ShadedPhoto SunlitPhoto  ShadedTranspi SunlitTranspi') 
+        fspatial.write('  ShadedArea SunlitArea ShadedGs  SunlitGs  VoxelNitrogen')     
+        fspatial.write('\n')
+        np.savetxt(fspatial,ratp.out_time_spatial,'%.6e')
+        fspatial.close()  
+        ftree = open(path+"/Resul"+'/tree.txt','w')
+        ftree.write('ntime  day   hour  VegetationType  TotalIrradiation  AirTemperature  TreePhotosynthesis  TreeTreanspiration')
+        ftree.write('\n')
+        np.savetxt(ftree,ratp.out_time_tree,'%.6e')
+        ftree.close()
 
         # Ecriture parametres calcul_
         fichier = open(path+"/Resul"+"/data.txt", "a")
@@ -141,7 +150,16 @@ class runRATP(object):
 
         pyratp.ratp.do_interception()
 
+        fspatial = open(path+"/Resul"+'/spatial.txt','w')
+        fspatial.write('VegetationType  Iteration day hour  VoxelId ShadedPAR SunlitPAR ShadedArea  SunlitArea')     
+        fspatial.write('\n')
+        np.savetxt(fspatial,ratp.out_rayt,'%.6e')
+        fspatial.close() 
 
-        np.savetxt(path+"/Resul"+'/spacial.txt',ratp.out_rayt,'%.6e')
 
+
+        PAR0 = np.transpose(ratp.out_rayt)[5]
+        PAR1 = np.transpose(ratp.out_rayt)[6]
+        #print PAR0
+        #print PAR1
         return ratp.out_rayt
