@@ -113,28 +113,23 @@ class Grid(object):
             - D_E2V: connectivity table Leaf -> Voxel
         """
         initParam(grid)
-        
+
+
         lneg=np.where(z<0) #suppression de feuilles ayant un z<0
-        if not lneg:
-          entity=np.delete(entity,lneg[0])
-          x=np.delete(x,lneg[0])
-          y=np.delete(y,lneg[0])
-          z=np.delete(z,lneg[0])
-          s=np.delete(s,lneg[0])
-          n=np.delete(n,lneg[0])
-          print 'lneg=', lneg  
-#          raise ValueError('Some leaves are within the soil layer')
-            
+        entity=np.delete(entity,lneg[0])
+        x=np.delete(x,lneg[0])
+        y=np.delete(y,lneg[0])
+        z=np.delete(z,lneg[0])
+        s=np.delete(s,lneg[0])
+        n=np.delete(n,lneg[0])
+
         x = x - grid.xorig
         y = y - grid.yorig
         z = z + grid.zorig
         s = s
-
 ##        if z.min() < 0.:
 ##                raise ValueError('Some elements have a negative Z value.')
 
- 
-                
         if entity.max() >  grid.nent:
             raise ValueError('Number of entity is too great')
 
