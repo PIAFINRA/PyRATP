@@ -6,7 +6,7 @@ import numpy as np
 def extract_leaves(g, factor=100, nitrogen=2, grid_definition=None):
     """ Return the list of leaves with some properties.
 
-    :Returns: 
+    :Returns:
         Return for each leaf:
             - the id in the mtg
             - the vegetation type
@@ -22,12 +22,12 @@ def extract_leaves(g, factor=100, nitrogen=2, grid_definition=None):
 
     max_scale = g.max_scale()
     leaf_area = g.property('leaf_area')
-    leaves = [vid for vid in g.vertices_iter(scale=max_scale) if leaf_area.get(vid,0)]
+    leaves = [vid for vid in g.vertices(scale=max_scale) if leaf_area.get(vid,0)]
     leaves.sort()
 
     leaf_type = {}
-    for vid in g.vertices_iter(scale=2):
-        l = [v for v in g.components_at_scale_iter(vid, scale=max_scale) if leaf_area.get(v,0)]
+    for vid in g.vertices(scale=2):
+        l = [v for v in g.components_at_scale(vid, scale=max_scale) if leaf_area.get(v,0)]
         klass = g.class_name(vid)
         length = len(l)
         _entity = 1 #entity(klass, length)
@@ -51,27 +51,27 @@ def test(fn = "mtg_test.txt"):
 
     l, lt, x, y, z, la, ln = extract_leaves(g)
     print len(l)
-    
-    
+
+
 
 def entity(klass, length):
     if klass == 'I':
         if length > 10:
             return 4
-        else: 
+        else:
             return 3
     elif length > 10:
         return 2
     else:
         return 1
 
-            
-        
-    
 
-    
-    
-    
+
+
+
+
+
+
 '''
 def Z(x):
    val = Feature(x,"YY")

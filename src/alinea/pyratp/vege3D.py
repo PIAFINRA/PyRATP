@@ -115,8 +115,8 @@ class Vege3D(object):
                 typeV = nbLigne -1
             else:
                 typeV =  random.randint(0,typeVege-1)
-                
-            if  int(liste[listEntete.index("Obj")])>0:   
+
+            if  int(liste[listEntete.index("Obj")])>0:
                 X = (liste[listEntete.index("TransX")])
                 Y = (liste[listEntete.index("TransY")])
                 Z = (liste[listEntete.index("TransZ")])
@@ -124,10 +124,10 @@ class Vege3D(object):
                 tabY= np.append(tabY,Y)
                 tabZ= np.append(tabZ,Z)
                 AREA = (liste[listEntete.index("EchX")])*(liste[listEntete.index("EchY")])*0.75
-            else:     
+            else:
                 X1 = (liste[listEntete.index("X1")])
                 Y1 = (liste[listEntete.index("Y1")])
-                Z1 = (liste[listEntete.index("Z1")]) 
+                Z1 = (liste[listEntete.index("Z1")])
                 X2 = (liste[listEntete.index("X2")])
                 Y2 = (liste[listEntete.index("Y2")])
                 Z2 = (liste[listEntete.index("Z2")])
@@ -136,12 +136,12 @@ class Vege3D(object):
                 Z3 = (liste[listEntete.index("Z3")])
                 tabX= np.append(tabX,(X1+X2+X3)/3.)
                 tabY= np.append(tabY,(Y1+Y2+Y3)/3.)
-                tabZ= np.append(tabZ,(Z1+Z2+Z3)/3.)        
+                tabZ= np.append(tabZ,(Z1+Z2+Z3)/3.)
                 tt01 = [X1-X2,Y1-Y2,Z1-Z2]
                 tt02 = [X1-X3,Y1-Y3,Z1-Z3]
                 CrossP = np.cross(tt01,tt02)
                 AREA = 0.5*np.sum(np.abs(CrossP)**2)**(1./2)
- 
+
             typeV =0
             tabTypeVege= np.append(tabTypeVege,typeV)
             tabS= np.append(tabS,AREA)

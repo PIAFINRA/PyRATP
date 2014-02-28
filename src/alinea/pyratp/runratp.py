@@ -5,13 +5,12 @@
 """
 
 from alinea.pyratp import pyratp
-##import vegetation
 import numpy as np
 import os
 import shutil
 import tempfile
 import sys
-#import pyRATP
+import grid
 import subprocess
 import platform
 
@@ -22,7 +21,7 @@ class runRATP(object):
     def DoAll(*args):
         ratp = pyratp.ratp
         pyratp.dir_interception.scattering = False
-        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*16*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,16)
+        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*18*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,18)
         ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*8*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,8)
         #Ajout 1 colonne pour N foliaire, ngao 05/06/2013
         path = 'c:/tmpRATP' if platform.system() == 'Windows' else '/tmp/tmpRATP'
@@ -30,6 +29,7 @@ class runRATP(object):
             shutil.rmtree(path)
         os.mkdir(path)
         os.mkdir(path+"/Resul")
+        grid.gridToVGX(pyratp.grid3d,path+"/Resul") #Save grid in VGX format
         ##print np.where(pyratp.vegetation_types.ismine==1)
         try:
             numeroMin = (np.where(pyratp.vegetation_types.ismine==1))[0][0] + 1
@@ -41,13 +41,13 @@ class runRATP(object):
         except:
             pyratp.ratp.do_all()
 
-        #print 'dz,', pyratp.grid3d.dz 
+        #print 'dz,', pyratp.grid3d.dz
         fspatial = open(path+"/Resul"+'/spatial.txt','w')
-        fspatial.write('ntime  day   hour  AirTemperature  VoxelId  ShadedTemp  SunlitTemp  ShadedPhoto SunlitPhoto  ShadedTranspi SunlitTranspi') 
-        fspatial.write('  ShadedArea SunlitArea ShadedGs  SunlitGs  VoxelNitrogen')     
+        fspatial.write('ntime  day   hour  AirTemperature  VoxelId  ShadedTemp  SunlitTemp  STARDirect STARSky ShadedPhoto SunlitPhoto  ShadedTranspi SunlitTranspi')
+        fspatial.write('  ShadedArea SunlitArea ShadedGs  SunlitGs  VoxelNitrogen')
         fspatial.write('\n')
         np.savetxt(fspatial,ratp.out_time_spatial,'%.6e')
-        fspatial.close()  
+        fspatial.close()
         ftree = open(path+"/Resul"+'/tree.txt','w')
         ftree.write('ntime  day   hour  VegetationType  TotalIrradiation  AirTemperature  TreePhotosynthesis  TreeTreanspiration')
         ftree.write('\n')
@@ -146,15 +146,14 @@ class runRATP(object):
         if os.path.exists(path):
             shutil.rmtree(path)
         os.mkdir(path)
-        os.mkdir(path+"/Resul")
-
+        os.mkdir(path+"/ResulIrradiation")
         pyratp.ratp.do_interception()
 
-        fspatial = open(path+"/Resul"+'/spatial.txt','w')
-        fspatial.write('VegetationType  Iteration day hour  VoxelId ShadedPAR SunlitPAR ShadedArea  SunlitArea')     
+        fspatial = open(path+"/ResulIrradiation"+'/spatial.txt','w')
+        fspatial.write('VegetationType  Iteration day hour  VoxelId ShadedPAR SunlitPAR ShadedArea  SunlitArea')
         fspatial.write('\n')
         np.savetxt(fspatial,ratp.out_rayt,'%.6e')
-        fspatial.close() 
+        fspatial.close()
 
 
 
