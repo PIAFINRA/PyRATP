@@ -1,5 +1,5 @@
 
-# This file has been generated at Mon Jan 28 15:59:12 2013
+# This file has been generated at Thu Feb 06 14:13:52 2014
 
 from openalea.core import *
 
@@ -192,6 +192,10 @@ ratp_ExtractTime = Factory(name='extract time',
                 category='Mtg, light',
                 nodemodule='ratp',
                 nodeclass='ExtractTime',
+                inputs=None,
+                outputs=None,
+                widgetmodule=None,
+                widgetclass=None,
                )
 
 

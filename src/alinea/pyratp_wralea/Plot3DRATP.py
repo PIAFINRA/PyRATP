@@ -9,7 +9,7 @@ def Plot3DRATP(scene1, color):
       scene1  = scene1 plant GL
       update each  shape appearance attribute  with a new material object for changing colors !
     '''
-
+    
     # write the node code here.
     for k,i in enumerate(scene1):
       NewColor = color[k]*65536
