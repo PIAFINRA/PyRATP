@@ -219,7 +219,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
      drv=0.
      else
      rv=(rss+ra)*(rsi+ra)/(rss+rsi+2.*ra)
-     drv=((rss+ra)/(rss+rsi+2*ra))**2*drsi
+     drv=drsi*((rss+ra)/(rss+rsi+2*ra))**2
     endif
 
     rh=ra/2.
@@ -357,8 +357,8 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
   do joe=0,1
    E_ss(joe)=E_ss(joe)/S_ss(joe)
   end do
-  E_canopy = E_canopy / S_canopy
-  H_canopy = H_canopy / S_canopy
+  E_canopy = E_canopy / S_canopy       ! Evaporation rate in mmol H20 s-1 m-2
+  H_canopy = H_canopy / S_canopy        
 
 
 !  Distribution of leaf temperature at canopy scale
@@ -584,7 +584,7 @@ real, allocatable  :: omega_factor(:,:,:) ! Decoupling factor of shaded/sunlit a
      drv=0.
      else
      rv=(rss+ra)*(rsi+ra)/(rss+rsi+2.*ra)
-     drv=((rss+ra)/(rss+rsi+2*ra))**2*drsi
+     drv=drsi*((rss+ra)/(rss+rsi+2*ra))**2
     endif
 
     rh=ra/2.

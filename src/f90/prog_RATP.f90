@@ -139,8 +139,8 @@ contains
    do class = 1,45
     out_time_tree(itertree,class+51) = Sts(jent,class)/S_vt(jent)
    end do
-   out_time_tree(itertree,97) = A_canopy
-   out_time_tree(itertree,98) = E_canopy
+   out_time_tree(itertree,97) = A_canopy          !  Net A rate in µmol CO2 s-1 m-2    
+   out_time_tree(itertree,98) = E_canopy         ! Evaporation rate in mmol H20 s-1 m-2 
    !write(2,20) ntime, day, hour, jent, glob(1)*2.02/0.48, (Spar(jent,class)/S_vt(jent), class=1,45) ! %SF per irradiance class
    !write(3,30) ntime, day, hour, jent, taref, (Sts(jent,class)/S_vt(jent), class=10,45)
   end do
@@ -153,7 +153,7 @@ contains
      iterspatial = iterspatial +1
      jent=nume(je,k)
      if (ismine(jent).eq.1) then
-      out_time_spatial(iterspatial,1) = ntime
+       out_time_spatial(iterspatial,1) = ntime
        out_time_spatial(iterspatial,2) = day
        out_time_spatial(iterspatial,3) = hour
        out_time_spatial(iterspatial,4) = taref
@@ -162,14 +162,17 @@ contains
        out_time_spatial(iterspatial,6) = ts(0,je,k)
        out_time_spatial(iterspatial,7) = ts(1,je,k)
     !Boucler sur nombre vegetation
-       out_time_spatial(iterspatial,8) = A_detailed(0,je,k)
-       out_time_spatial(iterspatial,9) = A_detailed(1,je,k)
-       out_time_spatial(iterspatial,10) = E(0,je,k)
-       out_time_spatial(iterspatial,11) = E(1,je,k)
-       out_time_spatial(iterspatial,12) = S_detailed(0,je,k)
-       out_time_spatial(iterspatial,13) = S_detailed(1,je,k) 
-       out_time_spatial(iterspatial,14) = gs(0,je,k)
-       out_time_spatial(iterspatial,15) = gs(1,je,k)
+       out_time_spatial(iterspatial,8) = STAR_vt_vx(je,k)   
+       out_time_spatial(iterspatial,9) = STARsky_vt_vx(je,k)
+       out_time_spatial(iterspatial,10) = A_detailed(0,je,k)
+       out_time_spatial(iterspatial,11) = A_detailed(1,je,k)
+       out_time_spatial(iterspatial,12) = E(0,je,k)
+       out_time_spatial(iterspatial,13) = E(1,je,k)
+       out_time_spatial(iterspatial,14) = S_detailed(0,je,k)
+       out_time_spatial(iterspatial,15) = S_detailed(1,je,k) 
+       out_time_spatial(iterspatial,16) = gs(0,je,k)
+       out_time_spatial(iterspatial,17) = gs(1,je,k)      
+       out_time_spatial(iterspatial,18) = N_detailed(je,k)      !ajout N foliaire, ngao 05/06/2013
 
 !      if (larvadeath(k).gt.0) then
        !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, 1000 + ntime + .0
@@ -346,8 +349,8 @@ subroutine do_all
    !out_time_tree(itertree,97) = A_canopy
    !out_time_tree(itertree,98) = E_canopy
    out_time_tree(itertree,6) = taref
-   out_time_tree(itertree,7) = A_canopy
-   out_time_tree(itertree,8) = E_canopy
+   out_time_tree(itertree,7) = A_canopy    !  Net A rate in µmol CO2 s-1 m-2 
+   out_time_tree(itertree,8) = E_canopy    ! Evaporation rate in mmol H20 s-1 m-2 
    
    !write(2,20) ntime, day, hour, jent, glob(1)*2.02/0.48, (Spar(jent,class)/S_vt(jent), class=1,45) ! %SF per irradiance class
    !write(3,30) ntime, day, hour, jent, taref, (Sts(jent,class)/S_vt(jent), class=10,45)
@@ -369,15 +372,17 @@ subroutine do_all
        out_time_spatial(iterspatial,6) = ts(0,je,k)
        out_time_spatial(iterspatial,7) = ts(1,je,k)
     !Boucler sur nombre vegetation
-       out_time_spatial(iterspatial,8) = A_detailed(0,je,k)
-       out_time_spatial(iterspatial,9) = A_detailed(1,je,k)
-       out_time_spatial(iterspatial,10) = E(0,je,k)
-       out_time_spatial(iterspatial,11) = E(1,je,k)
-       out_time_spatial(iterspatial,12) = S_detailed(0,je,k)
-       out_time_spatial(iterspatial,13) = S_detailed(1,je,k) 
-       out_time_spatial(iterspatial,14) = gs(0,je,k)
-       out_time_spatial(iterspatial,15) = gs(1,je,k)
-       out_time_spatial(iterspatial,16) = N_detailed(je,k)      !ajout N foliaire, ngao 05/06/2013
+       out_time_spatial(iterspatial,8) = STAR_vt_vx(je,k)   
+       out_time_spatial(iterspatial,9) = STARsky_vt_vx(je,k)
+       out_time_spatial(iterspatial,10) = A_detailed(0,je,k)
+       out_time_spatial(iterspatial,11) = A_detailed(1,je,k)
+       out_time_spatial(iterspatial,12) = E(0,je,k)
+       out_time_spatial(iterspatial,13) = E(1,je,k)
+       out_time_spatial(iterspatial,14) = S_detailed(0,je,k)
+       out_time_spatial(iterspatial,15) = S_detailed(1,je,k) 
+       out_time_spatial(iterspatial,16) = gs(0,je,k)
+       out_time_spatial(iterspatial,17) = gs(1,je,k)      
+       out_time_spatial(iterspatial,18) = N_detailed(je,k)      !ajout N foliaire, ngao 05/06/2013
        
        !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(1,1,k), taref
    end do

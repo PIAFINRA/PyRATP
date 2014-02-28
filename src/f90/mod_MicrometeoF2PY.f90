@@ -81,7 +81,7 @@ contains
     caref=tabMeteo(ntime,ii)
     ii = ii+1
     urefref=tabMeteo(ntime,ii)
-    ii = ii+2                       !Relative Soil Humidity   Ngao 02/2012 
+    ii = ii+1                       !Relative Soil Humidity   Ngao 02/2012 
     HRsol=tabMeteo(ntime,ii)        !Relative Soil Humidity   Ngao 02/2012  set to 1 by default (no stress)
 
   ! write(*,*) 'day,hour =',day,hour ,(glob(iblo),diff(iblo),iblo=1,nblomin), ratmos,tsol,taref,earef,caref,urefref
