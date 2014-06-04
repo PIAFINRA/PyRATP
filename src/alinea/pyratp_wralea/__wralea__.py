@@ -1,5 +1,5 @@
 
-# This file has been generated at Thu Feb 06 14:13:52 2014
+# This file has been generated at Wed Jun 04 11:42:23 2014
 
 from openalea.core import *
 
@@ -189,7 +189,7 @@ ratp_read_vgx = Factory(name='plant from vegestar',
 ratp_ExtractTime = Factory(name='extract time',
                 authors=' (wralea authors)',
                 description='',
-                category='Mtg, light',
+                category='Unclassified',
                 nodemodule='ratp',
                 nodeclass='ExtractTime',
                 inputs=None,

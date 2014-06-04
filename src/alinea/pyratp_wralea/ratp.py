@@ -70,23 +70,4 @@ class ExtractTime(ExtractColumn):
     header = [x.strip() for x in header]
     index = range(len(header))
 
-        
-class ExtractSpatial(ExtractColumn):
-    header = """iteration
-    day
-    hour
-    Air Temperature
-    Voxel id
-    Leaf Temperature (shaded)
-    Leaf Temperature (sunlit)
-    Photosynthesis (shaded)
-    Photosynthesis (sunlit)
-    Transpiration (shaded)
-    Transpiration (sunlit)
-    Leaf surface (shaded)
-    Leaf surface (sunlit)
-    """.split('\n')
-    header = [x.strip() for x in header]
-    index = range(len(header))
-
 

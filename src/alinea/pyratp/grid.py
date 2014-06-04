@@ -118,7 +118,7 @@ class Grid(object):
             y = y - grid.yorig
             z = z + grid.zorig
             s = s         
-           if z.min() < 0.:
+            if z.min() < 0.:
                     print 'Some elements have a negative Z value and will be removed ...'
                     print '... change the grid size or the leaves coodinates to get all leaves within the grid'
             lneg=np.where(z<0) #suppression de feuilles ayant un z<0
