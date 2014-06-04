@@ -21,7 +21,7 @@ class runRATP(object):
     def DoAll(*args):
         ratp = pyratp.ratp
         pyratp.dir_interception.scattering = False
-        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*18*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,18)
+        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*19*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,19)
         ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*8*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,8)
         #Ajout 1 colonne pour N foliaire, ngao 05/06/2013
         path = 'c:/tmpRATP' if platform.system() == 'Windows' else '/tmp/tmpRATP'
@@ -43,7 +43,7 @@ class runRATP(object):
 
         #print 'dz,', pyratp.grid3d.dz
         fspatial = open(path+"/Resul"+'/spatial.txt','w')
-        fspatial.write('ntime  day   hour  AirTemperature  VoxelId  ShadedTemp  SunlitTemp  STARDirect STARSky ShadedPhoto SunlitPhoto  ShadedTranspi SunlitTranspi')
+        fspatial.write('ntime  day   hour  AirTemperature  VoxelId  ShadedTemp  SunlitTemp  VoxelTemp  STARDirect STARSky ShadedPhoto SunlitPhoto  ShadedTranspi SunlitTranspi')
         fspatial.write('  ShadedArea SunlitArea ShadedGs  SunlitGs  VoxelNitrogen')
         fspatial.write('\n')
         np.savetxt(fspatial,ratp.out_time_spatial,'%.6e')

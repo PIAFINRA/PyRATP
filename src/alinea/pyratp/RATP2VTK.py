@@ -4,21 +4,21 @@ import numpy as np
 def RATP2VTK(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"):
     '''    Paraview file
            variable = liste de float
-           scene  = scene plant GL  
+           scene  = scene plant GL
             T = all.Tesselator()
             sce[0].apply(T)
             T.result
-            
 
-    '''      
-#    print 'len(scene)', len(scene) 
+
+    '''
+#    print 'len(scene)', len(scene)
 #    print 'len(variable)', len(variable)
-#    print "varname",varname 
+#    print "varname",varname
 #    print 'variable', variable
+
     if len(variable)<len(scene):
       variable=np.zeros(len(scene))
-#    print 'variable', variable
-      
+
     T = all.Tesselator()
     VertexCoords=[]
     TrianglesVertexIDs=[]
@@ -28,15 +28,15 @@ def RATP2VTK(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"
          i.apply(T) #Applique Tesselator
          TS = T.result
          for vertex in TS.pointList:
-              VertexCoords.append([vertex[0],vertex[1],vertex[2]])
-              
+              VertexCoords.append([vertex[0],vertex[1],-vertex[2]])
+
          ShapeNumTri = len(TS.pointList) #nbr points dans  TriangleSet
          for tri in TS.indexList:
               TrianglesVertexIDs.append([tri[0]+k*ShapeNumTri,tri[1]+k*ShapeNumTri,tri[2]+k*ShapeNumTri])
               triangleColor.append(variable[k])
-              
+
     numvertex = len(VertexCoords)
-    numTriangles = len(TrianglesVertexIDs)          
+    numTriangles = len(TrianglesVertexIDs)
     # write the node code here.
         # Write the output file following VTK file format for 3D view with Paraview
         # Works only with triangles P1 i.e. defined with 3 points
@@ -71,7 +71,7 @@ def RATP2VTK(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"
     for i in  TrianglesVertexIDs:
         f.write('5\n')
     f.write('\n')
-    
+
     # Write data for each triangle
     f.write('CELL_DATA '+str(numTriangles)+'\n')
 
@@ -79,9 +79,9 @@ def RATP2VTK(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"
     f.write(varname +' 1 '+str(numTriangles)+' float\n')
     for i in triangleColor:
           f.write(str(i).strip('[]')+'\n')
-            
+
     f.write('\n')
-    
+
     f.close()
 
     # return outputs

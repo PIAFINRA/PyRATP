@@ -158,21 +158,21 @@ contains
        out_time_spatial(iterspatial,3) = hour
        out_time_spatial(iterspatial,4) = taref
        out_time_spatial(iterspatial,5) = k
-    !Boucler sur nombre vegetation
        out_time_spatial(iterspatial,6) = ts(0,je,k)
        out_time_spatial(iterspatial,7) = ts(1,je,k)
-    !Boucler sur nombre vegetation
-       out_time_spatial(iterspatial,8) = STAR_vt_vx(je,k)   
-       out_time_spatial(iterspatial,9) = STARsky_vt_vx(je,k)
-       out_time_spatial(iterspatial,10) = A_detailed(0,je,k)
-       out_time_spatial(iterspatial,11) = A_detailed(1,je,k)
-       out_time_spatial(iterspatial,12) = E(0,je,k)
-       out_time_spatial(iterspatial,13) = E(1,je,k)
-       out_time_spatial(iterspatial,14) = S_detailed(0,je,k)
-       out_time_spatial(iterspatial,15) = S_detailed(1,je,k) 
-       out_time_spatial(iterspatial,16) = gs(0,je,k)
-       out_time_spatial(iterspatial,17) = gs(1,je,k)      
-       out_time_spatial(iterspatial,18) = N_detailed(je,k)      !ajout N foliaire, ngao 05/06/2013
+       out_time_spatial(iterspatial,8) = (ts(1,je,k)*S_detailed(1,je,k)+ts(0,je,k)*S_detailed(0,je,k))&
+     &/(S_detailed(0,je,k)+S_detailed(1,je,k))      
+       out_time_spatial(iterspatial,9) = STAR_vt_vx(je,k)   
+       out_time_spatial(iterspatial,10) = STARsky_vt_vx(je,k)
+       out_time_spatial(iterspatial,11) = A_detailed(0,je,k)
+       out_time_spatial(iterspatial,12) = A_detailed(1,je,k)
+       out_time_spatial(iterspatial,13) = E(0,je,k)
+       out_time_spatial(iterspatial,14) = E(1,je,k)
+       out_time_spatial(iterspatial,15) = S_detailed(0,je,k)
+       out_time_spatial(iterspatial,16) = S_detailed(1,je,k) 
+       out_time_spatial(iterspatial,17) = gs(0,je,k)
+       out_time_spatial(iterspatial,18) = gs(1,je,k)      
+       out_time_spatial(iterspatial,19) = N_detailed(je,k)      !ajout N foliaire, ngao 05/06/2013
 
 !      if (larvadeath(k).gt.0) then
        !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(0,2,k), ts(1,1,k), ts(1,2,k), taref, 1000 + ntime + .0
@@ -368,21 +368,21 @@ subroutine do_all
        out_time_spatial(iterspatial,3) = hour
        out_time_spatial(iterspatial,4) = taref
        out_time_spatial(iterspatial,5) = k
-    !Boucler sur nombre vegetation
        out_time_spatial(iterspatial,6) = ts(0,je,k)
        out_time_spatial(iterspatial,7) = ts(1,je,k)
-    !Boucler sur nombre vegetation
-       out_time_spatial(iterspatial,8) = STAR_vt_vx(je,k)   
-       out_time_spatial(iterspatial,9) = STARsky_vt_vx(je,k)
-       out_time_spatial(iterspatial,10) = A_detailed(0,je,k)
-       out_time_spatial(iterspatial,11) = A_detailed(1,je,k)
-       out_time_spatial(iterspatial,12) = E(0,je,k)
-       out_time_spatial(iterspatial,13) = E(1,je,k)
-       out_time_spatial(iterspatial,14) = S_detailed(0,je,k)
-       out_time_spatial(iterspatial,15) = S_detailed(1,je,k) 
-       out_time_spatial(iterspatial,16) = gs(0,je,k)
-       out_time_spatial(iterspatial,17) = gs(1,je,k)      
-       out_time_spatial(iterspatial,18) = N_detailed(je,k)      !ajout N foliaire, ngao 05/06/2013
+       out_time_spatial(iterspatial,8) = (ts(1,je,k)*S_detailed(1,je,k)+ts(0,je,k)*S_detailed(0,je,k))&
+     &/(S_detailed(0,je,k)+S_detailed(1,je,k))   
+       out_time_spatial(iterspatial,9) = STAR_vt_vx(je,k)   
+       out_time_spatial(iterspatial,10) = STARsky_vt_vx(je,k)
+       out_time_spatial(iterspatial,11) = A_detailed(0,je,k)
+       out_time_spatial(iterspatial,12) = A_detailed(1,je,k)
+       out_time_spatial(iterspatial,13) = E(0,je,k)
+       out_time_spatial(iterspatial,14) = E(1,je,k)
+       out_time_spatial(iterspatial,15) = S_detailed(0,je,k)
+       out_time_spatial(iterspatial,16) = S_detailed(1,je,k) 
+       out_time_spatial(iterspatial,17) = gs(0,je,k)
+       out_time_spatial(iterspatial,18) = gs(1,je,k)      
+       out_time_spatial(iterspatial,19) = N_detailed(je,k)      !ajout N foliaire, ngao 05/06/2013
        
        !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(1,1,k), taref
    end do

@@ -90,6 +90,7 @@ class Grid(object):
             - n: array of nitrogen content in g/m2    (real)
         """
         v,x,y,z,s,n = vege3D.Vege3D.readVGX(filename,2)
+##        print 'alen(x)',np.alen(x)
         return v,x/100,y/100,-z/100,s/10000.,n
 
 
@@ -113,8 +114,15 @@ class Grid(object):
 
             initParam(grid)
 
-
+            x = x - grid.xorig
+            y = y - grid.yorig
+            z = z + grid.zorig
+            s = s         
+           if z.min() < 0.:
+                    print 'Some elements have a negative Z value and will be removed ...'
+                    print '... change the grid size or the leaves coodinates to get all leaves within the grid'
             lneg=np.where(z<0) #suppression de feuilles ayant un z<0
+##            print 'lneg',lneg
             entity=np.delete(entity,lneg[0])
             x=np.delete(x,lneg[0])
             y=np.delete(y,lneg[0])
@@ -122,12 +130,7 @@ class Grid(object):
             s=np.delete(s,lneg[0])
             n=np.delete(n,lneg[0])
 
-            x = x - grid.xorig
-            y = y - grid.yorig
-            z = z + grid.zorig
-            s = s
-    ##        if z.min() < 0.:
-    ##                raise ValueError('Some elements have a negative Z value.')
+
 
             if entity.max() >  grid.nent:
                 raise ValueError('Number of entity is too great')
@@ -157,7 +160,7 @@ class Grid(object):
 
             #Relation Voxel2entite
             d_E2V = {} #entity id to voxel id
-
+##            print 'np.alen(x)', np.alen(x)
             for i in range(np.alen(x)):
 
               # Compute the coord of each element in the grid.
@@ -247,12 +250,12 @@ class Grid(object):
             _savegrid(grid,"c:/matGridRATP.mat") #appel de la procedure savegrid (voir plus bas)
             #gridToVGX(grid,"c:/") #Save grid in VGX format
 
-            return grid, d_E2V 
+            return grid, d_E2V
 
         else:
-            d_E2V = {}       
+            d_E2V = {}
             #gridToVGX(grid,"c:/") #Save grid in VGX format
-            return _importgrid(grid), d_E2V 
+            return _importgrid(grid), d_E2V
 
 def initParam(grid3d):
 ##        print 'GRILLE OK debut'

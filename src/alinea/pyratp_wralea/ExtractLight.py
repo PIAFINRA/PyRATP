@@ -4,25 +4,26 @@ def ExtractLight(d_e2v, data, day, hour,col):
         Input::Parameters:
             - d_e2v: connectivity table Leaf -> Voxel (list)
             - data: a 2D array(real)
-            - day, hour: time to extract data      
+            - day, hour: time to extract data
             - col: column corresponding to data to be extracted.
-            
-        Output:Parameters:  
-            - extractedvar: extracted data 
+
+        Output:Parameters:
+            - extractedvar: extracted data
     '''
     ls_id = [1,2]
     ls_vals = [day, hour]
     dat = extract_list(data, ls_id, ls_vals)
     dat = t_list(dat)
 
+
     extractedvar = []
+##    print 'len(d_e2v)',len(d_e2v)
     nmax = max(d_e2v.keys())
     for i in range(nmax+1):
         try :
             extractedvar.append(dat[col][d_e2v[i]])
         except:
             extractedvar.append(0)#!!! Recupere pas toutes les entites dans d_e2v!!? : A cause de triangles en z negatif!
-
 
     return extractedvar#,dat[5]#
 
@@ -55,7 +56,7 @@ def t_list(tab):
             v = []
             for i in range(len(tab)):
                 v.append(tab[i][j])
-        
+
             res.append(v)
 
     return res
