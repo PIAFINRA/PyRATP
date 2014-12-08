@@ -17,7 +17,7 @@ __institutes__ = None
 __icon__ = 'icon.png'
 
 
-__all__ = ['ratp_can2riri', 'ratp_RATP2VTK', 'ExtractLight_ExtractLight', 'ratp_read_micrometeo', 'ratp_read_grid', 'ExtractVar_ExtractVar', 'ratp_DoAll', 'ratp_fill_grid', 'ratp_Nallocate', 'Plot3DRATP_Plot3DRATP', 'ratp_read_vgx', 'ratp_ExtractTime', 'ratp_extract_leaves', 'ratp_read_vegetation', 'ratp_DoIrradiation', 'ratp_read_skyvault']
+__all__ = ['ratp_can2riri', 'ratp_RATP2VTK','ratp_RATPVOXELS2VTK', 'ExtractLight_ExtractLight','ExtractLight_ExtractVoxels','ratp_read_micrometeo', 'ratp_read_grid', 'ExtractVar_ExtractVar', 'ratp_DoAll', 'ratp_fill_grid', 'ratp_Nallocate', 'Plot3DRATP_Plot3DRATP', 'ratp_read_vgx', 'ratp_ExtractTime', 'ratp_extract_leaves', 'ratp_read_vegetation', 'ratp_DoIrradiation', 'ratp_read_skyvault']
 
 
 
@@ -46,8 +46,19 @@ ratp_RATP2VTK = Factory(name='RATP2VTK',
                 outputs=[{'interface': None, 'name': 'VTK File', 'desc': ''}],
                 widgetmodule=None,
                 widgetclass=None,
-               )
+               )  
 
+ratp_RATPVOXELS2VTK = Factory(name='RATPVOXELS2VTK',
+                authors=' (wralea authors)',
+                description='Paraview file',
+                category='data i/o',
+                nodemodule='ratp',
+                nodeclass='RATPVOXELS2VTK',
+                inputs=[{'interface': ISequence, 'name': 'Scene', 'value': None, 'desc': ''}, {'interface': ISequence, 'name': 'Variable', 'value': None, 'desc': ''}, {'interface': IStr, 'name': 'VariableName', 'value': None, 'desc': ''}, {'interface': IStr, 'name': 'OutputFileName', 'value': None, 'desc': ''}],
+                outputs=[{'interface': None, 'name': 'VTK File', 'desc': ''}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
 
 
 
@@ -58,6 +69,18 @@ ExtractLight_ExtractLight = Factory(name='ExtractLight',
                 nodemodule='alinea.pyratp_wralea.ExtractLight',
                 nodeclass='ExtractLight',
                 inputs=[{'interface': None, 'name': 'Elt2Voxel', 'value': None, 'desc': ''}, {'interface': None, 'name': 'RATPOutput', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Day', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Hour', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Variable', 'value': None, 'desc': 'Numero colonne de la variable choisie'}],
+                outputs=[{'interface': None, 'name': 'PAR', 'desc': ''}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
+
+ExtractLight_ExtractVoxels = Factory(name='ExtractVoxels',
+                authors=' (wralea authors)',
+                description='Extract PAR from RATP output',
+                category='data processing',
+                nodemodule='ExtractLight',
+                nodeclass='ExtractVoxels',
+                inputs=[{'interface': None, 'name': 'RATPOutput', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Day', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Hour', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Variable', 'value': None, 'desc': 'Numero colonne de la variable choisie'}],
                 outputs=[{'interface': None, 'name': 'PAR', 'desc': ''}],
                 widgetmodule=None,
                 widgetclass=None,

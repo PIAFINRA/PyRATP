@@ -117,7 +117,7 @@ class Grid(object):
             x = x - grid.xorig
             y = y - grid.yorig
             z = z + grid.zorig
-            s = s         
+            s = s
             if z.min() < 0.:
                     print 'Some elements have a negative Z value and will be removed ...'
                     print '... change the grid size or the leaves coodinates to get all leaves within the grid'
@@ -192,7 +192,8 @@ class Grid(object):
                      grid.s_vt_vx[0,k]=s[i]
                      grid.s_vx[k]=s[i]
                      grid.n_detailed[0,k]=n[i]
-                     d_E2V[i] = k
+                     d_E2V[str(i)] = float(k)
+##                     d_E2V[i] = k
 
                      k=k+1
                 else:
@@ -212,7 +213,8 @@ class Grid(object):
                     grid.nje[kk]=max(je+1,grid.nje[kk])
                     grid.nemax=max(grid.nemax,grid.nje[kk])
                     grid.nume[je,kk]=entity[i]+1
-                    d_E2V[i] = kk
+                    d_E2V[str(i)] = float(kk)
+##                    d_E2V[i] = kk
 
 
             grid.nveg=k
@@ -229,33 +231,16 @@ class Grid(object):
                     if  grid.s_vt_vx[je,k]> 0. :
                      grid.volume_canopy[grid.nume[je,k]-1]=grid.volume_canopy[grid.nume[je,k]-1]+dx*dy*dz[grid.numz[k]-1]
                      grid.voxel_canopy[grid.nume[je,k]-1]=grid.voxel_canopy[grid.nume[je,k]-1]+1
-    ##        print 'GRILLE Fillgrid'
-    ##        fichier = open("c:/xxx.txt", "a")
-    ##        fichier.write(str( grid.kxyz)+"\n")
-    ##        fichier.write(str( grid.numx)+"\n")
-    ##        fichier.write(str( grid.numy)+"\n")
-    ##        fichier.write(str( grid.numz)+"\n")
-    ##        fichier.write(str( grid.nje)+"\n")
-    ##        fichier.write(str( grid.leafareadensity)+"\n")
-    ##        fichier.write(str( grid.n_detailed)+"\n")
-    ##        fichier.write(str( grid.nume)+"\n")
-    ##        fichier.write(str( grid.s_vt_vx)+"\n")
-    ##        fichier.write(str( grid.s_vx)+"\n")
-    ##        # Leaf area (m^2) per vegetation type
-    ##        fichier.write(str( grid.s_vt)+"\n")
-    ##        fichier.write(str( grid.volume_canopy)+"\n")
-    ##        fichier.write(str( grid.voxel_canopy)+"\n")
-    ##        fichier.close()
 
-            _savegrid(grid,"c:/matGridRATP.mat") #appel de la procedure savegrid (voir plus bas)
-            #gridToVGX(grid,"c:/") #Save grid in VGX format
+
+            _savegrid(grid,d_E2V,"c:/matGridRATP_Strasbourg.mat") #appel de la procedure savegrid (voir plus bas)
+            gridToVGX(grid,"c:/") #Save grid in VGX format
 
             return grid, d_E2V
 
         else:
-            d_E2V = {}
             #gridToVGX(grid,"c:/") #Save grid in VGX format
-            return _importgrid(grid), d_E2V
+            return _importgrid(grid)
 
 def initParam(grid3d):
 ##        print 'GRILLE OK debut'
@@ -290,6 +275,9 @@ def initParam(grid3d):
 
         grid3d.volume_canopy = np.zeros(nent+1)
         grid3d.voxel_canopy = np.zeros(nent)
+        
+        grid3d.int_isolated_box = 1
+        grid3d.int_scattering = 0
         print 'GRILLE OK'
 
 
@@ -297,7 +285,7 @@ def gridToVGX(grid,chemin):
 
     echX= grid.dx *100
     echY= grid.dy *100
-    filename = chemin+"\Voxels.vgx"
+    filename = chemin+"\VoxelsStrasbourg.vgx"
     fichier = open( filename,"w")
     fichier.write( "Obj\tEchX\tEchY\tEchZ\tTransX\tTransY\tTransZ\tRotX\tRotY\tRotZ\tR\tG\tB\tnumero")
     fichier.write("\n")
@@ -334,7 +322,7 @@ def _read(f, *args):
 
 
 
-def _savegrid(grid,filename):
+def _savegrid(grid,d_E2V,filename):
     ## Sauvegarde grille format MATLAB
     dictgrid ={}                            #def d un dictionnaire dictgrid (necessaire pour io.savemat, voir plus bas)
     for i in dir(grid):
@@ -358,6 +346,8 @@ def _savegrid(grid,filename):
 
 
     io.savemat(filename, dictgrid,oned_as ='row') #sauvegarde du dictionnaire dictgrid, dans un fichier MATLAB: permet de inclure des float et nd_array (
+
+    io.savemat("C:\dE2V_Strasbourg.mat", d_E2V,oned_as ='row') #sauvegarde du dictionnaire dictgrid, dans un fichier MATLAB: permet de inclure des float et nd_array (
 
    # b = io.loadmat(filename)       #avantage: permet de rappeler le fichier entier
 
@@ -411,10 +401,14 @@ def _importgrid(filename):
     grid.longitude = gridmat["longitude"][0]
     grid.xorig = gridmat["xorig"][0]
     grid.int_isolated_box = gridmat["int_isolated_box"][0]
+    d_E2Vmat = io.loadmat("C:\dE2V_Strasbourg.mat")
+    del d_E2Vmat['__version__']
+    del d_E2Vmat['__globals__']
+    del d_E2Vmat['__header__']
+##    d_E2Vmat={}
 
 
-
-    return grid
+    return grid,d_E2Vmat
 
 
 

@@ -1,6 +1,8 @@
+import numpy as np
+
 def ExtractLight(d_e2v, data, day, hour,col):
     '''    Extract a variable from RATP output for a given date (day and hour)
-    and attached extracted variable to leaves for 3D visualization.
+    and attached this extracted variable to leaves for 3D visualization.
         Input::Parameters:
             - d_e2v: connectivity table Leaf -> Voxel (list)
             - data: a 2D array(real)
@@ -8,7 +10,7 @@ def ExtractLight(d_e2v, data, day, hour,col):
             - col: column corresponding to data to be extracted.
 
         Output:Parameters:
-            - extractedvar: extracted data
+            - extractedvar: extracted data. One data per leaf
     '''
     ls_id = [1,2]
     ls_vals = [day, hour]
@@ -17,17 +19,43 @@ def ExtractLight(d_e2v, data, day, hour,col):
 
 
     extractedvar = []
-##    print 'len(d_e2v)',len(d_e2v)
-    nmax = max(d_e2v.keys())
+
+    nmax = np.alen(d_e2v)
+
     for i in range(nmax+1):
         try :
-            extractedvar.append(dat[col][d_e2v[i]])
+            extractedvar.append(dat[col][int(d_e2v[str(i)])])
         except:
             extractedvar.append(0)#!!! Recupere pas toutes les entites dans d_e2v!!? : A cause de triangles en z negatif!
 
-    return extractedvar#,dat[5]#
+    return extractedvar
 
-#rajouter calcul d'irradiance moyen
+def ExtractVoxels(data, day, hour,col):
+    '''    Extract a variable from RATP output for a given date (day and hour)
+    and attached this extracted variable to voxels for 3D visualization.
+        Input:
+            - data: a 2D array(real)
+            - day, hour: time to extract data
+            - col: column corresponding to data to be extracted.
+
+        Output:
+            - extractedvar: extracted data. One data per Voxel
+    '''
+    ls_id = [1,2]
+    ls_vals = [day, hour]
+    dat = extract_list(data, ls_id, ls_vals)
+    dat = t_list(dat)
+    nmax = len(dat[col])
+    extractedvar = []
+    for i in range(nmax+1):
+        try :
+            extractedvar.append(dat[col][i])
+        except:
+            extractedvar.append(0)
+
+
+    return extractedvar
+
 
 
 #!!! Recupere pas toutes les entites dans d_e2v!!?
