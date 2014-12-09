@@ -1,8 +1,8 @@
 Getting Started
 ################
 
-Things to know ...
-------------------
+Things to know about pyRATP ...
+===============================
 Based on a single Fortran90 program, the OpenAlea version of RATP is still implemented 
 in Fortran90 with some specificities:
 
@@ -11,9 +11,10 @@ in Fortran90 with some specificities:
 - The RATP core i.e. radiation balance, heat energy balance and leaf physiological models (transpiration and photosynthesis) are still Fortran90 modules and are not available for users.
  
 First tutorial
----------------
-First step
-**********
+==============
+ 
+Load pyRATP
+***********
 Launch the Tuto1 composite node from the pyratp package (pyratp.demo.RATPTuto1):
 
 .. image:: Tuto1Image.png
@@ -23,7 +24,24 @@ Launch the Tuto1 composite node from the pyratp package (pyratp.demo.RATPTuto1):
 The following workspace should open :
 
 .. dataflow:: pyratp.demo RATPTuto1
-    
+
+This workspace is composed of:
+
+#. Five input files (first line): from left to right: the 3D plant file, the grid configuration file, the vegetation file, the sky discretization file and the meteo data file.
+#. Five nodes to read input files (second line)
+#. One specific node to fill the grid with the 3D leaves (fillgrid)
+#. The RATP core (do_all)
+
+Description of input files
+--------------------------
+
+
+Run pyRATP
+*********** 
+
+Visualize pyRATP outputs
+************************ 
+
 TODO
 #####
 
