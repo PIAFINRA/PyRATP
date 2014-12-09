@@ -12,9 +12,18 @@ in Fortran90 with some specificities:
  
 First tutorial
 ---------------
+First step
+**********
+Launch the Tuto1 composite node from the pyratp package (pyratp.demo.RATPTuto1):
+
+.. image:: Tuto1Image.png
+    :width: 30%
+    :align: center
+
+The following workspace should open :
 
 .. dataflow:: pyratp.demo RATPTuto1
-
+    
 TODO
 #####
 
