@@ -39,8 +39,14 @@ Description of input files
 Run pyRATP
 *********** 
 
-Visualize pyRATP outputs
-************************ 
+pyRATP outputs
+**************
+
+Description of output files
+---------------------------
+
+Visualize outputs
+---------------------------
 
 TODO
 #####
