@@ -1,6 +1,6 @@
 The model PyRATP was designed to simulate the spatial distribution of radiation and leaf-gas 
 exchanges within vegetation canopies as a function of canopy structure, 
-canopy microclimate within the canopy and physical and physiological leaf 
+canopy microclimate and physical and physiological leaf 
 properties. The model uses a 3D representation of the canopy (i.e. an array 
 of 3D voxels, each characterised by a leaf area density) and allows several 
 vegetation types to be input at voxel scale.

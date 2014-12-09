@@ -13,7 +13,7 @@ in Fortran90 with some specificities:
 First tutorial
 ---------------
 
-.. dataflow:: pyratp.demo RATP complet
+.. dataflow:: pyratp.demo RATPTuto1
 
 TODO
 #####
