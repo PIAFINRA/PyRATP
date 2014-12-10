@@ -240,7 +240,7 @@ class Grid(object):
 
         else:
             #gridToVGX(grid,"c:/") #Save grid in VGX format
-            return _importgrid(grid)
+           return grid, d_E2V #_importgrid(grid)
 
 def initParam(grid3d):
 ##        print 'GRILLE OK debut'
