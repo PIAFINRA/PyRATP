@@ -233,7 +233,7 @@ class Grid(object):
                      grid.voxel_canopy[grid.nume[je,k]-1]=grid.voxel_canopy[grid.nume[je,k]-1]+1
 
 
-            _savegrid(grid,d_E2V,"c:/matGridRATP_Strasbourg.mat") #appel de la procedure savegrid (voir plus bas)
+##            _savegrid(grid,d_E2V,"c:/matGridRATP_Strasbourg.mat") #appel de la procedure savegrid (voir plus bas)
             gridToVGX(grid,"c:/") #Save grid in VGX format
 
             return grid, d_E2V
@@ -275,7 +275,7 @@ def initParam(grid3d):
 
         grid3d.volume_canopy = np.zeros(nent+1)
         grid3d.voxel_canopy = np.zeros(nent)
-        
+
         grid3d.int_isolated_box = 1
         grid3d.int_scattering = 0
         print 'GRILLE OK'
@@ -345,9 +345,9 @@ def _savegrid(grid,d_E2V,filename):
     dictgrid["nume"] =grid.nume
 
 
-    io.savemat(filename, dictgrid,oned_as ='row') #sauvegarde du dictionnaire dictgrid, dans un fichier MATLAB: permet de inclure des float et nd_array (
+#    io.savemat(filename, dictgrid,oned_as ='row') #sauvegarde du dictionnaire dictgrid, dans un fichier MATLAB: permet de inclure des float et nd_array (
 
-    io.savemat("C:\dE2V_Strasbourg.mat", d_E2V,oned_as ='row') #sauvegarde du dictionnaire dictgrid, dans un fichier MATLAB: permet de inclure des float et nd_array (
+#    io.savemat("C:\dE2V_Strasbourg.mat", d_E2V,oned_as ='row') #sauvegarde du dictionnaire dictgrid, dans un fichier MATLAB: permet de inclure des float et nd_array (
 
    # b = io.loadmat(filename)       #avantage: permet de rappeler le fichier entier
 
