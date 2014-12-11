@@ -10,6 +10,44 @@ from alinea.pyratp import pyratp
 import numpy as np
 import vege3D
 import scipy.io as io
+from openalea.plantgl import all as pgl
+from math import ceil
+
+
+
+def scenetogrid(scene, dx=0.2, dy=0.2, dz=0.2 , domain=None):
+    """
+    Convert a PlantGL scene to ratp grid that fit the scene
+    """
+
+    def _is_iterable(x):
+        try:
+            x = iter(x)
+        except TypeError: 
+            return False
+        return True
+    
+    tesselator = pgl.Tesselator()
+    bbc = pgl.BBoxComputer(tesselator)
+    bbc.process(scene)
+    bbox = bbc.result
+    
+   
+    xorig = bbox.getXMin()
+    yorig = bbox.getYMin()
+    zorig = dz
+    
+    htop = bbox.getZMax()
+
+    nbz = int(ceil(htop / float(dz)))
+    nbx = int(ceil(bbox.getXRange() / float(dx))) 
+    nby = int(ceil(bbox.getYRange() / float(dy)))
+    
+    return nbx, nby, nbz, dx, dy, [dz] * nbz, xorig, yorig, zorig
+
+    
+    
+
 class Grid(object):
     """
     """
@@ -17,6 +55,46 @@ class Grid(object):
         """
 
         """
+    @staticmethod
+    def initialise(njx, njy, njz, dx, dy, dz, xorig, yorig, zorig, latitude, longitude, timezone, nent, rs, orientation = 0, idecaly=0):
+        grid3d = pyratp.grid3d
+        grid3d.njx, grid3d.njy, grid3d.njz = int(njx),int(njy),int(njz)
+        
+        #allocated to (njz+1) as needed in beampath
+        grid3d.dz = np.zeros(grid3d.njz+1)
+        
+        # voxel size according to X- Y- and Z- axis
+        # TEST
+        grid3d.dx, grid3d.dy, grid3d.dz[:-1] = dx, dy, np.array(dz, dtype=np.float)
+        # 3D grid origin
+        grid3d.xorig, grid3d.yorig, grid3d.zorig = xorig, yorig, zorig
+
+        grid3d.latitude, grid3d.longitude, grid3d.timezone = latitude, longitude, timezone
+
+        # angle (degree) between axis X+ and North
+        grid3d.orientation = orientation
+
+        # offset between canopy units along Y-axis
+        #      idecaly <> 0 : plantation en quinconce partiel (ie, decalage des Y
+        #      d'un nombre entier idecaly de cellules Y d'une maille a l'autre).
+        #             si idecaly = njy / 2 : quinconce parfait
+        #             si idecaly = 0       : plantation orthogonale
+        #      Cf. Subroutine Beampath
+        idecaly = grid3d.idecaly
+
+        # nent: number of vegetation types in the 3D grid
+        grid3d.nent = nent
+
+        # number of wavelength bands for the soil surface
+        grid3d.nblosoil = int(len(rs))
+        grid3d.rs = np.array(rs, dtype=np.float)
+
+
+        # definition of aliases
+
+        initParam(grid3d)
+
+        return grid3d
 
     @staticmethod
     def read(filename):

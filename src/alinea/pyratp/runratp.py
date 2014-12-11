@@ -161,4 +161,8 @@ class runRATP(object):
         PAR1 = np.transpose(ratp.out_rayt)[6]
         #print PAR0
         #print PAR1
-        return ratp.out_rayt
+        
+        # homogenise output matrix to get same shape as doall
+        rr = ratp.out_rayt.T[1:]
+        rr2 = rr.T
+        return rr2
