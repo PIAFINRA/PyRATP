@@ -89,11 +89,11 @@ class Vege3D(object):
         #- decoupage de la ligne d'entete
         listEntete = entete.split(chrSeparation)
         #- pour chaque mot cle, on verifie qu'il existe dans le dictionaire et on note son numero de colonne
+        listEntete = list(listEntete)
         for mot in listEntete:
             if dicoMotCle.has_key(str(mot)):
-                dicoMotCle[str(mot)] = listEntete.indexOf(str(mot))+1
+                dicoMotCle[str(mot)] = listEntete.index(str(mot))+1
         nbObj=1
-        listEntete = list(listEntete)
 
         while not(textStream.atEnd()):
             nbLigne +=1
@@ -106,11 +106,12 @@ class Vege3D(object):
             liste = []
 
             for ch in ligne :
-                val=ch.toDouble() #retourne (valeur,bool)
-                if not(val[1]):
+                try:
+                    val=float(ch)
+                except ValueError:
                     print ch,  " : valeur non numerique a la ligne : ", nbObj+1
                     return
-                liste.append(val[0])
+                liste.append(val)
             if bltypeVege :
                 typeV = nbLigne -1
             else:
