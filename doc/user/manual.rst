@@ -34,16 +34,30 @@ This workspace is composed of:
 
 Description of input files
 --------------------------
-
+Many input parameters are necessary to run RATP. It is out of the scope of this short tutorial to describe all this parameters. All information about these input files can be found in /LINK TO PDF ou WORD FILE/  
 
 Run pyRATP
-*********** 
+**********
+To run RATP click right on the node "do_all" and run the node. All the input files will be read sequentially. The success of each step and the computational time are highlighted in the console window as follow:  
+::
+  VEGE3D OK
+  GRILLE OK
+  GRILLE OK
+  VEGETATION OK
+  SKYVAULT OK
+  MICROMETEO OK
+  Evaluation time: 3.07400012016 
 
 pyRATP outputs
 **************
+By default 4 output files are stored in the directory: C:\\tmpRATP\\Resul\\: data.txt, spatial.txt, tree.txt and VoxelsGrid.vgx.
 
 Description of output files
 ---------------------------
+#. The data.txt file: this ASCII file lists the values of all input parameters
+#. The spatial.txt file:  this ASCII file contains all variables for each voxel and each time step. Each variable is store column by column
+#. The tree.txt file: this ASCII file stores all some variables computed at the scene scale
+#. The VoxelsGrid.vgx file: this is a vegeSTAR file taht enables to visualize the grid with the VegeSTAR Software (http://www6.clermont.inra.fr/piaf/Telechargements) or with PlantGL
 
 Visualize outputs
 ---------------------------
