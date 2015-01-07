@@ -29,7 +29,7 @@ class runRATP(object):
             shutil.rmtree(path)
         os.mkdir(path)
         os.mkdir(path+"/Resul")
-        grid.gridToVGX(pyratp.grid3d,path+"/Resul") #Save grid in VGX format
+        grid.gridToVGX(pyratp.grid3d,path+"/Resul/","VoxelsGrid.vgx") #Save grid in VGX format
         ##print np.where(pyratp.vegetation_types.ismine==1)
         try:
             numeroMin = (np.where(pyratp.vegetation_types.ismine==1))[0][0] + 1
@@ -161,7 +161,7 @@ class runRATP(object):
         PAR1 = np.transpose(ratp.out_rayt)[6]
         #print PAR0
         #print PAR1
-        
+
         # homogenise output matrix to get same shape as doall
         rr = ratp.out_rayt.T[1:]
         rr2 = rr.T

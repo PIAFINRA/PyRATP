@@ -22,7 +22,7 @@ def ExtractLight(d_e2v, data, day, hour,col):
 
     nmax = np.alen(d_e2v)
 
-    for i in range(nmax+1):
+    for i in range(nmax): #Enleve nmax+1 MARC 10 12 2014
         try :
             extractedvar.append(dat[col][int(d_e2v[str(i)])])
         except:

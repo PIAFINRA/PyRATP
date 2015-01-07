@@ -114,10 +114,10 @@ def RATPVOXELS2VTK(grid, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT
     f.write('Z_COORDINATES '+str(grid.njz+1)+' float\n')
 
     for i in  range(grid.njz-1,-1,-1):
-       z = -100*grid.dz[i]*(i)+100*grid.zorig
-##       
+       z = -100*grid.dz[i]*(i)#MARC +100*grid.zorig
+##
        f.write(str(z)+' ')
-    f.write(str(z+100*grid.zorig)+' ')
+    f.write(str(z)+' ')#MARC +100*grid.zorig)+' ')
 ##    f.write(str(0.0)+' ')
 
     f.write('\n')
@@ -150,7 +150,8 @@ def RATPVOXELS2VTK(grid, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT
       for ij in range(grid.njy):
         for ii in range(grid.njx):
           k =grid.kxyz[ii,ij,ik]-1 #Get the voxel id number
-          if (k>0):              #If the vowel k gets some vegetation then
+          if (k>=0):              #If the voxel k gets some vegetation then
+           #print k
            f.write(str(variable[k])+'\n')
           else:
            f.write(str(0.0)+'\n')

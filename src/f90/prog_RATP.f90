@@ -358,6 +358,7 @@ subroutine do_all
 
 
   !if (hour.eq.12) then
+
   do k=1,nveg
    do je=1,nje(k)
      iterspatial = iterspatial +1

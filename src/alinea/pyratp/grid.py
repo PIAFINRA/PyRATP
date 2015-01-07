@@ -23,30 +23,30 @@ def scenetogrid(scene, dx=0.2, dy=0.2, dz=0.2 , domain=None):
     def _is_iterable(x):
         try:
             x = iter(x)
-        except TypeError: 
+        except TypeError:
             return False
         return True
-    
+
     tesselator = pgl.Tesselator()
     bbc = pgl.BBoxComputer(tesselator)
     bbc.process(scene)
     bbox = bbc.result
-    
-   
+
+
     xorig = bbox.getXMin()
     yorig = bbox.getYMin()
     zorig = dz
-    
+
     htop = bbox.getZMax()
 
     nbz = int(ceil(htop / float(dz)))
-    nbx = int(ceil(bbox.getXRange() / float(dx))) 
+    nbx = int(ceil(bbox.getXRange() / float(dx)))
     nby = int(ceil(bbox.getYRange() / float(dy)))
-    
+
     return nbx, nby, nbz, dx, dy, [dz] * nbz, xorig, yorig, zorig
 
-    
-    
+
+
 
 class Grid(object):
     """
@@ -57,12 +57,27 @@ class Grid(object):
         """
     @staticmethod
     def initialise(njx, njy, njz, dx, dy, dz, xorig, yorig, zorig, latitude, longitude, timezone, nent, rs, orientation = 0, idecaly=0):
+        """ Initialize the 3D grid from input arguments
+
+        Input:Parameters:
+            - number of voxels according to the three axis: njx,njy,njz
+            - grid size along the three axis: dx,dy,dz
+            - grid origin: xorig, yorig, zorig
+            - location of the scene: latitude and longitude
+            - local time: timezone
+            - number of entities in the scene: nent
+            - soil reflectance for PAR and NIR wavebands: rs
+
+        Output:Parameters:
+            - grid3d: object grid updated (size, number of voxels)
+        """
+
         grid3d = pyratp.grid3d
         grid3d.njx, grid3d.njy, grid3d.njz = int(njx),int(njy),int(njz)
-        
+
         #allocated to (njz+1) as needed in beampath
         grid3d.dz = np.zeros(grid3d.njz+1)
-        
+
         # voxel size according to X- Y- and Z- axis
         # TEST
         grid3d.dx, grid3d.dy, grid3d.dz[:-1] = dx, dy, np.array(dz, dtype=np.float)
@@ -312,12 +327,12 @@ class Grid(object):
 
 
 ##            _savegrid(grid,d_E2V,"c:/matGridRATP_Strasbourg.mat") #appel de la procedure savegrid (voir plus bas)
-            gridToVGX(grid,"/tmp/") #Save grid in VGX format
+            #gridToVGX(grid,"/tmp/","gridVGX.vgx") #Save grid in VGX format
 
             return grid, d_E2V
 
         else:
-            #gridToVGX(grid,"c:/") #Save grid in VGX format
+            #gridToVGX(grid,"c:/","gridVGX.vgx") #Save grid in VGX format
            return grid, d_E2V #_importgrid(grid)
 
 def initParam(grid3d):
@@ -359,11 +374,12 @@ def initParam(grid3d):
         print 'GRILLE OK'
 
 
-def gridToVGX(grid,chemin):
+def gridToVGX(grid,path,filename):
 
     echX= grid.dx *100
     echY= grid.dy *100
-    filename = chemin+"\VoxelsStrasbourg.vgx"
+    filename = path + filename
+     ## VoxelsStrasbourg.vgx
     fichier = open( filename,"w")
     fichier.write( "Obj\tEchX\tEchY\tEchZ\tTransX\tTransY\tTransZ\tRotX\tRotY\tRotZ\tR\tG\tB\tnumero")
     fichier.write("\n")
