@@ -328,7 +328,7 @@ class Grid(object):
 
 
 ##            _savegrid(grid,d_E2V,"c:/matGridRATP_Strasbourg.mat") #appel de la procedure savegrid (voir plus bas)
-            gridToVGX(grid,"C:/Users/msaudreau/Desktop/Weiwei_Work/","gridVGX.vgx") #Save grid in VGX format
+##            gridToVGX(grid,"C:/Users/msaudreau/Desktop/Weiwei_Work/","gridVGX.vgx") #Save grid in VGX format
 
             return grid, d_E2V
 
