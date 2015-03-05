@@ -41,20 +41,28 @@ def ExtractVoxels(data, day, hour,col):
         Output:
             - extractedvar: extracted data. One data per Voxel
     '''
-    ls_id = [1,2]
+    # Works fine for 1 entity only. When we have several entities the column contains more than nb Voxels
+#    ls_id = [1,2] for one entity
+    ls_id = [2,3]               #Column number for day and hour in the output file - ANY CHANGE IN THE OUTPUT FILE SHOULD BE ALSO DONE THERE
     ls_vals = [day, hour]
-    dat = extract_list(data, ls_id, ls_vals)
+    dat = extract_list(data, ls_id, ls_vals) # dat contains only data for the targeted day and hour
     dat = t_list(dat)
     nmax = len(dat[col])
+    colVoxel = 5;           #VOXEL_ID SHOULD BE STORED IN THIS COLUMN IN THE OUTPU FILE
+    colEntity = 0;          #ENTITY ID SHOULD BE STORED IN THIS COLUMN IN THE OUTPU FILE
     extractedvar = []
-    for i in range(nmax+1):
-        try :
-            extractedvar.append(dat[col][i])
-        except:
-            extractedvar.append(0)
+    entity=[]
+    voxelId=[]
+    for i in range(nmax):
+#        try :
+        extractedvar.append(dat[col][i])
+        entity.append(dat[colEntity][i])
+        voxelId.append(dat[colVoxel][i])
+#        except:
+#        extractedvar.append(0)
 
 
-    return extractedvar
+    return extractedvar,entity,voxelId
 
 
 

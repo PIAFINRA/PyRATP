@@ -111,7 +111,7 @@ ExtractVar_ExtractVar = Factory(name='ExtractVar',
 
 
 
-ratp_DoAll = Factory(name='do_all',
+ratp_DoAll = Factory(name='ratp_DoAll',
                 authors=' (wralea authors)',
                 description='run RATP',
                 category='Unclassified',
@@ -141,7 +141,7 @@ ratp_fill_grid = Factory(name='fill grid',
 
 
 
-ratp_DoIrradiation = Factory(name='ratp_radiation',
+ratp_DoIrradiation = Factory(name='ratp_DoIrradiation',
                 authors=' (wralea authors)',
                 description='run RATP - irradiation calculation only',
                 category='Unclassified',

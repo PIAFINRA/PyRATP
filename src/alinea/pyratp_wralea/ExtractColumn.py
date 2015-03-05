@@ -45,7 +45,7 @@ def ExtractColumn(ExtractColumn2):
     Sunlit_Leaf_StomatalConductance
     Leaf_Nitrogen
     """.split('\n')
-    index = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18] #ajout 1 colonne pour N foliaire, ngao 05/06/2013
+    index = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19]
     def __init__(self):
 
         column_number = ExtractColumn2.__init__(self)

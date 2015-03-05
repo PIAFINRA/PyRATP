@@ -35,6 +35,7 @@ dicoMotCle["R"] = 0
 dicoMotCle["G"] = 0
 dicoMotCle["B"] = 0
 dicoMotCle["VCmax"] = 0
+dicoMotCle["ShootType"]=0
 #'dicoMotCle["Vcmax"] = 0
 dicoMotCle["Jmax"] = 0
 dicoMotCle["Resp"] = 0
@@ -68,7 +69,6 @@ class Vege3D(object):
         tabZ =np.array([])
         tabS =np.array([])
         tabN =np.array([])
-
         #lecture du fichier source
         file = QtCore.QFile(fileNameVGX)
         if not(file.open(QtCore.QIODevice.ReadOnly | QtCore.QIODevice.Text)):
@@ -112,6 +112,7 @@ class Vege3D(object):
                     print ch,  " : valeur non numerique a la ligne : ", nbObj+1
                     return
                 liste.append(val)
+
             if bltypeVege :
                 typeV = nbLigne -1
             else:
@@ -121,6 +122,7 @@ class Vege3D(object):
                 X = (liste[listEntete.index("TransX")])
                 Y = (liste[listEntete.index("TransY")])
                 Z = (liste[listEntete.index("TransZ")])
+                ShootType = (liste[listEntete.index("ShootType")])
                 tabX= np.append(tabX,X)
                 tabY= np.append(tabY,Y)
                 tabZ= np.append(tabZ,Z)
@@ -144,11 +146,21 @@ class Vege3D(object):
                 AREA = 0.5*np.sum(np.abs(CrossP)**2)**(1./2)
 
             typeV =0
+            #Entity numbers set according to ShootType 01/2015
+            if (ShootType == 1.0): typeV =0
+            if (ShootType == 2.0): typeV =0
+            if (ShootType == 3.0): typeV =1
+            if (ShootType == 4.0): typeV =2
+            if (ShootType == 5.0): typeV =3
+            if (ShootType == 6.0): typeV =4
+##            print 'typeV =',typeV
+##            typeV =0
+
             tabTypeVege= np.append(tabTypeVege,typeV)
             tabS= np.append(tabS,AREA)
             tabN= np.append(tabN,Azote)
-            #print 'Area',AREA
-            if nbLigne == typeVege : nbLigne=0
+##            print 'Area',AREA
+##            if nbLigne == typeVege : nbLigne=0
         file.close()
         print 'VEGE3D OK'
         return (tabTypeVege,tabX,tabY,tabZ,tabS,tabN)

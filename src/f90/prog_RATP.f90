@@ -352,38 +352,36 @@ subroutine do_all
    out_time_tree(itertree,7) = A_canopy    !  Net A rate in µmol CO2 s-1 m-2 
    out_time_tree(itertree,8) = E_canopy    ! Evaporation rate in mmol H20 s-1 m-2 
    
-   !write(2,20) ntime, day, hour, jent, glob(1)*2.02/0.48, (Spar(jent,class)/S_vt(jent), class=1,45) ! %SF per irradiance class
-   !write(3,30) ntime, day, hour, jent, taref, (Sts(jent,class)/S_vt(jent), class=10,45)
   end do
 
 
   !if (hour.eq.12) then
-
   do k=1,nveg
    do je=1,nje(k)
      iterspatial = iterspatial +1
      jent=nume(je,k)
        !write(*,*) k,je,jent
-       out_time_spatial(iterspatial,1) = ntime
-       out_time_spatial(iterspatial,2) = day
-       out_time_spatial(iterspatial,3) = hour
-       out_time_spatial(iterspatial,4) = taref
-       out_time_spatial(iterspatial,5) = k
-       out_time_spatial(iterspatial,6) = ts(0,je,k)
-       out_time_spatial(iterspatial,7) = ts(1,je,k)
-       out_time_spatial(iterspatial,8) = (ts(1,je,k)*S_detailed(1,je,k)+ts(0,je,k)*S_detailed(0,je,k))&
+       out_time_spatial(iterspatial,1) = jent
+       out_time_spatial(iterspatial,2) = ntime
+       out_time_spatial(iterspatial,3) = day
+       out_time_spatial(iterspatial,4) = hour
+       out_time_spatial(iterspatial,5) = taref
+       out_time_spatial(iterspatial,6) = k
+       out_time_spatial(iterspatial,7) = ts(0,je,k)
+       out_time_spatial(iterspatial,8) = ts(1,je,k)
+       out_time_spatial(iterspatial,9) = (ts(1,je,k)*S_detailed(1,je,k)+ts(0,je,k)*S_detailed(0,je,k))&
      &/(S_detailed(0,je,k)+S_detailed(1,je,k))   
-       out_time_spatial(iterspatial,9) = STAR_vt_vx(je,k)   
-       out_time_spatial(iterspatial,10) = STARsky_vt_vx(je,k)
-       out_time_spatial(iterspatial,11) = A_detailed(0,je,k)
-       out_time_spatial(iterspatial,12) = A_detailed(1,je,k)
-       out_time_spatial(iterspatial,13) = E(0,je,k)
-       out_time_spatial(iterspatial,14) = E(1,je,k)
-       out_time_spatial(iterspatial,15) = S_detailed(0,je,k)
-       out_time_spatial(iterspatial,16) = S_detailed(1,je,k) 
-       out_time_spatial(iterspatial,17) = gs(0,je,k)
-       out_time_spatial(iterspatial,18) = gs(1,je,k)      
-       out_time_spatial(iterspatial,19) = N_detailed(je,k)      !ajout N foliaire, ngao 05/06/2013
+       out_time_spatial(iterspatial,10) = STAR_vt_vx(je,k)   
+       out_time_spatial(iterspatial,11) = STARsky_vt_vx(je,k)
+       out_time_spatial(iterspatial,12) = A_detailed(0,je,k)
+       out_time_spatial(iterspatial,13) = A_detailed(1,je,k)
+       out_time_spatial(iterspatial,14) = E(0,je,k)
+       out_time_spatial(iterspatial,15) = E(1,je,k)
+       out_time_spatial(iterspatial,16) = S_detailed(0,je,k)
+       out_time_spatial(iterspatial,17) = S_detailed(1,je,k) 
+       out_time_spatial(iterspatial,18) = gs(0,je,k)
+       out_time_spatial(iterspatial,19) = gs(1,je,k)      
+       out_time_spatial(iterspatial,20) = N_detailed(je,k)      !ajout N foliaire, ngao 05/06/2013
        
        !write(12,90) ntime, day, hour, k, ts(0,1,k), ts(1,1,k), taref
    end do
@@ -488,8 +486,6 @@ subroutine do_all
   call mm_read(ntime,nbli)  ! Read micrometeo data (line #ntime in file mmeteo.<spec>)
   !write(*,*) '...mm_read : '
   call swrb_doall     ! Compute short wave radiation balance
-
-
 
   do k=1,nveg
 

@@ -177,11 +177,12 @@ class Grid(object):
             - a VegeSTAR file
 
         Output:Parameters:
-            - v: array of vegettion type (integer)
+            - v: array of vegetation type (integer)
             - x,y,z: arrays of 3D coordinates in m (real)
             - s: array of leaf area in m2 (real)
             - n: array of nitrogen content in g/m2    (real)
         """
+
         v,x,y,z,s,n = vege3D.Vege3D.readVGX(filename,2)
 ##        print 'alen(x)',np.alen(x)
         return v,x/100,y/100,-z/100,s/10000.,n
@@ -327,7 +328,7 @@ class Grid(object):
 
 
 ##            _savegrid(grid,d_E2V,"c:/matGridRATP_Strasbourg.mat") #appel de la procedure savegrid (voir plus bas)
-            #gridToVGX(grid,"/tmp/","gridVGX.vgx") #Save grid in VGX format
+            gridToVGX(grid,"C:/Users/msaudreau/Desktop/Weiwei_Work/","gridVGX.vgx") #Save grid in VGX format
 
             return grid, d_E2V
 
@@ -392,6 +393,7 @@ def gridToVGX(grid,path,filename):
         echZ= grid.dz[grid.numz[k]]*100
         fichier.write("35\t"+str(echX) +"\t"+ str(echY)+"\t"+str(echZ)+"\t"+str(transX)+"\t"+str(transY)+"\t"+str(transZ)+"\t0\t0\t0"+"\t0\t255\t0"+"\t"+str(k))
         fichier.write("\n")
+    print "Write Grid to VGX file"
     fichier.close()
 
 
@@ -417,7 +419,7 @@ def _read(f, *args):
 
 
 def _savegrid(grid,d_E2V,filename):
-    ## Sauvegarde grille format MATLAB
+    ## Sauvegarde grille format MATLAB /// WE HAVE TO FIND ANOTHER WAY TO STORE THE GRID !! MS 01/2015
     dictgrid ={}                            #def d un dictionnaire dictgrid (necessaire pour io.savemat, voir plus bas)
     for i in dir(grid):
         if i<>'g3d_destroy':              #evite g3d_destroy: element de l objet grid, mais une procedure donc pas ecrivable dans un fichier .mat (voir plus bas)

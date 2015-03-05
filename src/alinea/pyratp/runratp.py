@@ -21,9 +21,10 @@ class runRATP(object):
     def DoAll(*args):
         ratp = pyratp.ratp
         pyratp.dir_interception.scattering = False
-        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*19*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,19)
+        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*20*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent,20)
         ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*8*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,8)
         #Ajout 1 colonne pour N foliaire, ngao 05/06/2013
+        #Ajout 1 colonne pour Vegetation Type , MSaudreau 07/01/2014
         path = 'c:/tmpRATP' if platform.system() == 'Windows' else '/tmp/tmpRATP'
         if os.path.exists(path):
             shutil.rmtree(path)
@@ -43,13 +44,13 @@ class runRATP(object):
 
         #print 'dz,', pyratp.grid3d.dz
         fspatial = open(path+"/Resul"+'/spatial.txt','w')
-        fspatial.write('ntime  day   hour  AirTemperature  VoxelId  ShadedTemp  SunlitTemp  VoxelTemp  STARDirect STARSky ShadedPhoto SunlitPhoto  ShadedTranspi SunlitTranspi')
+        fspatial.write('VegetationType  ntime  day   hour  AirTemperature  VoxelId  ShadedTemp  SunlitTemp  VoxelTemp  STARDirect STARSky ShadedPhoto SunlitPhoto  ShadedTranspi SunlitTranspi')
         fspatial.write('  ShadedArea SunlitArea ShadedGs  SunlitGs  VoxelNitrogen')
         fspatial.write('\n')
         np.savetxt(fspatial,ratp.out_time_spatial,'%.6e')
         fspatial.close()
         ftree = open(path+"/Resul"+'/tree.txt','w')
-        ftree.write('ntime  day   hour  VegetationType  TotalIrradiation  AirTemperature  TreePhotosynthesis  TreeTreanspiration')
+        ftree.write('ntime  day   hour  VegetationType  TotalIrradiation  AirTemperature  TreePhotosynthesis  TreeTranspiration')
         ftree.write('\n')
         np.savetxt(ftree,ratp.out_time_tree,'%.6e')
         ftree.close()
@@ -132,8 +133,6 @@ class runRATP(object):
 
 
         fichier.close()
-##        pyratp.grid3d.g3d_destroy()
-##        pyratp.vegetation_types.vt_destroy()
 
         return ratp.out_time_spatial, ratp.out_time_tree
 
@@ -162,7 +161,7 @@ class runRATP(object):
         #print PAR0
         #print PAR1
 
-        # homogenise output matrix to get same shape as doall
-        rr = ratp.out_rayt.T[1:]
-        rr2 = rr.T
-        return rr2
+        # homogenizing the output matrix to get same shape as doall - Problem should be solved by changing the fortran source code.
+##        rr = ratp.out_rayt.T[1:]
+##        rr2 = rr.T
+##        return rr2
