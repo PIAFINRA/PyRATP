@@ -146,7 +146,7 @@ class Vege3D(object):
                 AREA = 0.5*np.sum(np.abs(CrossP)**2)**(1./2)
 
             typeV =0
-            #Entity numbers set according to ShootType 01/2015
+            #Entity numbers set according to ShootType 01/2015 - Skip i.e typeV = 0
             if (ShootType == 1.0): typeV =0
             if (ShootType == 2.0): typeV =0
             if (ShootType == 3.0): typeV =1
@@ -154,7 +154,7 @@ class Vege3D(object):
             if (ShootType == 5.0): typeV =3
             if (ShootType == 6.0): typeV =4
 ##            print 'typeV =',typeV
-##            typeV =0
+            typeV =0
 
             tabTypeVege= np.append(tabTypeVege,typeV)
             tabS= np.append(tabS,AREA)
