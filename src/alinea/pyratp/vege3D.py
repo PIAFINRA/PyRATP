@@ -122,7 +122,7 @@ class Vege3D(object):
                 X = (liste[listEntete.index("TransX")])
                 Y = (liste[listEntete.index("TransY")])
                 Z = (liste[listEntete.index("TransZ")])
-                ShootType = (liste[listEntete.index("ShootType")])
+##                ShootType = (liste[listEntete.index("ShootType")])
                 tabX= np.append(tabX,X)
                 tabY= np.append(tabY,Y)
                 tabZ= np.append(tabZ,Z)
@@ -147,14 +147,14 @@ class Vege3D(object):
 
             typeV =0
             #Entity numbers set according to ShootType 01/2015 - Skip i.e typeV = 0
-            if (ShootType == 1.0): typeV =0
-            if (ShootType == 2.0): typeV =0
-            if (ShootType == 3.0): typeV =1
-            if (ShootType == 4.0): typeV =2
-            if (ShootType == 5.0): typeV =3
-            if (ShootType == 6.0): typeV =4
+##            if (ShootType == 1.0): typeV =0
+##            if (ShootType == 2.0): typeV =0
+##            if (ShootType == 3.0): typeV =1
+##            if (ShootType == 4.0): typeV =2
+##            if (ShootType == 5.0): typeV =3
+##            if (ShootType == 6.0): typeV =4
 ##            print 'typeV =',typeV
-            typeV =0
+##            typeV =0
 
             tabTypeVege= np.append(tabTypeVege,typeV)
             tabS= np.append(tabS,AREA)

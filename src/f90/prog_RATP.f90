@@ -267,7 +267,6 @@ subroutine do_all
  !write(*,*)
 
  !write(*,*)
- !write(*,*)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! spec_grid='grd'     ! definition de la grille

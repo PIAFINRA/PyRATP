@@ -97,8 +97,8 @@ def RATP2VTKNew(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.v
             T.result
     '''
 
-    if len(variable)<len(scene):
-      variable=np.zeros(len(scene))
+##    if len(variable)<len(scene):
+##      variable=np.zeros(len(scene))
 
 
     T = all.Tesselator()
@@ -115,7 +115,9 @@ def RATP2VTKNew(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.v
          ShapeNumTri = len(TS.pointList) #nbr points dans  TriangleSet
          for tri in TS.indexList:
               TrianglesVertexIDs.append([tri[0]+k*ShapeNumTri,tri[1]+k*ShapeNumTri,tri[2]+k*ShapeNumTri])
-              triangleColor.append(variable[k])
+              varia =variable[0][k] #Get the variable of the leaf number i
+              triangleColor.append(varia)
+
 
     numvertex = len(VertexCoords)
     numTriangles = len(TrianglesVertexIDs)

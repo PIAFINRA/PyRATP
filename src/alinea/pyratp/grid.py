@@ -163,11 +163,9 @@ class Grid(object):
 
         # definition of aliases
 
-        initParam(grid3d)
+        Grid.initParam(grid3d)
 
         return grid3d
-
-##    @staticmethod
 
     @staticmethod
     def readVgx(filename):
@@ -206,7 +204,7 @@ class Grid(object):
 #        print 'type grid', type(grid)
         if type(grid)is not(str):
 
-            initParam(grid)
+            Grid.initParam(grid)
 
             x = x - grid.xorig
             y = y - grid.yorig
@@ -336,43 +334,44 @@ class Grid(object):
             #gridToVGX(grid,"c:/","gridVGX.vgx") #Save grid in VGX format
            return grid, d_E2V #_importgrid(grid)
 
-def initParam(grid3d):
-##        print 'GRILLE OK debut'
-        njx, njy, njz = grid3d.njx, grid3d.njy, grid3d.njz
-        dx, dy = grid3d.dx, grid3d.dy
-##        kxyz = grid3d.kxyz
+    @staticmethod
+    def initParam(grid3d):
+    ##        print 'GRILLE OK debut'
+            njx, njy, njz = grid3d.njx, grid3d.njy, grid3d.njz
+            dx, dy = grid3d.dx, grid3d.dy
+    ##        kxyz = grid3d.kxyz
 
-        nent = grid3d.nent
-        nvegmax = njx * njy * njz
+            nent = grid3d.nent
+            nvegmax = njx * njy * njz
 
-        xrang = njx * dx
-        yrang = njy * dy
-        grid3d.total_ground_area=xrang*yrang
+            xrang = njx * dx
+            yrang = njy * dy
+            grid3d.total_ground_area=xrang*yrang
 
-        grid3d.kxyz = np.zeros(njx*njy*(njz+1)).reshape((njx, njy, njz+1))
-        grid3d.numx = np.zeros(nvegmax)
-        grid3d.numy = np.zeros(nvegmax)
-        grid3d.numz = np.zeros(nvegmax)
-        grid3d.nje = np.zeros(nvegmax)
+            grid3d.kxyz = np.zeros(njx*njy*(njz+1)).reshape((njx, njy, njz+1))
+            grid3d.numx = np.zeros(nvegmax)
+            grid3d.numy = np.zeros(nvegmax)
+            grid3d.numz = np.zeros(nvegmax)
+            grid3d.nje = np.zeros(nvegmax)
 
-        grid3d.leafareadensity= np.zeros(nent*nvegmax).reshape(nent, nvegmax)
-        grid3d.n_detailed = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
-##        grid3d.toto = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
-        grid3d.nume = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+            grid3d.leafareadensity= np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+            grid3d.n_detailed = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+    ##        grid3d.toto = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+            grid3d.nume = np.zeros(nent*nvegmax).reshape(nent, nvegmax)
 
-        # Leaf area (m^2) per voxel and vegetation type
-        grid3d.s_vt_vx =  np.zeros(nent*nvegmax).reshape(nent, nvegmax)
-        # Leaf area (m^2) per voxel
-        grid3d.s_vx = np.zeros(nvegmax)
-        # Leaf area (m^2) per vegetation type
-        grid3d.s_vt = np.zeros(nent)
+            # Leaf area (m^2) per voxel and vegetation type
+            grid3d.s_vt_vx =  np.zeros(nent*nvegmax).reshape(nent, nvegmax)
+            # Leaf area (m^2) per voxel
+            grid3d.s_vx = np.zeros(nvegmax)
+            # Leaf area (m^2) per vegetation type
+            grid3d.s_vt = np.zeros(nent)
 
-        grid3d.volume_canopy = np.zeros(nent+1)
-        grid3d.voxel_canopy = np.zeros(nent)
+            grid3d.volume_canopy = np.zeros(nent+1)
+            grid3d.voxel_canopy = np.zeros(nent)
 
-        grid3d.int_isolated_box = 1
-        grid3d.int_scattering = 0
-        print 'GRILLE OK'
+            grid3d.int_isolated_box = 1
+            grid3d.int_scattering = 0
+            print 'GRILLE OK'
 
 
 def gridToVGX(grid,path,filename):
