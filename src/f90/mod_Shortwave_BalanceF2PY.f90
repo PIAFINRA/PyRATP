@@ -80,6 +80,7 @@ contains
 
 ! Computation of the sun direction (i.e. height and azimuth, in degrees) from grid location and time
 ! From programs given by Grebet (1993, in Crop structure and light microclimate)
+! Sun azimuth is computed with the South clockwise convention (East = -90, West = 90)
 
   real :: sunheight, sunazimuth
   real :: latitude, longitude
