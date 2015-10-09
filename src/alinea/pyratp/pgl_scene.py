@@ -54,11 +54,12 @@ class PglGrid(object):
                      'longitude':longitude,
                      'timezone':0,# consider UTC/GMT time
                      'idecaly':0,
-                     'orientation': - north}# in RATP orientation is defined from X+ to North clockwise
+                     'orientation': - north}# in RATP orientation is the angle from X+ to North, positive clockwise.
 
         self.xo = xo
         self.yo = yo
         self.zo = zo
+        self.zsoil = zsoil
         self.convert = convert
         
     def transform(self, x, y, z):
@@ -66,7 +67,8 @@ class PglGrid(object):
         """
         newx = (numpy.array(x) - self.xo) * self.convert
         newy = - (numpy.array(y) - self.yo) * self.convert
-        newz = - (numpy.array(z) - self.zo) * self.convert
+        #newz = - (numpy.array(z) - self.zo) * self.convert
+        newz = (numpy.array(z) - self.zsoil) * self.convert # grid.py fill the grid from top to base already
         return newx, newy, newz
 
     def grid(self, scene, entity=None, stem=None, nitrogen=None, rsoil=(0.075,0.20)):
@@ -91,28 +93,35 @@ class PglGrid(object):
         #Nitrogen (g/m2)
         n = numpy.ones(len(s))*2.0
 
-        #entities
-        if entity is None:
-            entity = numpy.zeros(len(s))
-        else:
-            entity = numpy.array(entity.values())
-        nent = max(entity) + 1
+
         
         #coordinates
         krikri = pgl.Discretizer()
         XYZLeaf=[]
+        sh_id=[]
         for sc in scene:
             krikri.process(sc)
             mesh=krikri.result
             XYZLeaf.append(mesh.pointList.getCenter())
+            sh_id.append(sc.id)
         xyz = numpy.array(XYZLeaf)
         x, y, z = self.transform(xyz.T[0], xyz.T[1], xyz.T[2])
         
+                #entities 
+        if entity is None:
+            entity = numpy.zeros(len(s))
+        else:
+            entity = numpy.array([entity[sh_id[i]] for i in range(len(sh_id))])
+        nent = max(entity) + 1
         
         self.grid_pars.update({'rs':rsoil,'nent':nent})
         
         grid = Grid.initialise(**self.grid_pars)
-        grid, mapping = Grid.fill(entity, x, y, z, s, n, grid)
+        grid, mapping = Grid.fill(entity, x, y, z, s, n, grid) # mapping is a {str(python_x_list_index) : python_k_gridvoxel_index}
         
-        return grid, mapping
+        # in RATP output, VoxelId is for the fortran_k_voxel_index (starts at 1, cf prog_RATP.f90, lines 489 and 500)
+        # here we return shape_id:fortran_k_voxel_index
+        newmap = {sh_id[i]:mapping[str(i)] + 1 for i in range(len(sh_id))}
+        
+        return grid, newmap
     
