@@ -95,7 +95,7 @@ class Grid(object):
         #             si idecaly = njy / 2 : quinconce parfait
         #             si idecaly = 0       : plantation orthogonale
         #      Cf. Subroutine Beampath
-        idecaly = grid3d.idecaly
+        grid3d.idecaly = idecaly
 
         # nent: number of vegetation types in the 3D grid
         grid3d.nent = nent
@@ -107,7 +107,7 @@ class Grid(object):
 
         # definition of aliases
 
-        initParam(grid3d)
+        Grid.initParam(grid3d)
 
         return grid3d
 
@@ -133,7 +133,7 @@ class Grid(object):
 
         # voxel size according to X- Y- and Z- axis
         # TEST
-        _read(f, grid3d.dx, grid3d.dy, grid3d.dz[:-1])
+        _read(f, grid3d.dx, grid3d.dy, grid3d.dz[:-1])# dz : de haut en bas  + un zero pour le sol
         # 3D grid origin
         _read(f, grid3d.xorig, grid3d.yorig, grid3d.zorig)
 

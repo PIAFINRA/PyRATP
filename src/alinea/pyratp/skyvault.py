@@ -38,5 +38,5 @@ class Skyvault(object):
         skyvault.pc=np.transpose(tabGene)[3]
         print 'SKYVAULT OK'
         f.close()
-
+        return skyvault
 
