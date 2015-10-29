@@ -165,3 +165,4 @@ class runRATP(object):
 ##        rr = ratp.out_rayt.T[1:]
 ##        rr2 = rr.T
 ##        return rr2
+        return ratp.out_rayt
