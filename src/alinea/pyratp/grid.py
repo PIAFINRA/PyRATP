@@ -1,19 +1,13 @@
-# Header
-#
-
+""" Class and methods for manipulating the pyratp grid3d object
 """
 
-"""
+import numpy as np
+import pandas
+import scipy.io as io
 
 from alinea.pyratp import pyratp
-#import pyRATP
-import numpy as np
-import vege3D
-import scipy.io as io
+import alinea.pyratp.vege3D as vege3D
 from openalea.plantgl import all as pgl
-from math import ceil
-
-
 
 def scenetogrid(scene, dx=0.2, dy=0.2, dz=0.2 , domain=None):
     """
@@ -39,22 +33,88 @@ def scenetogrid(scene, dx=0.2, dy=0.2, dz=0.2 , domain=None):
 
     htop = bbox.getZMax()
 
-    nbz = int(ceil(htop / float(dz)))
-    nbx = int(ceil(bbox.getXRange() / float(dx)))
-    nby = int(ceil(bbox.getYRange() / float(dy)))
+    nbz = int(np.ceil(htop / float(dz)))
+    nbx = int(np.ceil(bbox.getXRange() / float(dx)))
+    nby = int(np.ceil(bbox.getYRange() / float(dy)))
 
     return nbx, nby, nbz, dx, dy, [dz] * nbz, xorig, yorig, zorig
 
 
+def relative_index(x, dx):
+    """ compute the cell index of a coordinate x in a dx cell-wide 1D grid starting at zero with [lower_bound, upper_bound[ cell boundaries. 
+    negative index are used if x < 0.
+    """
+    x = np.array(x)
+    min_index = np.floor(min(x) / float(dx))
+    max_index = np.ceil(max(x) / float(dx))
+    bins = np.arange(min_index * dx, (max_index + 2) * dx, dx)
+    return min_index + pandas.cut(x, bins, right=False, labels=False)
 
+def grid_index(x, y, z, grid, toric=True):
+    """ Compute voxel indices in the RATP grid 'grid' for points of coordinates (x,y,z) in an orthonormal Z+ upward oriented and meter-calibrated scene
+    
+        Parameters:
+            - x, y, z : list of coordinates of points in the scene
+            - grid : a initialsed RATP grid object
+            - toric: if toric is False, points outside the grid are set to -1 index. 
+                     if toric is True, points outside the XY domain are kept are assigned to a cell that simulates an infinite replication of the grid
+        Returns:
+            - jx: voxel index along RATP X+ grid coordinate system
+            - jy: voxel index along RATP Y+ grid coordinate system
+            - jz: voxel index along RATP Z+ grid coordinate system
+            
+            Voxel indices are returned in python-style list index (starts at zero, end at len(list) - 1)
+            
+        Details:
+        
+        x, y, z are in an orthonormal coordinate system with Z+ pointing upward, hence with Y+ pointing to West when X+ points to North
+        jx, jy, jz are grid indices that refer to an RATP orthonormal coordinate system with Z+ pointing downward, hence with Y+ pointing to East when X+ points to North.
+        RATP conventions are required for RATP sky and sun beam to be corrrectly oriented (cf mod_Dir_InterceptionF2PY.f90, lines 199-200)
+        To satisfy RATP convention:
+            - the grid is constructed along X+, Y+ and Z+ scene axes, and the (0,0,0) corner is translated at (grid.xorig, grid.yorig, -grid.zorig) scene cooordinates 
+            - RATP grid origin defined at (grid.xorig, grid.yorig + grid.njy * grid.dy, -grid.zorig + sum(grid.dz)) scene coordinate
+            - RATP X+ is oriented as scene X+, RATP Y+ is oriented as scene Y- and RATP Z+ is oriented as scene Z-
+        As a result, when scene X+ points to North:
+            - jx increases from South to North (0 <= jx < grid.nbx) along RATP X+ (scene X+)
+            - jy increases from West to East(0 <= jy < grid.nby) along RATP Y+ (scene Y-)
+            - jz increases from top to soil (0 <= jz < grid.nbz) along RATP Z+ (scene Z-)   
+    """
+    
+    x = np.array(x) - grid.xorig 
+    y = np.array(y) - grid.yorig
+    z = np.array(z) + grid.zorig
+    
+    index = relative_index(x, grid.dx) % grid.njx
+    if toric:
+        jx = index
+    else:
+        jx = np.where((x >= 0) & (x < grid.njx * grid.dx), index, -1)
+        
+    index = relative_index(y, grid.dy) % grid.njy
+    rev_index = grid.njy - index - 1 
+    if toric:
+        jy = rev_index
+    else:
+        jy = np.where((y >= 0) & (y < grid.njy * grid.dy), rev_index, -1)
+    
+    # after init_Param, dz size is njz + 1. It contains njz voxel heights (from top to soil), PLUS an additional zero required for the soil.
+    dz = grid.dz[:-1]
+    # dh is for the upper boundary of cells from base to top
+    dh = dz[::-1].cumsum()
+    index = np.searchsorted(dh, z, 'right')
+    rev_index = grid.njz - index - 1
+    jz = np.where((z >= 0) & (z < dh.max()), rev_index, -1)
+
+    return map(lambda x: x.astype(int).tolist(), [jx, jy, jz])
+    
 
 class Grid(object):
-    """
+    """A python class interface to pyratp grid3d object
     """
     def __init__(self, *args, **kwds):
         """
-
         """
+        
     @staticmethod
     def initialise(njx, njy, njz, dx, dy, dz, xorig, yorig, zorig, latitude, longitude, timezone, nent, rs, orientation = 0, idecaly=0):
         """ Initialize the 3D grid from input arguments
@@ -187,7 +247,7 @@ class Grid(object):
 
 
     @staticmethod
-    def fill(entity, x, y, z, s, n ,grid):
+    def fill(entity, x, y, z, s, n ,grid, toric=False):
         """ Filling the 3D Grid with points, area and nitrogen content.
         Input::Parameters:
             - entity: array of vegettion type (integer)
@@ -195,6 +255,9 @@ class Grid(object):
             - s: array of leaf area in m2 (real)
             - n: array of nitrogen content in g/m2    (real)
             - grid: object grid (see readgrid method)
+            - toric: if toric is False, points outside the grid are not allowed, and fill return an error
+                     if toric is True, points outside the XY domain are kept,and placed in the grid as if the grid was replicated infinitly arround the scene
+
 
         Output:Parameters:
             - grid: object grid updated (i.e. filled with leaves)
@@ -206,22 +269,14 @@ class Grid(object):
 
             Grid.initParam(grid)
 
-            x = x - grid.xorig
-            y = y - grid.yorig
-            z = z + grid.zorig
-            s = s
-            if z.min() < 0.:
-                    print 'Some elements have a negative Z value and will be removed ...'
-                    print '... change the grid size or the leaves coodinates to get all leaves within the grid'
-            lneg=np.where(z<0) #suppression de feuilles ayant un z<0
-##            print 'lneg',lneg
-            entity=np.delete(entity,lneg[0])
-            x=np.delete(x,lneg[0])
-            y=np.delete(y,lneg[0])
-            z=np.delete(z,lneg[0])
-            s=np.delete(s,lneg[0])
-            n=np.delete(n,lneg[0])
-
+            # check that coordinates fits in the grid
+            Jx, Jy, Jz = grid_index(x, y, z, grid, toric)            
+            if any(np.in1d(-1, Jx)):
+                raise ValueError('Some x coordinates fail outside the grid boundaries, consider increasing grid size, change grid origin or use toric option')
+            if any(np.in1d(-1, Jy)):
+                raise ValueError('Some y coordinates fail outside the grid boundaries, consider increasing grid size, change grid origin or use toric option')
+            if any(np.in1d(-1, Jz)):
+                raise ValueError('Some z coordinates fail outside the grid boundaries, consider increasing grid size or change grid origin')
 
 
             if entity.max() >  grid.nent:
@@ -229,82 +284,54 @@ class Grid(object):
 
             if s.min() < 0.:
                 raise ValueError('Negative area value is prohibited')
-
-            ztot = grid.dz.sum()
-            if z.max() > ztot:
-                raise ValueError('Some Z points are outside of the grid')
-
+                
             grid.nemax = 1
-            k = 0
-
-            grid.n_canopy = (n*s).sum()
+            grid.n_canopy = (n * s).sum()
             grid.s_canopy = s.sum()
              # sum the surface of each element of the same entity
             for i in range(grid.nent):
                 grid.s_vt[i] = s[entity==i].sum()
-
-            dx, dy , dz = grid.dx, grid.dy, grid.dz
-            #dh: tableau des hauteurs z
-            dh = np.array(0)
-            for i in range(np.alen(dz)):
-                dh=np.append(dh,dz[:i].sum())
-            dh=np.delete(dh,0)
-
             #Relation Voxel2entite
             d_E2V = {} #entity id to voxel id
-##            print 'np.alen(x)', np.alen(x)
-            for i in range(np.alen(x)):
 
-              # Compute the coord of each element in the grid.
-                # modulo is used to build a toric scene.
-                #------------------------------------------ Attention au decalage de 1--------------------------------
 
-                jx = int((abs(x[i])/dx))
-                jx=(jx)%grid.njx
-                #if x[i]<=0:jx = grid.njx-jx-1  #Enleve recalage feuille dans la scene si feuille a l'exterieure
-
-                jy = int(abs(y[i])/dy)
-                jy=(jy)%grid.njy
-                #if y[i]<=0:jy = grid.njy-jy-1      #Enleve recalage feuille dans la scene si feuille a l'exterieure
-
-                jz = np.where(dh>z[i])[0][0]
-                jz = grid.njz-jz+1
-
-                # TO CONTINUE (line 318)
+            dx, dy , dz = grid.dx, grid.dy, grid.dz
+            k = 0
+            for i in range(np.alen(x)):               
+                jx, jy, jz = Jx[i], Jy[i], Jz[i]
              #Cas ou il n'y avait encore rien dans la cellule (jx,jy,jz)
-                if grid.kxyz[jx,jy,jz]==0 :
-                     grid.kxyz[jx,jy,jz]=k+1 #ajouter 1 pour utilisation f90
-                     grid.numx[k]=jx + 1 #ajouter 1 pour utilisation f90
-                     grid.numy[k]=jy + 1 #ajouter 1 pour utilisation f90
-                     grid.numz[k]=jz + 1 #ajouter 1 pour utilisation f90
-                     grid.nje[k]=1
-                     grid.nume[0,k]=entity[i]+1
+                if grid.kxyz[jx, jy, jz] == 0 :
+                     grid.kxyz[jx, jy, jz] = k + 1 #ajouter 1 pour utilisation f90
+                     grid.numx[k] = jx + 1 #ajouter 1 pour utilisation f90
+                     grid.numy[k] = jy + 1 #ajouter 1 pour utilisation f90
+                     grid.numz[k] = jz + 1 #ajouter 1 pour utilisation f90
+                     grid.nje[k] = 1
+                     grid.nume[0,k] = entity[i] + 1
 
-                     grid.leafareadensity[0,k]=s[i]/(dx*dy*dz[jz])
-                     grid.s_vt_vx[0,k]=s[i]
-                     grid.s_vx[k]=s[i]
-                     grid.n_detailed[0,k]=n[i]
+                     grid.leafareadensity[0,k] = s[i] / (dx * dy * dz[jz])
+                     grid.s_vt_vx[0,k] = s[i]
+                     grid.s_vx[k] = s[i]
+                     grid.n_detailed[0,k] = n[i]
                      d_E2V[str(i)] = float(k)
 ##                     d_E2V[i] = k
-
                      k=k+1
                 else:
                   #    Cas ou il y avait deja quelque chose dans la cellule [jx,jy,jz]
 
-                    kk=grid.kxyz[jx,jy,jz]-1 #retirer 1 pour compatiblite python
-                    je=0
-                    while (grid.nume[je,kk]!= (entity[i]+1) and (je+1)<=grid.nje[kk]):
-                        je=je+1
+                    kk = grid.kxyz[jx,jy,jz] - 1 #retirer 1 pour compatiblite python
+                    je = 0
+                    while (grid.nume[je,kk] != (entity[i] + 1) and (je + 1) <= grid.nje[kk]):
+                        je = je + 1
 
-                    grid.leafareadensity[je,kk]=grid.leafareadensity[je,kk]+s[i]/(dx*dy*dz[jz])
+                    grid.leafareadensity[je,kk] = grid.leafareadensity[je,kk] + s[i] / (dx * dy * dz[jz])
 
-                    grid.n_detailed[je,kk]=(grid.n_detailed[je,kk]*grid.s_vt_vx[je,kk]+n[i]*s[i])/(grid.s_vt_vx[je,kk]+s[i])
+                    grid.n_detailed[je,kk] = (grid.n_detailed[je,kk] * grid.s_vt_vx[je,kk] + n[i] * s[i]) / (grid.s_vt_vx[je,kk] + s[i])
     ##                grid.toto[je,kk]=(grid.n_detailed[je,kk]*grid.s_vt_vx[je,kk]+n[i]*s[i])/(grid.s_vt_vx[je,kk]+s[i])
                     grid.s_vt_vx[je,kk] = grid.s_vt_vx[je,kk] + s[i]
                     grid.s_vx[kk] = grid.s_vx[kk] + s[i]
-                    grid.nje[kk]=max(je+1,grid.nje[kk])
-                    grid.nemax=max(grid.nemax,grid.nje[kk])
-                    grid.nume[je,kk]=entity[i]+1
+                    grid.nje[kk] = max(je + 1, grid.nje[kk])
+                    grid.nemax = max(grid.nemax, grid.nje[kk])
+                    grid.nume[je,kk] = entity[i] + 1
                     d_E2V[str(i)] = float(kk)
 ##                    d_E2V[i] = kk
 
@@ -313,21 +340,19 @@ class Grid(object):
             grid.nsol=grid.njx*grid.njy   # Numbering soil surface areas
             for jx in range(grid.njx):
                 for jy in range(grid.njy):
-                    grid.kxyz[jx,jy,grid.njz]=grid.njy*jx+jy+1
-            grid.n_canopy=grid.n_canopy/grid.s_canopy
+                    grid.kxyz[jx,jy,grid.njz] = grid.njy * jx + jy + 1
+            grid.n_canopy = grid.n_canopy / grid.s_canopy
 
             for k in range(grid.nveg):
                 for je in range(grid.nje[k]):
-                    if je==0:
-                     grid.volume_canopy[grid.nent]=grid.volume_canopy[grid.nent]+dx*dy*dz[grid.numz[k]-1]  # Incrementing total canopy volume
-                    if  grid.s_vt_vx[je,k]> 0. :
-                     grid.volume_canopy[grid.nume[je,k]-1]=grid.volume_canopy[grid.nume[je,k]-1]+dx*dy*dz[grid.numz[k]-1]
-                     grid.voxel_canopy[grid.nume[je,k]-1]=grid.voxel_canopy[grid.nume[je,k]-1]+1
-
+                    if je == 0:
+                        grid.volume_canopy[grid.nent] = grid.volume_canopy[grid.nent] + dx * dy * dz[grid.numz[k] - 1]  # Incrementing total canopy volume
+                    if  grid.s_vt_vx[je,k] > 0. :
+                        grid.volume_canopy[grid.nume[je,k] - 1] = grid.volume_canopy[grid.nume[je,k] - 1] + dx * dy * dz[grid.numz[k] - 1]
+                        grid.voxel_canopy[grid.nume[je,k] - 1] = grid.voxel_canopy[grid.nume[je,k] - 1] + 1
 
 ##            _savegrid(grid,d_E2V,"c:/matGridRATP_Strasbourg.mat") #appel de la procedure savegrid (voir plus bas)
 ##            gridToVGX(grid,"C:/Users/msaudreau/Desktop/Weiwei_Work/","gridVGX.vgx") #Save grid in VGX format
-
             return grid, d_E2V
 
         else:
