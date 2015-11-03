@@ -7,37 +7,6 @@ import scipy.io as io
 
 from alinea.pyratp import pyratp
 import alinea.pyratp.vege3D as vege3D
-from openalea.plantgl import all as pgl
-
-def scenetogrid(scene, dx=0.2, dy=0.2, dz=0.2 , domain=None):
-    """
-    Convert a PlantGL scene to ratp grid that fit the scene
-    """
-
-    def _is_iterable(x):
-        try:
-            x = iter(x)
-        except TypeError:
-            return False
-        return True
-
-    tesselator = pgl.Tesselator()
-    bbc = pgl.BBoxComputer(tesselator)
-    bbc.process(scene)
-    bbox = bbc.result
-
-
-    xorig = bbox.getXMin()
-    yorig = bbox.getYMin()
-    zorig = dz
-
-    htop = bbox.getZMax()
-
-    nbz = int(np.ceil(htop / float(dz)))
-    nbx = int(np.ceil(bbox.getXRange() / float(dx)))
-    nby = int(np.ceil(bbox.getYRange() / float(dy)))
-
-    return nbx, nby, nbz, dx, dy, [dz] * nbz, xorig, yorig, zorig
 
 
 def relative_index(x, dx):
