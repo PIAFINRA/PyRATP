@@ -102,7 +102,7 @@ class RatpScene(object):
     timezone = 0 # consider UTC/GMT time for date inputs
     idecaly = 0 
     
-    def __init__(self, scene=None, scene_unit = 'm', entity=None, nitrogen=None, z_soil=None, localisation='Montpellier', grid_shape=None, grid_resolution=None, grid_orientation=0, z_resolution=None):
+    def __init__(self, scene=None, scene_unit = 'm', toric=False, entity=None, nitrogen=None, z_soil=None, localisation='Montpellier', grid_shape=None, grid_resolution=None, grid_orientation=0, z_resolution=None):
         """
         Initialise a RatpScene.
         
@@ -117,7 +117,8 @@ class RatpScene(object):
         grid_resolution: size (m) of voxels in x,y and z direction :[dx, dy, dz]. If None, resolution will adapt to scene using grid_shape.
         grid_orientation: angle (deg, positive clockwise) from X+ to North (default: 0).
         z_resolution (optional): tuple decribing individual voxel size (m) in z direction (from the soil to the top of the canopy). If None (default), grid_resolution is used.
-        
+        toric (bool): False (default) if the scene is an isolated canopy, True if the scene is toric, ie repeated indefinitvely 
+
         Note
         If scene is set to None, class default grid parameters are used to replace None values for grid_resolution and grid_shape
         If scene is provided and both grid_resolution and grid_shape are set to None,  the class default grid shape is used
@@ -167,7 +168,7 @@ class RatpScene(object):
             
         self.grid_orientation = grid_orientation
         self.z_resolution = z_resolution
-        
+        self.toric = toric
         
     def fit_grid(self, z_adaptive=False):
         """ Find grid parameters that fit the scene in the RATP grid
@@ -267,7 +268,8 @@ class RatpScene(object):
                      'longitude':self.localisation['longitude'],
                      'timezone': RatpScene.timezone,
                      'idecaly': RatpScene.idecaly,
-                     'orientation': self.grid_orientation}
+                     'orientation': self.grid_orientation,
+                     'toric': self.toric}
         
         grid_size = self.fit_grid()
         grid_pars.update(grid_size)

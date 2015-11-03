@@ -85,7 +85,7 @@ class Grid(object):
         """
         
     @staticmethod
-    def initialise(njx, njy, njz, dx, dy, dz, xorig, yorig, zorig, latitude, longitude, timezone, nent, rs, orientation = 0, idecaly=0):
+    def initialise(njx, njy, njz, dx, dy, dz, xorig, yorig, zorig, latitude, longitude, timezone, nent, rs, orientation = 0, idecaly=0, toric=False):
         """ Initialize the 3D grid from input arguments
 
         Input:Parameters:
@@ -96,6 +96,7 @@ class Grid(object):
             - local time: timezone
             - number of entities in the scene: nent
             - soil reflectance for PAR and NIR wavebands: rs
+            - toric (bool): False (default) if the scene is an isolated canopy, True if the scene is toric, ie repeated indefinitvely 
 
         Output:Parameters:
             - grid3d: object grid updated (size, number of voxels)
@@ -133,7 +134,8 @@ class Grid(object):
         grid3d.nblosoil = int(len(rs))
         grid3d.rs = np.array(rs, dtype=np.float)
 
-
+        # isolated or toric scene ?
+        grid3d.int_isolated_box = int(toric)
         # definition of aliases
 
         Grid.initParam(grid3d)
@@ -191,7 +193,7 @@ class Grid(object):
         f.close()
 
         # definition of aliases
-
+        grid3d.int_isolated_box = 1
         Grid.initParam(grid3d)
 
         return grid3d
@@ -216,7 +218,7 @@ class Grid(object):
 
 
     @staticmethod
-    def fill(entity, x, y, z, s, n ,grid, toric=False):
+    def fill(entity, x, y, z, s, n ,grid):
         """ Filling the 3D Grid with points, area and nitrogen content.
         Input::Parameters:
             - entity: array of vegetation type indices (integer).Indices are expected in python syle: indices 0 to n-1 encode RATP vegetation types 1 to n 
@@ -224,9 +226,6 @@ class Grid(object):
             - s: array of leaf area in m2 (real)
             - n: array of nitrogen content in g/m2    (real)
             - grid: object grid (see readgrid method)
-            - toric: if toric is False, points outside the grid are not allowed, and fill return an error
-                     if toric is True, points outside the XY domain are kept,and placed in the grid as if the grid was replicated infinitly arround the scene
-
 
         Output:Parameters:
             - grid: object grid updated (i.e. filled with leaves)
@@ -241,6 +240,7 @@ class Grid(object):
             Grid.initParam(grid)
 
             # check that coordinates fits in the grid
+            toric = bool(grid.int_isolated_box)
             Jx, Jy, Jz = grid_index(x, y, z, grid, toric)            
             if any(np.in1d(-1, Jx)):
                 raise ValueError('Some x coordinates fail outside the grid boundaries, consider increasing grid size, change grid origin or use toric option')
@@ -365,7 +365,6 @@ class Grid(object):
             grid3d.volume_canopy = np.zeros(nent+1)
             grid3d.voxel_canopy = np.zeros(nent)
 
-            grid3d.int_isolated_box = 1
             grid3d.int_scattering = 0
             print 'GRILLE OK'
 
