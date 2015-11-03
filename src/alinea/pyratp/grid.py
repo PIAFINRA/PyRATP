@@ -250,7 +250,7 @@ class Grid(object):
     def fill(entity, x, y, z, s, n ,grid, toric=False):
         """ Filling the 3D Grid with points, area and nitrogen content.
         Input::Parameters:
-            - entity: array of vegettion type (integer)
+            - entity: array of vegetation type indices (integer).Indices are expected in python syle: indices 0 to n-1 encode RATP vegetation types 1 to n 
             - x,y,z: arrays of 3D coordinates in m (real)
             - s: array of leaf area in m2 (real)
             - n: array of nitrogen content in g/m2    (real)
@@ -266,7 +266,9 @@ class Grid(object):
 
 #        print 'type grid', type(grid)
         if type(grid)is not(str):
-
+        
+            entity, x, y, z, s, n = map(np.array, (entity, x, y, z, s, n))
+            
             Grid.initParam(grid)
 
             # check that coordinates fits in the grid

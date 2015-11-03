@@ -40,7 +40,7 @@ def test_grid_index():
     computed = grid_index(x, y, z, grid, toric=False)
     numpy.testing.assert_array_equal(computed, expected, 'Boundaries of voxel have not been positioned in the corect RATP voxel')
 
-    # test x,y,z cell boundaries, non toric
+    # test x,y,z cell boundaries, toric
     boundaries = numpy.arange(0, 1.5, 0.5)
     expected = ([0, 1, 0], [1, 0, 1], [1, 0, -1])
     x,y,z = [boundaries] * 3
