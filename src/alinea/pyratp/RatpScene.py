@@ -294,7 +294,7 @@ class RatpScene(object):
         """ Run a simulation of light interception
         """
         grid, voxel_maping, shape_maping = self.grid(rsoil=rsoil)
-        vegetation = Vegetation.initialise()
+        vegetation = Vegetation.initialise(nblomin=1)
         sky = Skyvault.initialise()
         met = MicroMeteo.initialise(hour=12, PARglob=1, PARdif=1)
 

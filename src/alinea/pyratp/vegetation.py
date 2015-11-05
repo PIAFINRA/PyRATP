@@ -44,7 +44,7 @@ class Vegetation(object):
         pass
 
     @staticmethod
-    def initialise(entities=[{}]):
+    def initialise(entities=[{}], nblomin=1):
         """  Setup a vegetation object from arguments
         
             Parameters : 
@@ -71,7 +71,9 @@ class Vegetation(object):
                             Rd25(micromol CO2 m-2 s-1) = ARdN[0] * Na (g m-2) + ARdN[1]
                 - 'IsMine' : enable mine damage (0 = no mine)
                 - 'epm' : mine damage : product of leaf thickness * mine damage perimeter
-                
+
+            - nblomin : number of wavelength band given in MicroMeteo
+            
             Details: 
                 - Ags_PAR_function code allows for selecting one of the following function:
                     - 1: 2nd order polynomial function fgs = AgsPAR[0] * PAR**2 + AgsPAR[1] * PAR + AgsPAR[2]
@@ -95,8 +97,6 @@ class Vegetation(object):
         
         nent = len(entities)
         nbincli = [len(entity.get('distinc', default['distinc'])) for entity in entities]
-        nblo = [len(entity.get('rf', default['rf'])) for entity in entities]
-        nbgspar = [len(entity.get('AgsPAR', default['AgsPAR'])) for entity in entities]
         
         vegetation = pyratp.vegetation_types
         
@@ -104,7 +104,7 @@ class Vegetation(object):
         vegetation.nbincli = np.zeros(nent)
         vegetation.distinc =  np.zeros((nent, max(nbincli)))
         vegetation.nblo = np.zeros(nent)
-        vegetation.rf =  np.zeros((nent, max(nblo)))
+        vegetation.rf =  np.zeros((nent, nblomin))
         vegetation.aga = np.zeros((nent,2))
         vegetation.agsn = np.zeros((nent,2))
         vegetation.i_gspar = np.zeros(nent)
@@ -123,9 +123,9 @@ class Vegetation(object):
         vegetation.mu[:] = [entity.get('mu', default['mu']) for entity in entities]
         vegetation.nbincli[:] = nbincli
         vegetation.distinc[:,:] = [entity.get('distinc', default['distinc']) for entity in entities]
-        vegetation.nblo[:] = nblo
-        vegetation.nblomin = max(nblo)
-        vegetation.rf[:,:] =  [entity.get('rf', default['rf']) for entity in entities]
+        vegetation.nblo[:] = [nblomin] * nent
+        vegetation.nblomin = nblomin
+        vegetation.rf[:,:] =  [entity.get('rf', default['rf'] * nblomin)[0:nblomin] for entity in entities]
         vegetation.aga[:,:] =  [entity.get('Aga', default['Aga']) for entity in entities]
         vegetation.agsn[:,:] =  [entity.get('AgsN', default['AgsN']) for entity in entities]
         vegetation.i_gspar[:] = [entity.get('AgsPAR_function', default['AgsPAR_function']) for entity in entities]
