@@ -290,13 +290,13 @@ class RatpScene(object):
         
         return grid, vox_map, sh_map
 
-    def do_irradiation(self, vfnfile, skyfile, metfile, rsoil=(0.075,0.20)):
+    def do_irradiation(self, rsoil=(0.075,0.20)):
         """ Run a simulation of light interception
         """
         grid, voxel_maping, shape_maping = self.grid(rsoil=rsoil)
-        vegetation = Vegetation.read(vfnfile)
-        sky = Skyvault.read(skyfile)
-        met = MicroMeteo.read(metfile)
+        vegetation = Vegetation.initialise()
+        sky = Skyvault.initialise()
+        met = MicroMeteo.initialise(hour=12, PARglob=1, PARdif=1)
 
         res = runRATP.DoIrradiation(grid, vegetation, sky, met)
         

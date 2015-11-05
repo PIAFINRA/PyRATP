@@ -39,21 +39,13 @@ def test_grid():
     return s.grid()
     
 def test_irradiation():
-    sc = scene()
-    vfn = './vegetationa_2004.vfn'
-    sky = './skyvaultsoc.skv'
-    met = './mmeteo082050_1h.mto'
-    
+    sc = scene()    
     s = RatpScene(sc)
-    return s.do_irradiation(vfn, sky, met)
+    return s.do_irradiation()
     
 def test_plot():
     sc = scene()
-    vfn = './vegetationa_2004.vfn'
-    sky = './skyvaultsoc.skv'
-    met = './mmeteo082050_1h.mto'
-    
     s = RatpScene(sc)
-    res = s.do_irradiation(vfn, sky, met)
+    res = s.do_irradiation()
     s.plot(res[res['Iteration'] == 1])
     
