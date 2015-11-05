@@ -51,8 +51,8 @@ class MicroMeteo(object):
         - hour : decimal hour (0-24)
         - PARglob : global (direct + diffuse) radiation in the PAR band (W.m-2)
         - PARdif : direct/diffuse ratio for PAR
-        - other_glob : a list of global (direct + diffuse) radiation in the 'other than PAR' bands (W.m-2). None if only PAR is considered;
-        - other_dif : a list of direct/diffuse ratio for other than PAR bands. None is only PAR is considered.
+        - other_glob : a list of global (direct + diffuse) radiation in the 'other than PAR' bands (W.m-2). 
+        - other_dif : a list of direct/diffuse ratio for other than PAR bands.
         - Ratmos : atmospheric thermal radiation (W.m-2)
         - Tsol, Tair : soil and air temperature above the canopy (degree celcius)
         - Eair: water vapour pressure in the air (Pa)
