@@ -43,16 +43,14 @@ class MicroMeteo(object):
         return micrometeo
 
     @staticmethod
-    def initialise(day=1, hour=12, PARglob=1, PARdif=1, other_glob=[], other_dif=[], Ratmos=1, Tsol=1, Tair=1, Eair=1, CO2air=1, Wind=1, HRsol=1):
+    def initialise(doy=1, hour=12, Rglob=1, Rdif=1, Ratmos=1, Tsol=1, Tair=1, Eair=1, CO2air=1, Wind=1, HRsol=1):
         """ Create a micrometeo object from data given in arguments
         
         Parameters:
-        - day : day of year
+        - doy : day of year
         - hour : decimal hour (0-24)
-        - PARglob : global (direct + diffuse) radiation in the PAR band (W.m-2)
-        - PARdif : direct/diffuse ratio for PAR
-        - other_glob : a list of global (direct + diffuse) radiation in the 'other than PAR' bands (W.m-2). 
-        - other_dif : a list of direct/diffuse ratio for other than PAR bands.
+        - Rglob : [list of] global (direct + diffuse) radiation [for successive wavelength bands] (W.m-2)
+        - Rdif : [list of] direct/diffuse radiation ratio [for successive wavelength bands] (0-1)
         - Ratmos : atmospheric thermal radiation (W.m-2)
         - Tsol, Tair : soil and air temperature above the canopy (degree celcius)
         - Eair: water vapour pressure in the air (Pa)
@@ -60,19 +58,41 @@ class MicroMeteo(object):
         - Wind: wind speed above the canopy (m.s-1)
         - HRsol: Relative Soil Humidity (0-1)
         
+        Note that for the first wavelength should be PAR if phothosysnthesis is to be computed, and that all wavelength are summed for Shortwave energy ballance.
+        
+        All args could be listed to provide data for several dates at a time.
+        
         """
         
         micrometeo = pyratp.micrometeo
-        micrometeo.nbli = np.array(day).size # handle both list and scalar args for day
-        glob = ['band' + str(i) + 'glob' for i in other_glob]
-        dif = ['band' + str(i) + 'dif' for i in other_dif]
-        other_bands = list(sum(zip(glob, dif),()))
-        cols = ['day', 'hour', 'PARglob', 'PARdif'] + other_bands + ['Ratmos', 'Tsol', 'Tair', 'Eair', 'CO2air', 'Wind', 'HRsol']
+        micrometeo.nbli = np.array(doy).size # handle both list and scalar args for day
+        
+        # cast scalar or  flat lists like objects to list of list for glob and dif
+        nbh = np.array(hour).size
+        if np.array(Rglob).size == 1:# input = one date and one wavelength
+            Rglob = [[Rglob]]    
+        if np.array(Rglob).size > 1 and nbh == 1:# input = one date and n wavelength
+            Rglob = [Rglob]
+        if np.array(Rglob).size > 1 and nbh > 1 and np.array(Rglob[0]).size == 1:# input = n date and one wavelength
+            Rglob = [[v] for v in Rglob]
+        if np.array(Rdif).size == 1:# input = one date and one wavelength
+            Rdif = [[Rdif]]    
+        if np.array(Rdif).size > 1 and nbh == 1:# input = one date and n wavelength
+            Rdif = [Rdif]
+        if np.array(Rdif).size > 1 and nbh > 1 and np.array(Rdif[0]).size == 1:# input = n date and one wavelength
+            Rdif = [[v] for v in Rdif]
+
+        nblo = len(Rglob[0])
+        
+        glob_names = ['Rglob' + str(i) for i in range(nblo)]
+        dif_names = ['Rdif' + str(i) for i in range(nblo)]
+        Rcols = list(sum(zip(glob_names, dif_names),()))
+        cols = ['doy', 'hour'] + Rcols + ['Ratmos', 'Tsol', 'Tair', 'Eair', 'CO2air', 'Wind', 'HRsol']
         col = np.int32(len(cols))
-        micrometeo.tabmeteo = np.ones(micrometeo.nbli*col).reshape(micrometeo.nbli ,col) 
+        micrometeo.tabmeteo = np.ones(micrometeo.nbli * col).reshape(micrometeo.nbli ,col) 
         args = locals()
-        args.update({glob[i]:other_glob[i] for i in range(len(glob))})
-        args.update({dif[i]:other_dif[i] for i in range(len(dif))})
+        args.update({glob_names[i]: [Rglob[h][i] for h in range(nbh)] for i in range(nblo)})
+        args.update({dif_names[i]: [Rdif[h][i] for h in range(nbh)] for i in range(nblo)})
         for i,col in enumerate(cols):
             micrometeo.tabmeteo[:,i] = args[col]
         
