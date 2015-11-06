@@ -95,7 +95,7 @@ class Grid(object):
             - location of the scene: latitude and longitude
             - local time: timezone
             - number of entities in the scene: nent
-            - soil reflectance for PAR and NIR wavebands: rs
+            - list of soil reflectance for wavebands: rs
             - toric (bool): False (default) if the scene is an isolated canopy, True if the scene is toric, ie repeated indefinitvely 
 
         Output:Parameters:

@@ -109,6 +109,7 @@ class RatpScene(object):
         Arguments:
         scene: a PlantGL Scene (list of shapes with ids)
         scene_unit (string): scene length unit ('m', 'cm', ...)
+        toric (bool): False (default) if the scene is an isolated canopy, True if the scene is toric, ie simulated as if repeated indefinitvely 
         entity: a {scene_id:entity_key} dict that associate a scene object to an RATP entity. If None (default), all shapes points to entity_code 1.
         nitrogen: a {scene_id:entity_key} dict that associate a scene object to a nitrogen content. If None (default), all got a value of 2
         z_soil : z coordinate (scene units) of the soil in the scene. If None (default), soil will be positioned at the base of the canopy bounding box
@@ -117,7 +118,7 @@ class RatpScene(object):
         grid_resolution: size (m) of voxels in x,y and z direction :[dx, dy, dz]. If None, resolution will adapt to scene using grid_shape.
         grid_orientation: angle (deg, positive clockwise) from X+ to North (default: 0).
         z_resolution (optional): tuple decribing individual voxel size (m) in z direction (from the soil to the top of the canopy). If None (default), grid_resolution is used.
-        toric (bool): False (default) if the scene is an isolated canopy, True if the scene is toric, ie repeated indefinitvely 
+
 
         Note
         If scene is set to None, class default grid parameters are used to replace None values for grid_resolution and grid_shape
@@ -276,6 +277,10 @@ class RatpScene(object):
         
         entity, x, y, z, s, n, sh_id = self.scene_transform()
         nent = max(entity) + 1
+        
+        if not hasattr(rsoil, '__len__'):
+            rsoil = [rsoil]
+        
         grid_pars.update({'rs':rsoil,'nent':nent})
         
         grid = Grid.initialise(**grid_pars)
@@ -290,18 +295,32 @@ class RatpScene(object):
         
         return grid, vox_map, sh_map
 
-    def do_irradiation(self, rsoil=(0.075,0.20)):
-        """ Run a simulation of light interception
+    def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1):
+        """ Run a simulation of light interception for one wavelength
+        
+            Parameters:            
+                - rleaf : list of leaf refectance per entity
+                - rsoil : soil reflectance
+                - doy : [list of] day of year [for the different iterations]
+                - hour : [list of] decimal hour (0-24) [for the different iterations]
+                - Rglob : [list of] global (direct + diffuse) radiation [for the different iterations] (W.m-2)
+                - Rdif : [list of] direct/diffuse radiation ratio [for the different iterations] (0-1)
+
         """
+        
         grid, voxel_maping, shape_maping = self.grid(rsoil=rsoil)
-        vegetation = Vegetation.initialise(nblomin=1)
+               
+        entities = [{'rf':[rf]} for rf in rleaf]
+        vegetation = Vegetation.initialise(entities, nblomin=1)
+        
         sky = Skyvault.initialise()
-        met = MicroMeteo.initialise(hour=12, PARglob=1, PARdif=1)
+        
+        met = MicroMeteo.initialise(doy=doy, hour=hour, Rglob=Rglob, Rdif=Rdif)
 
         res = runRATP.DoIrradiation(grid, vegetation, sky, met)
         
         VegetationType,Iteration,day,hour,VoxelId,ShadedPAR,SunlitPAR,ShadedArea,SunlitArea= res.T
-        # PAR is expected in  Watt.m-2 in RATP input, whereas output is in micromol => convert back to W.m2 (cf shortwavebalance, line 306)
+        # 'PAR' is expected in  Watt.m-2 in RATP input, whereas output is in micromol => convert back to W.m2 (cf shortwavebalance, line 306)
         dfvox =  pandas.DataFrame({'VegetationType':VegetationType,
                             'Iteration':Iteration,
                             'day':day,
@@ -311,7 +330,7 @@ class RatpScene(object):
                             'SunlitPAR':SunlitPAR,
                             'ShadedArea':ShadedArea,
                             'SunlitArea': SunlitArea,
-                            'PAR_Wm2': (ShadedPAR * ShadedArea + SunlitPAR * SunlitArea) / (ShadedArea + SunlitArea) / 4.6, 
+                            'Rinc': (ShadedPAR * ShadedArea + SunlitPAR * SunlitArea) / (ShadedArea + SunlitArea) / 4.6, 
                             })
         dfvox = dfvox[dfvox['VegetationType'] > 0]
         index = range(len(voxel_maping))
@@ -323,7 +342,7 @@ class RatpScene(object):
         return output
         
     def plot(self, output, minval=None, maxval=None):
-        par = output['PAR_Wm2']
+        par = output['Rinc']
         if minval is None:
             minval = min(par)
         if maxval is None:

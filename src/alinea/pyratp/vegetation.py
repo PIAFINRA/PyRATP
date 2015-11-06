@@ -54,7 +54,7 @@ class Vegetation(object):
                 - 'rf' : list of reflectance for the different wavelength bands
                 - 'Aga' : 2-tuple of parameters for leaf boundary conductance ga: ga = Aga[0] * wind_speed + Aga[1]
                 - 'AgsN': 2-tuple of parameters for maximal stomatal conductance gs as a funtion of nitrogen: 
-                          gs(s.m-1) = AgsN[0] * Na(g.m-2) + AgsN[1]
+                          gsmax(s.m-1) = AgsN[0] * Na(g.m-2) + AgsN[1]
                 - 'AgsPAR_function': integer code that select for a gs_reduction=f(PAR) function (see details below)
                 - 'AgsPAR': parameters for the AgsPAR function (see details below)
                 - 'AgsCA_function' : integer code that select for a gs reduction function = f(pCO2 (Pa)) (see details)
@@ -75,6 +75,8 @@ class Vegetation(object):
             - nblomin : number of wavelength band given in MicroMeteo
             
             Details: 
+                - gs = gsmax(Na) * fgsPAR * fgsCA * fgsLT *fgsVPD
+                
                 - Ags_PAR_function code allows for selecting one of the following function:
                     - 1: 2nd order polynomial function fgs = AgsPAR[0] * PAR**2 + AgsPAR[1] * PAR + AgsPAR[2]
                     - 2: hyperbola  fgs= (AgsPAR[0] * PAR + AgsPAR[1]) / (AgsPAR[2] * PAR + AgsPAR[3])

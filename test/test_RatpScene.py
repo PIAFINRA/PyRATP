@@ -6,6 +6,7 @@ from openalea.plantgl import all as pgl
 
 def scene():
     s = pgl.Scene()
+    #s.add(pgl.Sphere(slices=64,stacks=64))
     s.add(pgl.Sphere())
     return s
 
@@ -43,9 +44,9 @@ def test_irradiation():
     s = RatpScene(sc)
     return s.do_irradiation()
     
-def test_plot():
+def test_plot(**args):
     sc = scene()
-    s = RatpScene(sc)
+    s = RatpScene(sc,**args)
     res = s.do_irradiation()
     s.plot(res[res['Iteration'] == 1])
     
