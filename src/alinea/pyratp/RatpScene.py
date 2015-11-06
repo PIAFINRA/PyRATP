@@ -102,7 +102,7 @@ class RatpScene(object):
     timezone = 0 # consider UTC/GMT time for date inputs
     idecaly = 0 
     
-    def __init__(self, scene=None, scene_unit = 'm', toric=False, entity=None, nitrogen=None, z_soil=None, localisation='Montpellier', grid_shape=None, grid_resolution=None, grid_orientation=0, z_resolution=None):
+    def __init__(self, scene=None, scene_unit = 'm', toric=False, entity=None, nitrogen=None, z_soil=None, localisation='Montpellier', grid_shape=None, grid_resolution=None, grid_orientation=0, z_resolution=None, nbincli=9):
         """
         Initialise a RatpScene.
         
@@ -118,7 +118,7 @@ class RatpScene(object):
         grid_resolution: size (m) of voxels in x,y and z direction :[dx, dy, dz]. If None, resolution will adapt to scene using grid_shape.
         grid_orientation: angle (deg, positive clockwise) from X+ to North (default: 0).
         z_resolution (optional): tuple decribing individual voxel size (m) in z direction (from the soil to the top of the canopy). If None (default), grid_resolution is used.
-
+        nbincli: number of inclination class withi each voxel
 
         Note
         If scene is set to None, class default grid parameters are used to replace None values for grid_resolution and grid_shape
@@ -170,6 +170,7 @@ class RatpScene(object):
         self.grid_orientation = grid_orientation
         self.z_resolution = z_resolution
         self.toric = toric
+        self.nbincli = nbincli
         
     def fit_grid(self, z_adaptive=False):
         """ Find grid parameters that fit the scene in the RATP grid
@@ -241,13 +242,14 @@ class RatpScene(object):
             mesh = discretizer.result
             ifaces = range(mesh.indexListSize())
             s = [_surf(mesh,i) * self.convert**2 for i in ifaces]
+            phi = [pgl.Vector3.Spherical(_normal(mesh,i)).phi for i in ifaces]
             sh_id  = [shape.id] * len(s)
             n = [self.nitrogen[shape.id]] * len(s)
             entity = [self.entity[shape.id] - 1] * len(s) # entity 1 is encoded 0 in fill grid
             centers = [mesh.faceCenter(i) for i in ifaces]
             x, y, z = zip(*map(lambda x: (x[0] * self.convert, x[1] * self.convert, x[2] * self.convert), centers))
 
-            return entity, x, y, z, s, n, sh_id
+            return entity, x, y, z, s, n, sh_id, phi
           
         d = pgl.Discretizer()
         transform = map(lambda x: _process(x,d), self.scene)
@@ -255,7 +257,7 @@ class RatpScene(object):
 
             
         
-    def grid(self, rsoil=(0.075,0.20)):
+    def grid(self, rsoil=0.20):
         """ Create and fill a RATP grid 
 
         :Parameters:
@@ -263,6 +265,9 @@ class RatpScene(object):
 
         :Output:
             - grid3d : ratp fortran grid object
+            - vox_id : list of ratp voxel_id for all primitive in the grid
+            - sh_id : list of shape_id for all primitive in the grid
+            - orientation : list of primitive orientations (degrees to horizontal)
         """
     
         grid_pars = {'latitude': self.localisation['latitude'],
@@ -275,7 +280,7 @@ class RatpScene(object):
         grid_size = self.fit_grid()
         grid_pars.update(grid_size)
         
-        entity, x, y, z, s, n, sh_id = self.scene_transform()
+        entity, x, y, z, s, n, sh_id, theta = self.scene_transform()
         nent = max(entity) + 1
         
         if not hasattr(rsoil, '__len__'):
@@ -287,13 +292,14 @@ class RatpScene(object):
         grid, mapping = Grid.fill(entity, x, y, z, s, n, grid) # mapping is a {str(python_x_list_index) : python_k_gridvoxel_index}
         
         # in RATP output, VoxelId is for the fortran_k_voxel_index (starts at 1, cf prog_RATP.f90, lines 489 and 500)
-        # here we return a python_x_list_index:fortran_k_voxel_index mapping
+        # here we return 
         # and one additional map that allows retrieving shape_id from python_x_index
         index = range(len(x))
-        vox_map = {i:mapping[str(i)] + 1 for i in index}
-        sh_map = {i:sh_id[i] for i in index}
+        vox_id = [mapping[str(i)] + 1 for i in index]
+        sh_id = [sh_id[i] for i in index]
+        orientation = numpy.degrees(numpy.abs(theta)) % 90
         
-        return grid, vox_map, sh_map
+        return grid, vox_id, sh_id, orientation
 
     def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1):
         """ Run a simulation of light interception for one wavelength
@@ -308,9 +314,17 @@ class RatpScene(object):
 
         """
         
-        grid, voxel_maping, shape_maping = self.grid(rsoil=rsoil)
+        grid, voxel_id, shape_id, orientation = self.grid(rsoil=rsoil)
                
-        entities = [{'rf':[rf]} for rf in rleaf]
+        def _dist(inc):
+            dist = numpy.histogram(inc, self.nbincli, (0,90))[0]
+            return dist.astype('float') / dist.sum()
+        
+        df = pandas.DataFrame({'entity':[self.entity[sh_id] for sh_id in shape_id], 'inc':orientation})
+        distinc = df.sort('entity').groupby('entity').apply(_dist).tolist()
+        
+        entities = [{'rf':[rleaf[i]], 'distinc':distinc[i]} for i in range(len(rleaf))]
+
         vegetation = Vegetation.initialise(entities, nblomin=1)
         
         sky = Skyvault.initialise()
@@ -333,11 +347,11 @@ class RatpScene(object):
                             'Rinc': (ShadedPAR * ShadedArea + SunlitPAR * SunlitArea) / (ShadedArea + SunlitArea) / 4.6, 
                             })
         dfvox = dfvox[dfvox['VegetationType'] > 0]
-        index = range(len(voxel_maping))
-        dfmap = pandas.DataFrame({'scene_index': index,'shape_id':[shape_maping[i] for i in index], 'VoxelId':[voxel_maping[i] for i in index], 'VegetationType':[self.entity[shape_maping[i]] for i in index]})
+        index = range(len(voxel_id))
+        dfmap = pandas.DataFrame({'primitive_index': index,'shape_id': shape_id, 'VoxelId':voxel_id, 'VegetationType':[self.entity[sh_id] for sh_id in shape_id]})
     
         output = pandas.merge(dfmap, dfvox)
-        output =  output.sort('scene_index') # sort is needed to ensure matching with triangulation indices
+        output =  output.sort('primitive_index') # sort is needed to ensure matching with triangulation indices
         
         return output
         
