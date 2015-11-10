@@ -220,8 +220,11 @@ class RatpScene(object):
             if zsoil is None:
                 zsoil = bbox.getZMin() 
             htop = bbox.getZMax()
+            
             xo = bbox.getXMin() * self.convert # origin    
-            yo = bbox.getYMin() * self.convert
+            yo = bbox.getYMin() * self.convert 
+            zo = -zsoil * self.convert # zorig is a z offset in grid.py (grid_z = z + zo)
+            
             if self.grid_resolution is not None and self.grid_shape is not None:
                 nbx, nby, nbz = self.grid_shape
                 dx, dy, dz = self.grid_resolution # already in meter
@@ -246,7 +249,7 @@ class RatpScene(object):
             
         grid_pars = {'njx':nbx, 'njy':nby, 'njz':nbz,
                      'dx':dx, 'dy':dy, 'dz':dz,
-                     'xorig':xo, 'yorig':yo, 'zorig':-zsoil} # zorig is a z offset in grid.py (grid_z = z + zorig)
+                     'xorig':xo, 'yorig':yo, 'zorig':zo} 
         
         return grid_pars
       
