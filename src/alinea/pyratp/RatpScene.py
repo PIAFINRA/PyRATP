@@ -291,17 +291,17 @@ class RatpScene(object):
 
             
         
-    def grid(self, rsoil=0.20):
+    def grid(self, rsoil=0.20, scale_surface=1.):
         """ Create and fill a RATP grid 
 
         :Parameters:
         - rsoil : soil reflectances in the PAR and NIR band
+        - scale_surface : multiplicative factor that scale surfaces before putting them in the grid
 
         :Output:
             - grid3d : ratp fortran grid object
             - vox_id : list of ratp voxel_id for all primitive in the grid
             - sh_id : list of shape_id for all primitive in the grid
-            - orientation : list of primitive orientations (degrees to horizontal)
         """
     
         grid_pars = {'latitude': self.localisation['latitude'],
@@ -323,7 +323,7 @@ class RatpScene(object):
         grid_pars.update({'rs':rsoil,'nent':nent})
         
         grid = Grid.initialise(**grid_pars)
-        grid, mapping = Grid.fill(entity, x, y, z, s, n, grid) # mapping is a {str(python_x_list_index) : python_k_gridvoxel_index}
+        grid, mapping = Grid.fill(entity, x, y, z, numpy.array(s) * scale_surface, n, grid) # mapping is a {str(python_x_list_index) : python_k_gridvoxel_index}
         
         # in RATP output, VoxelId is for the fortran_k_voxel_index (starts at 1, cf prog_RATP.f90, lines 489 and 500)
         # here we return 
@@ -349,7 +349,7 @@ class RatpScene(object):
         grouped = data.groupby('entity')
         for e in range(nent):
             df = grouped.get_group(e)
-            mu.append(clark_evans(zip(df['x'], df['y'], df['z']), len(df['x'])))
+            mu.append(clark_evans(zip(df['x'], df['y'], df['z']), 1.))
         self.mu = mu
         
         return grid, vox_id, sh_id
