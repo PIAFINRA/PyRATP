@@ -1,3 +1,7 @@
+
+#       File author(s): Christian Fournier <Christian.Fournier@supagro.inra.fr>
+
+
 """ A high level class interface to RATP
 """
 
@@ -10,7 +14,26 @@ from alinea.pyratp.vegetation import Vegetation
 from alinea.pyratp.micrometeo import MicroMeteo
 from alinea.pyratp.runratp import runRATP
 
+from alinea.pyratp.clumping_index import clark_evans
+
 from openalea.plantgl import all as pgl
+
+# to be moved to grid.py
+def voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True):
+    """ return coordinates of points relative to voxel origin
+        If normalise = true, coordinates are normalised by voxel dimensions
+    """
+    kvox = [mapping[str(i)] for i in range(len(x))]
+    xv = numpy.array(x) - grid.xorig - numpy.array([(grid.numx[k] - 1) * grid.dx for k in kvox])
+    yv = numpy.array(y) - grid.yorig - numpy.array([(grid.njy - grid.numy[k]) * grid.dy for k in kvox])
+    zv = numpy.array(z) + grid.zorig - numpy.array([grid.dz.sum() - grid.dz[:grid.numz[k]].sum() for k in kvox])
+    # normalising voxel dimensions
+    if normalise:
+        xv /= grid.dx
+        yv /= grid.dy
+        zv /= numpy.array([grid.dz[grid.numz[k] - 1] for k in kvox])
+    
+    return xv, yv, zv 
 
 class ColorMap(object):
     """A RGB color map, between 2 colors defined in HSV code
@@ -297,9 +320,21 @@ class RatpScene(object):
         index = range(len(x))
         vox_id = [mapping[str(i)] + 1 for i in index]
         sh_id = [sh_id[i] for i in index]
+        
         orientation = numpy.degrees(numpy.abs(theta)) % 90
         
-        return grid, vox_id, sh_id, orientation
+        # compute clumping : supperpose all non-empty voxel contents and compute 3D dispersion index
+        # (a valider avec marc)
+        # coordinates of points within voxels
+        xv, yv, zv = voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True)
+        data = pandas.DataFrame({'entity':entity, 'x':xv, 'y':yv, 'z':zv})        
+        mu = []
+        grouped = data.groupby('entity')
+        for e in range(nent):
+            df = grouped.get_group(e)
+            mu.append(clark_evans(zip(df['x'], df['y'], df['z']), len(df['x'])))
+        
+        return grid, vox_id, sh_id, orientation, mu
 
     def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1):
         """ Run a simulation of light interception for one wavelength
@@ -314,7 +349,7 @@ class RatpScene(object):
 
         """
         
-        grid, voxel_id, shape_id, orientation = self.grid(rsoil=rsoil)
+        grid, voxel_id, shape_id, orientation, mu = self.grid(rsoil=rsoil)
                
         def _dist(inc):
             dist = numpy.histogram(inc, self.nbincli, (0,90))[0]
@@ -323,7 +358,7 @@ class RatpScene(object):
         df = pandas.DataFrame({'entity':[self.entity[sh_id] for sh_id in shape_id], 'inc':orientation})
         distinc = df.sort('entity').groupby('entity').apply(_dist).tolist()
         
-        entities = [{'rf':[rleaf[i]], 'distinc':distinc[i]} for i in range(len(rleaf))]
+        entities = [{'rf':[rleaf[i]], 'distinc':distinc[i], 'mu':mu[i]} for i in range(len(rleaf))]
 
         vegetation = Vegetation.initialise(entities, nblomin=1)
         
