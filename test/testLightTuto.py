@@ -22,6 +22,9 @@ def test_pommier():
     
     ratp.plot(out)
     
+    print 'clumping within voxels: ', ratp.mu
+    print 'orientations: ', ratp.distinc
+    
     return out
     
 

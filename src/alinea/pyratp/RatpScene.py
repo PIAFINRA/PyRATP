@@ -194,6 +194,9 @@ class RatpScene(object):
         self.z_resolution = z_resolution
         self.toric = toric
         self.nbincli = nbincli
+        #
+        self.distinc = []
+        self.mu = []
         
     def fit_grid(self, z_adaptive=False):
         """ Find grid parameters that fit the scene in the RATP grid
@@ -329,8 +332,14 @@ class RatpScene(object):
         vox_id = [mapping[str(i)] + 1 for i in index]
         sh_id = [sh_id[i] for i in index]
         
+        # compute distributions of orientation
         orientation = numpy.degrees(numpy.abs(theta)) % 90
-        
+        def _dist(inc):
+            dist = numpy.histogram(inc, self.nbincli, (0,90))[0]
+            return dist.astype('float') / dist.sum()
+        df = pandas.DataFrame({'entity':[self.entity[sid] for sid in sh_id], 'inc':orientation})
+        self.distinc = df.sort('entity').groupby('entity').apply(_dist).tolist()
+
         # compute clumping : supperpose all non-empty voxel contents and compute 3D dispersion index
         # (a valider avec marc)
         # coordinates of points within voxels
@@ -341,8 +350,9 @@ class RatpScene(object):
         for e in range(nent):
             df = grouped.get_group(e)
             mu.append(clark_evans(zip(df['x'], df['y'], df['z']), len(df['x'])))
+        self.mu = mu
         
-        return grid, vox_id, sh_id, orientation, mu
+        return grid, vox_id, sh_id
 
     def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1):
         """ Run a simulation of light interception for one wavelength
@@ -357,16 +367,10 @@ class RatpScene(object):
 
         """
         
-        grid, voxel_id, shape_id, orientation, mu = self.grid(rsoil=rsoil)
+        grid, voxel_id, shape_id = self.grid(rsoil=rsoil)
                
-        def _dist(inc):
-            dist = numpy.histogram(inc, self.nbincli, (0,90))[0]
-            return dist.astype('float') / dist.sum()
         
-        df = pandas.DataFrame({'entity':[self.entity[sh_id] for sh_id in shape_id], 'inc':orientation})
-        distinc = df.sort('entity').groupby('entity').apply(_dist).tolist()
-        
-        entities = [{'rf':[rleaf[i]], 'distinc':distinc[i], 'mu':mu[i]} for i in range(len(rleaf))]
+        entities = [{'rf':[rleaf[i]], 'distinc':self.distinc[i], 'mu':self.mu[i]} for i in range(len(rleaf))]
 
         vegetation = Vegetation.initialise(entities, nblomin=1)
         
