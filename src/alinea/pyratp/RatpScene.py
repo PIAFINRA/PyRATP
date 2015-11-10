@@ -199,6 +199,11 @@ class RatpScene(object):
         """ Find grid parameters that fit the scene in the RATP grid
         """
         
+        def _fceil(x, prec=1):
+            """ ceiling of float at a given precision in scientific notation """
+            magnitude = 10**numpy.floor(numpy.log10(x))
+            return numpy.ceil(x / magnitude * 10**prec) / 10**prec * magnitude
+        
         # fit regular grid to scene
         if self.scene is None:
             nbx, nby, nbz = self.grid_shape
@@ -223,9 +228,9 @@ class RatpScene(object):
             else:
                 if self.grid_resolution is None:
                     nbx, nby, nbz = self.grid_shape
-                    dx = numpy.ceil(bbox.getXRange() / float(nbx) * self.convert * 100) / 100.
-                    dy = numpy.ceil(bbox.getYRange() / float(nby) * self.convert * 100) / 100.
-                    dz = numpy.ceil((htop - zsoil) / float(nbz) * self.convert * 100) / 100.
+                    dx = _fceil(bbox.getXRange() / float(nbx) * self.convert)
+                    dy = _fceil(bbox.getYRange() / float(nby) * self.convert)
+                    dz = _fceil((htop - zsoil) / float(nbz) * self.convert)
                 if self.grid_shape is None: 
                     dx, dy, dz = self.grid_resolution
                     nbx = int(numpy.ceil(bbox.getXRange() * self.convert / float(dx)))
