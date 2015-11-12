@@ -349,7 +349,7 @@ class RatpScene(object):
         grouped = data.groupby('entity')
         for e in range(nent):
             df = grouped.get_group(e)
-            mu.append(clark_evans(zip(df['x'], df['y'], df['z']), 1.))
+            mu.append(clark_evans(zip(df['x'], df['y'], df['z']), ((0,0,0),(1,1,1))))
         self.mu = mu
         
         return grid, vox_id, sh_id
