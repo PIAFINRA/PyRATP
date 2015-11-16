@@ -12,10 +12,6 @@ def scene():
 
 def test_init():
     s = RatpScene()
-    
-    sc = scene()
-    s = RatpScene(sc)
-    
     return s
     
     

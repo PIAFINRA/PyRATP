@@ -18,7 +18,7 @@ from alinea.pyratp.clumping_index import clark_evans
 
 from openalea.plantgl import all as pgl
 
-# to be moved to grid.py
+# to be moved to grid.py: function voxel_boxes that return center + x,y,z sizes of filled voxel boxes
 def voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True):
     """ return coordinates of points relative to voxel origin
         If normalise = true, coordinates are normalised by voxel dimensions
@@ -202,46 +202,45 @@ class RatpScene(object):
         """ Find grid parameters that fit the scene in the RATP grid
         """
         
-        def _fceil(x, prec=1):
-            """ ceiling of float at a given precision in scientific notation """
-            magnitude = 10**numpy.floor(numpy.log10(x))
-            return numpy.ceil(x / magnitude * 10**prec) / 10**prec * magnitude
-        
         # fit regular grid to scene
         if self.scene is None:
             nbx, nby, nbz = self.grid_shape
             dx, dy, dz = self.grid_resolution # already in meter
-            xo, yo, zsoil = 0, 0, 0 # origin
+            xo, yo, zo = 0, 0, 0 # origin
         else:
             # Find the bounding box that fit the scene
             tesselator = pgl.Tesselator()
             bbc = pgl.BBoxComputer(tesselator)
             bbc.process(self.scene)
             bbox = bbc.result
-
             zsoil = self.z_soil
             if zsoil is None:
                 zsoil = bbox.getZMin() 
-            htop = bbox.getZMax()
             
             xo = bbox.getXMin() * self.convert # origin    
             yo = bbox.getYMin() * self.convert 
-            zo = -zsoil * self.convert # zorig is a z offset in grid.py (grid_z = z + zo)
+            zo = zsoil * self.convert
             
             if self.grid_resolution is not None and self.grid_shape is not None:
                 nbx, nby, nbz = self.grid_shape
                 dx, dy, dz = self.grid_resolution # already in meter
             else:
+                xmax = bbox.getXMax() * self.convert    
+                ymax = bbox.getYMax() * self.convert 
+                zmax = bbox.getZMax() * self.convert
                 if self.grid_resolution is None:
                     nbx, nby, nbz = self.grid_shape
-                    dx = _fceil(bbox.getXRange() / float(nbx) * self.convert)
-                    dy = _fceil(bbox.getYRange() / float(nby) * self.convert)
-                    dz = _fceil((htop - zsoil) / float(nbz) * self.convert)
+                    dx = (xmax - xo) / float(nbx - 1)# use nbx -1 to ensure min and max are in the grid 
+                    dy = (ymax - yo) / float(nby - 1)
+                    dz = (zmax - zo) / float(nbz - 1)
                 if self.grid_shape is None: 
                     dx, dy, dz = self.grid_resolution
-                    nbx = int(numpy.ceil(bbox.getXRange() * self.convert / float(dx)))
-                    nby = int(numpy.ceil(bbox.getYRange() * self.convert / float(dy)))
-                    nbz = int(numpy.ceil((htop - zsoil) * self.convert / float(dz)))
+                    nbx = int(numpy.ceil((xmax - xo) / float(dx)))
+                    nby = int(numpy.ceil((ymax - yo) / float(dy)))
+                    nbz = int(numpy.ceil((zmax - zo) / float(dz)))
+                xo -= (dx / 2)
+                yo -= (dy / 2)
+                zo -= (dz / 10) # try to respect zsoil
 
         # dz for all voxels    
         if self.z_resolution is not None:
@@ -252,7 +251,7 @@ class RatpScene(object):
             
         grid_pars = {'njx':nbx, 'njy':nby, 'njz':nbz,
                      'dx':dx, 'dy':dy, 'dz':dz,
-                     'xorig':xo, 'yorig':yo, 'zorig':zo} 
+                     'xorig':xo, 'yorig':yo, 'zorig':-zo} # zorig is a z offset in grid.py (grid_z = z + zo)
         
         return grid_pars
       
@@ -344,12 +343,15 @@ class RatpScene(object):
         # (a valider avec marc)
         # coordinates of points within voxels
         xv, yv, zv = voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True)
-        data = pandas.DataFrame({'entity':entity, 'x':xv, 'y':yv, 'z':zv})        
+        data = pandas.DataFrame({'entity':entity, 'x':xv, 'y':yv, 'z':zv, 's':s})        
         mu = []
         grouped = data.groupby('entity')
         for e in range(nent):
             df = grouped.get_group(e)
-            mu.append(clark_evans(zip(df['x'], df['y'], df['z']), ((0,0,0),(1,1,1))))
+            nvox_e = grid.voxel_canopy[e]
+            min_mu = df['s'].mean() / (df['s'].sum() / nvox_e) # minimal mu in the case of perfect clumping
+            clumping = clark_evans(zip(df['x'], df['y'], df['z']), ((0,0,0),(1,1,1)))
+            mu.append(max(min_mu, clumping))
         self.mu = mu
         
         return grid, vox_id, sh_id
