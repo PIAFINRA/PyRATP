@@ -125,7 +125,7 @@ class RatpScene(object):
     timezone = 0 # consider UTC/GMT time for date inputs
     idecaly = 0 
     
-    def __init__(self, scene=None, scene_unit = 'm', toric=False, entity=None, nitrogen=None, z_soil=None, localisation='Montpellier', grid_shape=None, grid_resolution=None, grid_orientation=0, z_resolution=None, nbincli=9):
+    def __init__(self, scene=None, scene_unit = 'm', toric=False, entity=None, nitrogen=None, area=None, z_soil=None, localisation='Montpellier', grid_shape=None, grid_resolution=None, grid_orientation=0, z_resolution=None, nbincli=9):
         """
         Initialise a RatpScene.
         
@@ -134,7 +134,8 @@ class RatpScene(object):
         scene_unit (string): scene length unit ('m', 'cm', ...)
         toric (bool): False (default) if the scene is an isolated canopy, True if the scene is toric, ie simulated as if repeated indefinitvely 
         entity: a {scene_id:entity_key} dict that associate a scene object to an RATP entity. If None (default), all shapes points to entity_code 1.
-        nitrogen: a {scene_id:entity_key} dict that associate a scene object to a nitrogen content. If None (default), all got a value of 2
+        nitrogen: a {scene_id:nitrogen_content} dict that associate a scene object to a nitrogen content. If None (default), all got a value of 2
+        area: a {scene_id:area} dict that associate a scene object to its 'radiative' (one sided) area (in scene unit). If None (default), object area is used.
         z_soil : z coordinate (scene units) of the soil in the scene. If None (default), soil will be positioned at the base of the canopy bounding box
         localisation : a string referencing a city of the localisation database (class variable), or a dict{'longitude':longitude, 'latitude':latitude}
         grid_shape: dimensions of the grid (voxel number per axis: [nx, ny, nz]). If None, shape will adapt to scene, using grid_resolution.
@@ -166,6 +167,9 @@ class RatpScene(object):
         if self.nitrogen is None and self.scene is not None:
             self.nitrogen = {sh.id:2 for sh in scene}
         
+        self.area = area
+        if self.area is None:
+            self.area={}
         
         self.z_soil = z_soil
         if self.scene is None and self.z_soil is None:
@@ -275,12 +279,15 @@ class RatpScene(object):
             mesh = discretizer.result
             ifaces = range(mesh.indexListSize())
             s = [_surf(mesh,i) * self.convert**2 for i in ifaces]
+            a = float(sum(s)) / self.convert**2
             phi = [pgl.Vector3.Spherical(_normal(mesh,i)).phi for i in ifaces]
             sh_id  = [shape.id] * len(s)
             n = [self.nitrogen[shape.id]] * len(s)
             entity = [self.entity[shape.id] - 1] * len(s) # entity 1 is encoded 0 in fill grid
+            scale_area = [float(self.area.get(shape.id, a)) / a] * len(s)
             centers = [mesh.faceCenter(i) for i in ifaces]
             x, y, z = zip(*map(lambda x: (x[0] * self.convert, x[1] * self.convert, x[2] * self.convert), centers))
+            s = (numpy.array(s) * numpy.array(scale_area)).tolist()
 
             return entity, x, y, z, s, n, sh_id, phi
           
@@ -290,17 +297,17 @@ class RatpScene(object):
 
             
         
-    def grid(self, rsoil=0.20, scale_surface=1.):
+    def grid(self, rsoil=0.20):
         """ Create and fill a RATP grid 
 
         :Parameters:
         - rsoil : soil reflectances in the PAR and NIR band
-        - scale_surface : multiplicative factor that scale surfaces before putting them in the grid
 
         :Output:
             - grid3d : ratp fortran grid object
             - vox_id : list of ratp voxel_id for all primitive in the grid
             - sh_id : list of shape_id for all primitive in the grid
+            - area : list of radiative object area for all primitive in the grid
         """
     
         grid_pars = {'latitude': self.localisation['latitude'],
@@ -322,13 +329,13 @@ class RatpScene(object):
         grid_pars.update({'rs':rsoil,'nent':nent})
         
         grid = Grid.initialise(**grid_pars)
-        grid, mapping = Grid.fill(entity, x, y, z, numpy.array(s) * scale_surface, n, grid) # mapping is a {str(python_x_list_index) : python_k_gridvoxel_index}
+        grid, mapping = Grid.fill(entity, x, y, z, s, n, grid) # mapping is a {str(python_x_list_index) : python_k_gridvoxel_index}
         
         # in RATP output, VoxelId is for the fortran_k_voxel_index (starts at 1, cf prog_RATP.f90, lines 489 and 500)
-        # here we return 
-        # and one additional map that allows retrieving shape_id from python_x_index
+
         index = range(len(x))
         vox_id = [mapping[str(i)] + 1 for i in index]
+        # and one additional map that allows retrieving shape_id from python_x_index
         sh_id = [sh_id[i] for i in index]
         
         # compute distributions of orientation
@@ -354,7 +361,7 @@ class RatpScene(object):
             mu.append(max(min_mu, clumping))
         self.mu = mu
         
-        return grid, vox_id, sh_id
+        return grid, vox_id, sh_id, s
 
     def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1):
         """ Run a simulation of light interception for one wavelength
@@ -369,7 +376,7 @@ class RatpScene(object):
 
         """
         
-        grid, voxel_id, shape_id = self.grid(rsoil=rsoil)
+        grid, voxel_id, shape_id , areas = self.grid(rsoil=rsoil)
                
         
         entities = [{'rf':[rleaf[i]], 'distinc':self.distinc[i], 'mu':self.mu[i]} for i in range(len(rleaf))]
@@ -389,23 +396,58 @@ class RatpScene(object):
                             'day':day,
                             'hour':hour,
                             'VoxelId':VoxelId,
-                            'ShadedPAR':ShadedPAR,
-                            'SunlitPAR':SunlitPAR,
+                            'ShadedPAR':ShadedPAR / 4.6,
+                            'SunlitPAR':SunlitPAR / 4.6,
                             'ShadedArea':ShadedArea,
                             'SunlitArea': SunlitArea,
-                            'Rinc': (ShadedPAR * ShadedArea + SunlitPAR * SunlitArea) / (ShadedArea + SunlitArea) / 4.6, 
+                            'Area': ShadedArea + SunlitArea,
+                            'PAR': (ShadedPAR * ShadedArea + SunlitPAR * SunlitArea) / (ShadedArea + SunlitArea) / 4.6, 
                             })
         dfvox = dfvox[dfvox['VegetationType'] > 0]
         index = range(len(voxel_id))
-        dfmap = pandas.DataFrame({'primitive_index': index,'shape_id': shape_id, 'VoxelId':voxel_id, 'VegetationType':[self.entity[sh_id] for sh_id in shape_id]})
+        dfmap = pandas.DataFrame({'primitive_index': index,'shape_id': shape_id, 'VoxelId':voxel_id, 'VegetationType':[self.entity[sh_id] for sh_id in shape_id], 'primitive_area':areas})
     
         output = pandas.merge(dfmap, dfvox)
         output =  output.sort('primitive_index') # sort is needed to ensure matching with triangulation indices
         
         return output
+      
+    def aggregate_light(self, output, spatial = True, temporal = True):
+        """ Aggregate light outputs
+        """
         
+        res = output
+        
+        def _process(df):
+            shape_area = df['primitive_area'].sum()
+            res = pandas.Series({   'VegetationType': df['VegetationType'].values[0],
+                                    'day': df['day'].values[0],
+                                    'hour': df['hour'].values[0],
+                                    'ShadedPAR': numpy.sum(df['ShadedPAR'] * df['primitive_area']) / shape_area,#weighted mean of voxel values (weigth = primitive area)
+                                    'SunlitPAR': numpy.sum(df['SunlitPAR'] * df['primitive_area']) / shape_area,
+                                    'ShadedArea': numpy.sum(df['ShadedArea'] / df['Area'] * df['primitive_area']),
+                                    'SunlitArea': numpy.sum(df['SunlitArea'] / df['Area'] * df['primitive_area']),
+                                    'Area': shape_area,
+                                    'PAR': numpy.sum(df['PAR'] * df['primitive_area']) / shape_area
+            })
+            return res
+            
+        
+        if spatial:
+            grouped = output.groupby(['Iteration', 'shape_id'])
+            res = grouped.apply(_process).reset_index()
+        if temporal:
+            grouped = res.groupby(['shape_id'])
+            how = {'VegetationType':numpy.mean, 'day':numpy.mean, 'hour':numpy.mean, 
+                    'ShadedPAR':numpy.sum, 'SunlitPAR':numpy.sum, 
+                    'ShadedArea': numpy.mean, 'SunlitArea': numpy.mean,
+                    'Area': numpy.mean, 'PAR': numpy.sum}
+            res = grouped.agg(how).reset_index()
+            
+        return res
+      
     def plot(self, output, minval=None, maxval=None):
-        par = output['Rinc']
+        par = output['PAR']
         if minval is None:
             minval = min(par)
         if maxval is None:
