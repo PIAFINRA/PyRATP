@@ -1,5 +1,5 @@
 
-# This file has been generated at Thu Dec 11 00:05:06 2014
+# This file has been generated at Mon Dec 07 14:49:50 2015
 
 from openalea.core import *
 
@@ -17,14 +17,14 @@ __institutes__ = None
 __icon__ = 'icon.png'
 
 
-__all__ = ['ratp_can2riri', 'ratp_RATP2VTK', 'ExtractLight_ExtractLight', 'ExtractLight_ExtractVoxels', 'ratp_read_grid', 'ExtractVar_ExtractVar', 'ratp_DoAll', 'ratp_fill_grid', 'ratp_DoIrradiation', 'Plot3DRATP_Plot3DRATP', 'ratp_read_vgx', 'ratp_ExtractTime', 'ratp_extract_leaves', 'ratp_read_vegetation', 'ratp_RATPVOXELS2VTK', 'ratp_Nallocate', 'ratp_read_micrometeo', 'ratp_read_skyvault']
+__all__ = ['ratp_PlantGL2VTK', 'ratp_can2riri', 'ratp_RATP2VTK_Leaves', 'ExtractLight_ExtractLight', 'ExtractLight_ExtractVoxels', 'ratp_read_grid', 'ExtractVar_ExtractVar', 'ratp_DoAll', 'ratp_fill_grid', 'ratp_DoIrradiation', 'Plot3DRATP_Plot3DRATP', 'ratp_read_vgx', 'ratp_ExtractTime', 'ratp_extract_leaves', 'ratp_read_vegetation', 'ratp_RATPVOXELS2VTK', 'ratp_Nallocate', 'ratp_read_micrometeo', 'ratp_read_skyvault']
 
 
 
 ratp_can2riri = Factory(name='can2riri',
                 authors=' (wralea authors)',
                 description='can2riri',
-                category='Unclassified',
+                category='simulation, ecophysiology',
                 nodemodule='ratp',
                 nodeclass='can2riri',
                 inputs=[{'interface': IFileStr(filter="*.can", save=False), 'name': 'filename', 'value': None, 'desc': '3D can file'}],
@@ -33,10 +33,20 @@ ratp_can2riri = Factory(name='can2riri',
                 widgetclass=None,
                )
 
+ratp_PlantGL2VTK = Factory(name='PlantGL2VTK',
+                authors=' (wralea authors)',
+                description='Paraview file',
+                category='data i/o',
+                nodemodule='ratp',
+                nodeclass='PlantGL2VTK',
+                inputs=[{'interface': ISequence, 'name': 'Scene', 'value': None, 'desc': ''}, {'interface': ISequence, 'name': 'Variable', 'value': None, 'desc': ''}, {'interface': IStr, 'name': 'VariableName', 'value': None, 'desc': ''}, {'interface': IStr, 'name': 'OutputFileName', 'value': None, 'desc': ''}],
+                outputs=[{'interface': None, 'name': 'VTK File', 'desc': ''}],
+                widgetmodule=None,
+                widgetclass=None,
+               )
 
 
-
-ratp_RATP2VTK = Factory(name='RATP2VTK',
+ratp_RATP2VTK_Leaves = Factory(name='RATP2VTK_Leaves',
                 authors=' (wralea authors)',
                 description='Paraview file',
                 category='data i/o',
@@ -53,12 +63,12 @@ ratp_RATP2VTK = Factory(name='RATP2VTK',
 
 ExtractLight_ExtractLight = Factory(name='ExtractLight',
                 authors=' (wralea authors)',
-                description='Extract PAR from RATP output',
+                description='Extract a Variable from RATP Voxel output',
                 category='data processing',
                 nodemodule='ExtractLight',
                 nodeclass='ExtractLight',
                 inputs=[{'interface': None, 'name': 'Elt2Voxel', 'value': None, 'desc': ''}, {'interface': None, 'name': 'RATPOutput', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Day', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Hour', 'value': None, 'desc': ''}, {'interface': IInt, 'name': 'Variable', 'value': None, 'desc': 'Numero colonne de la variable choisie'}],
-                outputs=[{'interface': None, 'name': 'PAR', 'desc': ''}],
+                outputs=[{'interface': None, 'name': 'Var To Plot', 'desc': ''}],
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -111,14 +121,14 @@ ExtractVar_ExtractVar = Factory(name='ExtractVar',
 
 
 
-ratp_DoAll = Factory(name='ratp_DoAll',
+ratp_DoAll = Factory(name='do_all',
                 authors=' (wralea authors)',
                 description='run RATP',
                 category='Unclassified',
                 nodemodule='ratp',
                 nodeclass='DoAll',
                 inputs=[{'interface': ISequence, 'name': 'inputs', 'value': None, 'desc': ''}],
-                outputs=[{'interface': None, 'name': 'time_spatial', 'desc': 'time evolution for each voxel'}, {'interface': None, 'name': 'tree', 'desc': 'the evolution for each voxel'}],
+                outputs=[{'name': 'time_spatial', 'desc': 'time evolution for each voxel'}, {'name': 'tree', 'desc': 'time evolution for each voxel'}],
                 widgetmodule=None,
                 widgetclass=None,
                )
@@ -141,7 +151,7 @@ ratp_fill_grid = Factory(name='fill grid',
 
 
 
-ratp_DoIrradiation = Factory(name='ratp_DoIrradiation',
+ratp_DoIrradiation = Factory(name='ratp_radiation',
                 authors=' (wralea authors)',
                 description='run RATP - irradiation calculation only',
                 category='Unclassified',
@@ -177,7 +187,7 @@ ratp_read_vgx = Factory(name='plant from vegestar',
                 category='Unclassified',
                 nodemodule='ratp',
                 nodeclass='read_vgx',
-                inputs=[{'interface': IFileStr(filter="*.vgx", save=False), 'name': 'filename', 'value': None, 'desc': 'Vegestar 3d Grid file'}],
+                inputs=[{'interface': IFileStr(filter="*.vgx", save=False), 'name': 'filename', 'value': None, 'desc': 'Vegestar 3d Grid file'}, {'interface': IFloat, 'name': 'CoeffAll', 'value': None, 'desc': ''}],
                 outputs=[{'interface': IInt, 'name': 'entity', 'desc': ''}, {'interface': IFloat, 'name': 'x', 'desc': ''}, {'interface': IFloat, 'name': 'y', 'desc': ''}, {'interface': IFloat, 'name': 'z', 'desc': ''}, {'interface': IFloat, 'name': 's', 'desc': ''}, {'interface': IFloat, 'name': 'n', 'desc': ''}],
                 widgetmodule=None,
                 widgetclass=None,
@@ -252,7 +262,7 @@ ratp_Nallocate = Factory(name='Nallocate',
                 category='Unclassified',
                 nodemodule='ratp',
                 nodeclass='Nallocate',
-                inputs=[{'interface': ISequence, 'name': 'inputs', 'value': None, 'desc': ''}, {'interface': ISequence, 'name': 'Variable', 'value': None, 'desc': ''}],
+                inputs=[{'interface': ISequence, 'name': 'inputs', 'value': None, 'desc': ''}, {'interface': ISequence, 'name': 'Variable', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'aNA', 'value': None, 'desc': ''}, {'interface': IFloat, 'name': 'bNA', 'value': None, 'desc': ''}],
                 outputs=[{'interface': ISequence, 'name': 'grid', 'desc': 'No output for the moment'}],
                 widgetmodule=None,
                 widgetclass=None,

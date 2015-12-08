@@ -9,6 +9,7 @@ from alinea.pyratp import mtg_extract
 from alinea.pyratp import can2riri
 from alinea.pyratp.RATP2VTK import RATP2VTK 
 from alinea.pyratp.RATP2VTK import RATPVOXELS2VTK
+from alinea.pyratp.RATP2VTK import PlantGL2VTK
 from alinea.pyratp import Nallocate
 
 

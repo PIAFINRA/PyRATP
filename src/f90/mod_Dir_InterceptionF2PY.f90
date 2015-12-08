@@ -97,19 +97,19 @@ contains
 
 !   sumrka=0.  ! Sum of rka over directions should be ONE
    di=(pi/2.)/nbincli(jent)
-         do jinc=1,nbincli(jent)
-    xic=(real(jinc)-.5)*di
-    if (xic.le.hmoy0) then
-     G_function=cos(xic)*sin(hmoy0)
-    else
-             xm=acos(-tan(hmoy0)/tan(xic))
-       G_function=(2*cos(hmoy0)*sin(xic)*sin(xm)-cos(xic)*sin(hmoy0)*(pi-2*xm))/pi
-    endif
+   do jinc=1,nbincli(jent)
+      xic=(real(jinc)-.5)*di
+      if (xic.le.hmoy0) then
+        G_function=cos(xic)*sin(hmoy0)
+      else
+        xm=acos(-tan(hmoy0)/tan(xic))
+        G_function=(2*cos(hmoy0)*sin(xic)*sin(xm)-cos(xic)*sin(hmoy0)*(pi-2*xm))/pi
+      endif
 !    write(*,*) xic*180./pi, hmoy0*180./pi, G_function/sin(hmoy0)
 !    pause
 
-     xka(jent)=xka(jent) + G_function/sin(hmoy0) * distinc(jent,jinc)
-     rka(jent)=rka(jent) + G_function*omega0/(2.*pi) * distinc(jent,jinc)
+      xka(jent)=xka(jent) + G_function/sin(hmoy0) * distinc(jent,jinc)
+      rka(jent)=rka(jent) + G_function*omega0/(2.*pi) * distinc(jent,jinc)
 
 ! rem: rka est une variable qui peut être utilisée à l'échelle des voxels
 !   puisque qu'elle intègre la convolution avec la distribution d'inclinaison

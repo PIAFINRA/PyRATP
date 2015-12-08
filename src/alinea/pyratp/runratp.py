@@ -21,16 +21,15 @@ class runRATP(object):
     def DoAll(*args):
         ratp = pyratp.ratp
         pyratp.dir_interception.scattering = False
-        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*20*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent,20)
+        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*22*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent,22) 
         ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*8*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,8)
-        #Ajout 1 colonne pour N foliaire, ngao 05/06/2013
-        #Ajout 1 colonne pour Vegetation Type , MSaudreau 07/01/2014
         path = 'c:/tmpRATP' if platform.system() == 'Windows' else '/tmp/tmpRATP'
         if os.path.exists(path):
             shutil.rmtree(path)
         os.mkdir(path)
         os.mkdir(path+"/Resul")
         grid.gridToVGX(pyratp.grid3d,path+"/Resul/","VoxelsGrid.vgx") #Save grid in VGX format
+        print "... grid written"
         ##print np.where(pyratp.vegetation_types.ismine==1)
         try:
             numeroMin = (np.where(pyratp.vegetation_types.ismine==1))[0][0] + 1
@@ -44,8 +43,8 @@ class runRATP(object):
 
         #print 'dz,', pyratp.grid3d.dz
         fspatial = open(path+"/Resul"+'/spatial.txt','w')
-        fspatial.write('VegetationType  ntime  day   hour  AirTemperature  VoxelId  ShadedTemp  SunlitTemp  VoxelTemp  STARDirect STARSky ShadedPhoto SunlitPhoto  ShadedTranspi SunlitTranspi')
-        fspatial.write('  ShadedArea SunlitArea ShadedGs  SunlitGs  VoxelNitrogen')
+        fspatial.write('VegetationType  ntime  day   hour  AirTemperature  VoxelId  ShadedTemp  SunlitTemp  STARDirect STARSky ShadedPhoto SunlitPhoto  ShadedTranspi SunlitTranspi')
+        fspatial.write('  ShadedArea SunlitArea ShadedGs  SunlitGs ShadedAbsorbedPAR SunlitAbsorbedPAR ShadedAbsorbedNIR SunlitAbsorbedNIR')
         fspatial.write('\n')
         np.savetxt(fspatial,ratp.out_time_spatial,'%.6e')
         fspatial.close()
@@ -154,15 +153,4 @@ class runRATP(object):
         np.savetxt(fspatial,ratp.out_rayt,'%.6e')
         fspatial.close()
 
-
-
-        PAR0 = np.transpose(ratp.out_rayt)[5]
-        PAR1 = np.transpose(ratp.out_rayt)[6]
-        #print PAR0
-        #print PAR1
-
-        # homogenizing the output matrix to get same shape as doall - Problem should be solved by changing the fortran source code.
-##        rr = ratp.out_rayt.T[1:]
-##        rr2 = rr.T
-##        return rr2
         return ratp.out_rayt

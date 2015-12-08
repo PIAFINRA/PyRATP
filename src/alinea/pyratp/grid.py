@@ -10,7 +10,7 @@ import alinea.pyratp.vege3D as vege3D
 
 
 def relative_index(x, dx):
-    """ compute the cell index of a coordinate x in a dx cell-wide 1D grid starting at zero with [lower_bound, upper_bound[ cell boundaries. 
+    """ compute the cell index of a coordinate x in a dx cell-wide 1D grid starting at zero with [lower_bound, upper_bound[ cell boundaries.
     negative index are used if x < 0.
     """
     x = np.array(x)
@@ -21,51 +21,51 @@ def relative_index(x, dx):
 
 def grid_index(x, y, z, grid, toric=True):
     """ Compute voxel indices in the RATP grid 'grid' for points of coordinates (x,y,z) in an orthonormal Z+ upward oriented and meter-calibrated scene
-    
+
         Parameters:
             - x, y, z : list of coordinates of points in the scene
             - grid : a initialsed RATP grid object
-            - toric: if toric is False, points outside the grid are set to -1 index. 
+            - toric: if toric is False, points outside the grid are set to -1 index.
                      if toric is True, points outside the XY domain are kept are assigned to a cell that simulates an infinite replication of the grid
         Returns:
             - jx: voxel index along RATP X+ grid coordinate system
             - jy: voxel index along RATP Y+ grid coordinate system
             - jz: voxel index along RATP Z+ grid coordinate system
-            
+
             Voxel indices are returned in python-style list index (starts at zero, end at len(list) - 1)
-            
+
         Details:
-        
+
         x, y, z are in an orthonormal coordinate system with Z+ pointing upward, hence with Y+ pointing to West when X+ points to North
         jx, jy, jz are grid indices that refer to an RATP orthonormal coordinate system with Z+ pointing downward, hence with Y+ pointing to East when X+ points to North.
         RATP conventions are required for RATP sky and sun beam to be corrrectly oriented (cf mod_Dir_InterceptionF2PY.f90, lines 199-200)
         To satisfy RATP convention:
-            - the grid is constructed along X+, Y+ and Z+ scene axes, and the (0,0,0) corner is translated at (grid.xorig, grid.yorig, -grid.zorig) scene cooordinates 
+            - the grid is constructed along X+, Y+ and Z+ scene axes, and the (0,0,0) corner is translated at (grid.xorig, grid.yorig, -grid.zorig) scene cooordinates
             - RATP grid origin defined at (grid.xorig, grid.yorig + grid.njy * grid.dy, -grid.zorig + sum(grid.dz)) scene coordinate
             - RATP X+ is oriented as scene X+, RATP Y+ is oriented as scene Y- and RATP Z+ is oriented as scene Z-
         As a result, when scene X+ points to North:
             - jx increases from South to North (0 <= jx < grid.nbx) along RATP X+ (scene X+)
             - jy increases from West to East(0 <= jy < grid.nby) along RATP Y+ (scene Y-)
-            - jz increases from top to soil (0 <= jz < grid.nbz) along RATP Z+ (scene Z-)   
+            - jz increases from top to soil (0 <= jz < grid.nbz) along RATP Z+ (scene Z-)
     """
-    
-    x = np.array(x) - grid.xorig 
+
+    x = np.array(x) - grid.xorig
     y = np.array(y) - grid.yorig
     z = np.array(z) + grid.zorig
-    
+
     index = relative_index(x, grid.dx) % grid.njx
     if toric:
         jx = index
     else:
         jx = np.where((x >= 0) & (x < grid.njx * grid.dx), index, -1)
-        
+
     index = relative_index(y, grid.dy) % grid.njy
-    rev_index = grid.njy - index - 1 
+    rev_index = grid.njy - index - 1
     if toric:
         jy = rev_index
     else:
         jy = np.where((y >= 0) & (y < grid.njy * grid.dy), rev_index, -1)
-    
+
     # after init_Param, dz size is njz + 1. It contains njz voxel heights (from top to soil), PLUS an additional zero required for the soil.
     dz = grid.dz[:-1]
     # dh is for the upper boundary of cells from base to top
@@ -75,7 +75,7 @@ def grid_index(x, y, z, grid, toric=True):
     jz = np.where((z >= 0) & (z < dh.max()), rev_index, -1)
 
     return map(lambda x: x.astype(int).tolist(), [jx, jy, jz])
-    
+
 
 class Grid(object):
     """A python class interface to pyratp grid3d object
@@ -83,7 +83,7 @@ class Grid(object):
     def __init__(self, *args, **kwds):
         """
         """
-        
+
     @staticmethod
     def initialise(njx, njy, njz, dx, dy, dz, xorig, yorig, zorig, latitude, longitude, timezone, nent, rs, orientation = 0, idecaly=0, toric=False):
         """ Initialize the 3D grid from input arguments
@@ -96,7 +96,7 @@ class Grid(object):
             - local time: timezone
             - number of entities in the scene: nent
             - list of soil reflectance for wavebands: rs
-            - toric (bool): False (default) if the scene is an isolated canopy, True if the scene is toric, ie repeated indefinitvely 
+            - toric (bool): False (default) if the scene is an isolated canopy, True if the scene is toric, ie repeated indefinitvely
 
         Output:Parameters:
             - grid3d: object grid updated (size, number of voxels)
@@ -165,8 +165,12 @@ class Grid(object):
         # voxel size according to X- Y- and Z- axis
         # TEST
         _read(f, grid3d.dx, grid3d.dy, grid3d.dz[:-1])# dz : de haut en bas  + un zero pour le sol
+
         # 3D grid origin
         _read(f, grid3d.xorig, grid3d.yorig, grid3d.zorig)
+
+        #Set the soil layer depth    ## 29/11/2015 Does Zorig stand for the soil layer or not ??? See the original fortran program or the doc !!!
+        grid3d.dz[grid3d.njz] = grid3d.dz[grid3d.njz-1]
 
         _read(f, grid3d.latitude, grid3d.longitude, grid3d.timezone)
 
@@ -199,7 +203,7 @@ class Grid(object):
         return grid3d
 
     @staticmethod
-    def readVgx(filename):
+    def readVgx(filename,CoefAllo):
         """ Reading the foliage distribution.
 
         Input:Parameters:
@@ -212,16 +216,162 @@ class Grid(object):
             - n: array of nitrogen content in g/m2    (real)
         """
 
-        v,x,y,z,s,n = vege3D.Vege3D.readVGX(filename,2)
+        v,x,y,z,s,n = vege3D.Vege3D.readVGX(filename,CoefAllo,2)
 ##        print 'alen(x)',np.alen(x)
         return v,x/100,y/100,-z/100,s/10000.,n
-
 
     @staticmethod
     def fill(entity, x, y, z, s, n ,grid):
         """ Filling the 3D Grid with points, area and nitrogen content.
         Input::Parameters:
-            - entity: array of vegetation type indices (integer).Indices are expected in python syle: indices 0 to n-1 encode RATP vegetation types 1 to n 
+            - entity: array of vegettion type (integer)
+            - x,y,z: arrays of 3D coordinates in m (real)
+            - s: array of leaf area in m2 (real)
+            - n: array of nitrogen content in g/m2    (real)
+            - grid: object grid (see readgrid method)
+
+        Output:Parameters:
+            - grid: object grid updated (i.e. filled with leaves)
+            - D_E2V: connectivity table Leaf -> Voxel
+        """
+
+#        print 'type grid', type(grid)
+        if type(grid) is not(str):
+
+            Grid.initParam(grid)
+
+            x = x - grid.xorig
+            y = y - grid.yorig
+            z = z + grid.zorig
+            s = s
+            if z.min() < 0.:
+                    print 'Some elements have a negative Z value and will be removed ...'
+                    print '... change the grid size or the leaves coodinates to get all leaves within the grid'
+            lneg=np.where(z<0) #suppression de feuilles ayant un z<0
+##            print 'lneg',lneg
+            entity=np.delete(entity,lneg[0])
+            x=np.delete(x,lneg[0])
+            y=np.delete(y,lneg[0])
+            z=np.delete(z,lneg[0])
+            s=np.delete(s,lneg[0])
+            n=np.delete(n,lneg[0])
+
+            if entity.max() >  grid.nent:
+                raise ValueError('Number of entity is too great')
+
+            if s.min() < 0.:
+                raise ValueError('Negative area value is prohibited')
+
+            ztot = grid.dz.sum()
+            if z.max() > ztot:
+                raise ValueError('Some Z points are outside of the grid')
+
+            grid.nemax = 1
+            k = 0
+
+            grid.n_canopy = (n*s).sum()
+            grid.s_canopy = s.sum()
+             # sum the surface of each element of the same entity
+            for i in range(grid.nent):
+                grid.s_vt[i] = s[entity==i].sum()
+
+            dx, dy , dz = grid.dx, grid.dy, grid.dz
+            #dh: tableau des hauteurs z
+            dh = np.array(0)
+            for i in range(np.alen(dz)):
+                dh=np.append(dh,dz[:i].sum())
+            dh=np.delete(dh,0)
+
+            #Relation Voxel2entite
+            d_E2V = {} #entity id to voxel id
+##            print 'np.alen(x)', np.alen(x)
+            for i in range(np.alen(x)):
+
+              # Compute the coord of each element in the grid.
+                # modulo is used to build a toric scene.
+                #------------------------------------------ Attention au decalage de 1--------------------------------
+
+                jx = int((abs(x[i])/dx))
+                jx=(jx)%grid.njx
+                #if x[i]<=0:jx = grid.njx-jx-1  #Enleve recalage feuille dans la scene si feuille a l'exterieur
+
+                jy = int(abs(y[i])/dy)
+                jy=(jy)%grid.njy
+                #if y[i]<=0:jy = grid.njy-jy-1      #Enleve recalage feuille dans la scene si feuille a l'exterieur
+
+                jz = np.where(dh>z[i])[0][0]
+                jz = grid.njz-jz+1
+
+                # TO CONTINUE (line 318)
+             #Cas ou il n'y avait encore rien dans la cellule (jx,jy,jz)
+                if grid.kxyz[jx,jy,jz]==0 :
+                     grid.kxyz[jx,jy,jz]=k+1 #ajouter 1 pour utilisation f90
+                     grid.numx[k]=jx + 1 #ajouter 1 pour utilisation f90
+                     grid.numy[k]=jy + 1 #ajouter 1 pour utilisation f90
+                     grid.numz[k]=jz + 1 #ajouter 1 pour utilisation f90
+                     grid.nje[k]=1
+                     grid.nume[0,k]=entity[i]+1
+
+                     grid.leafareadensity[0,k]=s[i]/(dx*dy*dz[jz])
+                     grid.s_vt_vx[0,k]=s[i]
+                     grid.s_vx[k]=s[i]
+                     grid.n_detailed[0,k]=n[i]
+                     d_E2V[str(i)] = float(k)
+##                     d_E2V[i] = k
+
+                     k=k+1
+                else:
+                  #    Cas ou il y avait deja quelque chose dans la cellule [jx,jy,jz]
+
+                    kk=grid.kxyz[jx,jy,jz]-1 #retirer 1 pour compatiblite python
+                    je=0
+                    while (grid.nume[je,kk]!= (entity[i]+1) and (je+1)<=grid.nje[kk]):
+                        je=je+1
+
+                    grid.leafareadensity[je,kk]=grid.leafareadensity[je,kk]+s[i]/(dx*dy*dz[jz])
+
+                    grid.n_detailed[je,kk]=(grid.n_detailed[je,kk]*grid.s_vt_vx[je,kk]+n[i]*s[i])/(grid.s_vt_vx[je,kk]+s[i])
+    ##                grid.toto[je,kk]=(grid.n_detailed[je,kk]*grid.s_vt_vx[je,kk]+n[i]*s[i])/(grid.s_vt_vx[je,kk]+s[i])
+                    grid.s_vt_vx[je,kk] = grid.s_vt_vx[je,kk] + s[i]
+                    grid.s_vx[kk] = grid.s_vx[kk] + s[i]
+                    grid.nje[kk]=max(je+1,grid.nje[kk])
+                    grid.nemax=max(grid.nemax,grid.nje[kk])
+                    grid.nume[je,kk]=entity[i]+1
+                    d_E2V[str(i)] = float(kk)
+##                    d_E2V[i] = kk
+
+
+            grid.nveg=k
+            grid.nsol=grid.njx*grid.njy   # Numbering soil surface areas
+            for jx in range(grid.njx):
+                for jy in range(grid.njy):
+                    grid.kxyz[jx,jy,grid.njz]=grid.njy*jx+jy+1
+            grid.n_canopy=grid.n_canopy/grid.s_canopy
+
+            for k in range(grid.nveg):
+                for je in range(grid.nje[k]):
+                    if je==0:
+                     grid.volume_canopy[grid.nent]=grid.volume_canopy[grid.nent]+dx*dy*dz[grid.numz[k]-1]  # Incrementing total canopy volume
+                    if  grid.s_vt_vx[je,k]> 0. :
+                     grid.volume_canopy[grid.nume[je,k]-1]=grid.volume_canopy[grid.nume[je,k]-1]+dx*dy*dz[grid.numz[k]-1]
+                     grid.voxel_canopy[grid.nume[je,k]-1]=grid.voxel_canopy[grid.nume[je,k]-1]+1
+
+
+##            _savegrid(grid,d_E2V,"c:/matGridRATP_Strasbourg.mat") #appel de la procedure savegrid (voir plus bas)
+##            gridToVGX(grid,"C:/","gridVGX.vgx") #Save grid in VGX format
+
+            return grid, d_E2V
+
+        else:
+            #gridToVGX(grid,"c:/","gridVGX.vgx") #Save grid in VGX format
+           return grid, d_E2V #_importgrid(grid)
+
+
+    @staticmethod
+    def fill_1(entity, x, y, z, s, n ,grid):
+        """ Filling the 3D Grid with points, area and nitrogen content.
+        Input::Parameters:
+            - entity: array of vegetation type indices (integer).Indices are expected in python syle: indices 0 to n-1 encode RATP vegetation types 1 to n
             - x,y,z: arrays of 3D coordinates in m (real)
             - s: array of leaf area in m2 (real)
             - n: array of nitrogen content in g/m2    (real)
@@ -234,14 +384,14 @@ class Grid(object):
 
 #        print 'type grid', type(grid)
         if type(grid)is not(str):
-        
+
             entity, x, y, z, s, n = map(np.array, (entity, x, y, z, s, n))
-            
+
             Grid.initParam(grid)
 
-            # check that coordinates fits in the grid
+            # check that coordinates fit in the grid
             toric = bool(grid.int_isolated_box)
-            Jx, Jy, Jz = grid_index(x, y, z, grid, toric)            
+            Jx, Jy, Jz = grid_index(x, y, z, grid, toric)
             if any(np.in1d(-1, Jx)):
                 raise ValueError('Some x coordinates fail outside the grid boundaries, consider increasing grid size, change grid origin or use toric option')
             if any(np.in1d(-1, Jy)):
@@ -255,7 +405,7 @@ class Grid(object):
 
             if s.min() < 0.:
                 raise ValueError('Negative area value is prohibited')
-                
+
             grid.nemax = 1
             grid.n_canopy = (n * s).sum()
             grid.s_canopy = s.sum()
@@ -268,7 +418,7 @@ class Grid(object):
 
             dx, dy , dz = grid.dx, grid.dy, grid.dz
             k = 0
-            for i in range(np.alen(x)):               
+            for i in range(np.alen(x)):
                 jx, jy, jz = Jx[i], Jy[i], Jz[i]
              #Cas ou il n'y avait encore rien dans la cellule (jx,jy,jz)
                 if grid.kxyz[jx, jy, jz] == 0 :
@@ -364,7 +514,7 @@ class Grid(object):
 
             grid3d.volume_canopy = np.zeros(nent+1)
             grid3d.voxel_canopy = np.zeros(nent)
-
+            grid3d.int_isolated_box = 1
             grid3d.int_scattering = 0
             print 'GRILLE OK'
 

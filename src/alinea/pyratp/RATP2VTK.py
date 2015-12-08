@@ -2,10 +2,10 @@ from openalea.plantgl import *
 import numpy as np
 from collections import Counter
 
-def RATP2VTK(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"):
-    '''    Display leaves colored by voxel values with Paraview
+def PlantGL2VTK(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"):
+    '''    Display a PlantGL Scene in VTK
            Scene is written in VTK Format as an unstructured grid
-           Inputs: ... a RATP variable = liste de float
+           Inputs: ... a variable = liste de float
                    ... a scene plant GL composed of triangulated leaves
            Outputs: ... a VTK file
             T = all.Tesselator()
@@ -85,8 +85,7 @@ def RATP2VTK(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"
     # return outputs
     return   triangleColor
 
-
-def RATP2VTKNew(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"):
+def RATP2VTK(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"):
     '''    Display leaves colored by voxel values with Paraview for each entity
            Scene is written in VTK Format as an unstructured grid
            Inputs: ... a RATP variable = liste de float
@@ -171,88 +170,7 @@ def RATP2VTKNew(scene, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.v
     # return outputs
     return   triangleColor
 
-
 def RATPVOXELS2VTK(grid, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"):
-    '''    Display Voxels colored by variable with Paraview
-           RATP Grid is written in VTK Format as a structured grid
-           Inputs: ... a RATP variable = liste de float
-                   ... a RATP grid
-           Outputs: ... a VTK file
-    '''
-
-    # write the node code here.
-        # Write the output file following VTK file format for 3D view with Paraview
-        # Works only with triangles P1 i.e. defined with 3 points
-        #... Input:
-            #... Triangles - self attribute
-            #... Variable[0] is the value of the variable to be plotted
-            #... Variable[1] is the entity corresponding to the variable
-            #... Variable[2] is the Voxel id associated to the entity
-            #... Corresponding variable name - varname
-        #... Output:
-            #... a VTK file - filename
-
-##    print nomfich
-    f=open(nomfich,'w')
-    # Set the header
-    f.write('# vtk DataFile Version 3.0\n')
-    f.write('vtk output\n')
-    f.write('ASCII\n')
-    f.write('DATASET RECTILINEAR_GRID\n')
-    f.write('DIMENSIONS '+str(grid.njx+1)+' '+str(grid.njy+1)+' '+str(grid.njz+1)+'\n')
-
-    f.write('Z_COORDINATES '+str(grid.njz+1)+' float\n')
-
-    for i in  range(grid.njz-1,-1,-1):
-       z = -100*grid.dz[i]*(i)#MARC +100*grid.zorig
-##
-       f.write(str(z)+' ')
-    f.write(str(z)+' ')#MARC +100*grid.zorig)+' ')
-##    f.write(str(0.0)+' ')
-
-    f.write('\n')
-
-    f.write('Y_COORDINATES '+str(grid.njy+1)+' float\n')
-    for i in range(grid.njy+1):
-       y = 100*grid.dy*i
-##       +100*grid.yorig
-       f.write(str(y)+' ')
-    f.write('\n')
-
-
-    f.write('X_COORDINATES '+str(grid.njx+1)+' float\n')
-    for i in  range(grid.njx+1):
-       x = 100*grid.dx*i
-##       +100*grid.xorig
-       f.write(str(x)+' ')
-    f.write('\n')
-    # Write data for each voxels
-    numVoxels = (grid.njx)*(grid.njy)*(grid.njz)
-
-    f.write('CELL_DATA '+str(numVoxels)+'\n')
-
-    f.write('SCALARS '+varname+' float 1 \n')
-    f.write('LOOKUP_TABLE default\n')
-    #For a non vegetative voxel set to the voxel value to the default value
-    #DefaultValue = -9999.0
-    #Utiliser grid.kxyz
-    for ik in range(grid.njz):
-      for ij in range(grid.njy):
-        for ii in range(grid.njx):
-          k =grid.kxyz[ii,ij,ik] #Get the voxel id number
-          if (k>0):              #If the voxel k gets some vegetation then
-##           print k
-           f.write(str(variable[0][k-1])+'\n')
-          else:
-           f.write(str(-9999.0)+'\n')
-
-
-
-    f.write('\n')
-
-    f.close()
-
-def RATPVOXELS2VTKNew(grid, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT.vtk"):
     '''    Display Voxels colored by variable with Paraview
            RATP Grid is written in VTK Format as a structured grid
            Inputs: ... variable : a list of 3 arrays composed of the a RATP variable to be plotted, corresponding entities, and Voxel ID
@@ -280,35 +198,33 @@ def RATPVOXELS2VTKNew(grid, variable,varname="Variable",nomfich="C:\tmpRATP\RATP
     f.write('vtk output\n')
     f.write('ASCII\n')
     f.write('DATASET RECTILINEAR_GRID\n')
-    f.write('DIMENSIONS '+str(grid.njx+1)+' '+str(grid.njy+1)+' '+str(grid.njz+1)+'\n')
+    f.write('DIMENSIONS '+str(grid.njx+1)+' '+str(grid.njy+1)+' '+str(grid.njz+2)+'\n')
+    ## The soil layer is included
 
-    f.write('Z_COORDINATES '+str(grid.njz+1)+' float\n')
+    f.write('Z_COORDINATES '+str(grid.njz+2)+' float\n')
 
-    for i in  range(grid.njz-1,-1,-1):
-       z = -100*grid.dz[i]*(i)#MARC +100*grid.zorig
-##
+    for i in range(grid.njz,-1,-1):
+       z = -100*grid.dz[i]*(i+1)+100*grid.zorig
        f.write(str(z)+' ')
-    f.write(str(z)+' ')#MARC +100*grid.zorig)+' ')
-##    f.write(str(0.0)+' ')
+    f.write(str(100*grid.zorig)+' ')
+
 
     f.write('\n')
 
     f.write('Y_COORDINATES '+str(grid.njy+1)+' float\n')
     for i in range(grid.njy+1):
-       y = 100*grid.dy*i
-##       +100*grid.yorig
+       y = 100*grid.dy*i -100*grid.yorig
        f.write(str(y)+' ')
     f.write('\n')
 
 
     f.write('X_COORDINATES '+str(grid.njx+1)+' float\n')
     for i in  range(grid.njx+1):
-       x = 100*grid.dx*i
-##       +100*grid.xorig
+       x = 100*grid.dx*i-100*grid.xorig
        f.write(str(x)+' ')
     f.write('\n')
-    # Write data for each voxels with 1 variable per entity
-    numVoxels = (grid.njx)*(grid.njy)*(grid.njz)
+    # Write data for each voxels with 1 variable per entity inkcuding soil layer
+    numVoxels = (grid.njx)*(grid.njy)*(grid.njz+1)
 
     # Set the number of entities to write - NbScalars
     ll = Counter(variable[1])
@@ -327,10 +243,10 @@ def RATPVOXELS2VTKNew(grid, variable,varname="Variable",nomfich="C:\tmpRATP\RATP
         #For a non vegetative voxel set the voxel value to a default value
         #DefaultValue = -9999.0
         #Utiliser grid.kxyz
-        for ik in range(grid.njz):
+        for ik in range(grid.njz+1):#range(grid.njz-1,-1,-1):#
           for ij in range(grid.njy):
             for ii in range(grid.njx): #Loop over all voxels
-              k =grid.kxyz[ii,ij,ik] #Get the voxel id number
+              k =grid.kxyz[ii,ij,ik] #Get the voxel id number in fortran minus 1 to get the value in Python
               if (k>0):              #If the voxel k gets some vegetation then
 ##                print "ent =",ent,"... k =", k
                 #find the index of voxel k in the variable[2]
@@ -344,8 +260,11 @@ def RATPVOXELS2VTKNew(grid, variable,varname="Variable",nomfich="C:\tmpRATP\RATP
                     f.write(str(-9999.0)+'\n')
                 else:                           #if enties is in this voxel
 ##                    print "np.where(enties==ent)",np.where(enties==ent)
-                    value = variable[0][kindex[np.where(enties==ent)]]
-                    f.write(str(value)+'\n')
+                    if ik == grid.njz:         #Soil layer
+                        f.write(str(-9999.0)+'\n')
+                    else:
+                        value = variable[0][kindex[np.where(enties==ent)]]
+                        f.write(str(value)+'\n')
               else:
                 f.write(str(-9999.0)+'\n')
     #          f.write(str(ik)+'\n')

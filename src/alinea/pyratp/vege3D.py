@@ -37,6 +37,7 @@ dicoMotCle["B"] = 0
 dicoMotCle["VCmax"] = 0
 dicoMotCle["ShootType"]=0
 #'dicoMotCle["Vcmax"] = 0
+dicoMotCle["TC"] = 0
 dicoMotCle["Jmax"] = 0
 dicoMotCle["Resp"] = 0
 dicoMotCle["Pmax"] = 0
@@ -59,9 +60,14 @@ class Vege3D(object):
     @staticmethod
 
 ##    def readVGX(fileNameVGX,typeVege,bltypeVege=False,Azote=2):
-    def readVGX(fileNameVGX,typeVege=1,bltypeVege=True,Azote=2):
+    def readVGX(fileNameVGX,CoefAllo,typeVege=1,bltypeVege=True,Azote=2):
         nbLigne = 0
-        """ Reading a VegeSTAR (*.vgx) file and return 6 numpy arrays (type of vegetation, X, Y, Z, Leaf surface and Nitrogen """
+        """
+        Reading a VegeSTAR (*.vgx) file and return 6 numpy arrays (type of vegetation, X, Y, Z, Leaf surface and Nitrogen 
+        Input data ... VegeSTAR file
+                   ... Allometric coefficient to get from leaf length the leaf surface area 
+        Output data ... type of vegetation, X, Y, Z, Leaf surface and Nitrogen content 
+        """
         #liste ? retourner
         tabTypeVege = np.array([])
         tabX =np.array([])
@@ -123,10 +129,11 @@ class Vege3D(object):
                 Y = (liste[listEntete.index("TransY")])
                 Z = (liste[listEntete.index("TransZ")])
 ##                ShootType = (liste[listEntete.index("ShootType")])
+##                ThermoC = (liste[listEntete.index("TC")])
                 tabX= np.append(tabX,X)
                 tabY= np.append(tabY,Y)
                 tabZ= np.append(tabZ,Z)
-                AREA = (liste[listEntete.index("EchX")])*(liste[listEntete.index("EchY")])*0.75
+                AREA = (liste[listEntete.index("EchX")])*(liste[listEntete.index("EchY")])*CoefAllo
             else:
                 X1 = (liste[listEntete.index("X1")])
                 Y1 = (liste[listEntete.index("Y1")])
@@ -146,6 +153,8 @@ class Vege3D(object):
                 AREA = 0.5*np.sum(np.abs(CrossP)**2)**(1./2)
 
             typeV =0
+            #Entity numbers according to Aphis Pomi on shoots
+##            if (ThermoC == 999): typeV = 1
             #Entity numbers set according to ShootType 01/2015 - Skip i.e typeV = 0
 ##            if (ShootType == 1.0): typeV =0
 ##            if (ShootType == 2.0): typeV =0
