@@ -23,10 +23,13 @@ class runRATP(object):
         pyratp.dir_interception.scattering = False
         ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*22*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent,22) 
         ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*8*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,8)
-        path = 'c:/tmpRATP' if platform.system() == 'Windows' else '/tmp/tmpRATP'
-        if os.path.exists(path):
-            shutil.rmtree(path)
-        os.mkdir(path)
+        if platform.system() == 'Windows':
+            path = 'c:/tmpRATP'
+            if os.path.exists(path):
+                shutil.rmtree(path)
+            os.mkdir(path)
+        else :
+            path = tempfile.mkdtemp()
         os.mkdir(path+"/Resul")
         grid.gridToVGX(pyratp.grid3d,path+"/Resul/","VoxelsGrid.vgx") #Save grid in VGX format
         print "... grid written"
@@ -139,11 +142,14 @@ class runRATP(object):
     def DoIrradiation(*args):
         ratp = pyratp.ratp
         ratp.out_rayt = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*9*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,9)
-
-        path = 'c:/tmpRATP' if platform.system() == 'Windows' else '/tmp/tmpRATP'
-        if os.path.exists(path):
-            shutil.rmtree(path)
-        os.mkdir(path)
+        
+        if platform.system() == 'Windows':
+            path = 'c:/tmpRATP'
+            if os.path.exists(path):
+                shutil.rmtree(path)
+            os.mkdir(path)
+        else :
+            path = tempfile.mkdtemp()
         os.mkdir(path+"/ResulIrradiation")
         pyratp.ratp.do_interception()
 
