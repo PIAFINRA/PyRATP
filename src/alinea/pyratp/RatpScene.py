@@ -256,7 +256,7 @@ class RatpScene(object):
                 xo -= (extrax / 2.)
                 extray = dy * nby - (ymax - yo)
                 yo -= (extray / 2.)
-                if self.zsoil is None:
+                if self.z_soil is None:
                     extraz = dz * nbz - (zmax - zo)
                     zo -= (extraz / 2.) 
 
