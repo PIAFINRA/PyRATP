@@ -237,15 +237,15 @@ class RatpScene(object):
                     if nbx > 1:
                         dx = (xmax - xo) / float(nbx - 1)# use nbx -1 to ensure min and max are in the grid 
                     else:
-                        dx = xmax - xo
+                        dx = (xmax - xo) * 1.01
                     if nby > 1:
                         dy = (ymax - yo) / float(nby - 1)
                     else:
-                        dy = ymax - yo
+                        dy = (ymax - yo) * 1.01
                     if nbz > 1:
                         dz = (zmax - zo) / float(nbz - 1)
                     else:
-                        dz = zmax - zo
+                        dz = (zmax - zo) * 1.01
                 if self.grid_shape is None: 
                     dx, dy, dz = self.grid_resolution
                     nbx = int(numpy.ceil((xmax - xo) / float(dx)))
