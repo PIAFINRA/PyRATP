@@ -234,9 +234,18 @@ class RatpScene(object):
                 zmax = bbox.getZMax() * self.convert
                 if self.grid_resolution is None:
                     nbx, nby, nbz = self.grid_shape
-                    dx = (xmax - xo) / float(nbx - 1)# use nbx -1 to ensure min and max are in the grid 
-                    dy = (ymax - yo) / float(nby - 1)
-                    dz = (zmax - zo) / float(nbz - 1)
+                    if nbx > 1:
+                        dx = (xmax - xo) / float(nbx - 1)# use nbx -1 to ensure min and max are in the grid 
+                    else:
+                        dx = xmax - xo
+                    if nby > 1:
+                        dy = (ymax - yo) / float(nby - 1)
+                    else:
+                        dy = ymax - yo
+                    if nbz > 1:
+                        dz = (zmax - zo) / float(nbz - 1)
+                    else:
+                        dz = zmax - zo
                 if self.grid_shape is None: 
                     dx, dy, dz = self.grid_resolution
                     nbx = int(numpy.ceil((xmax - xo) / float(dx)))
@@ -425,7 +434,7 @@ class RatpScene(object):
                                     'hour': df['hour'].values[0],
                                     'ShadedPAR': numpy.sum(df['ShadedPAR'] * df['primitive_area']) / shape_area,#weighted mean of voxel values (weigth = primitive area)
                                     'SunlitPAR': numpy.sum(df['SunlitPAR'] * df['primitive_area']) / shape_area,
-                                    'ShadedArea': numpy.sum(df['ShadedArea'] / df['Area'] * df['primitive_area']),
+                                    'ShadedArea': numpy.sum(df['ShadedArea'] / df['Area'] * df['primitive_area']),#weighted mean of shaded fraction times shape_area
                                     'SunlitArea': numpy.sum(df['SunlitArea'] / df['Area'] * df['primitive_area']),
                                     'Area': shape_area,
                                     'PAR': numpy.sum(df['PAR'] * df['primitive_area']) / shape_area
