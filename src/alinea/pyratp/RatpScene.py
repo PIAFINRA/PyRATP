@@ -251,9 +251,14 @@ class RatpScene(object):
                     nbx = int(numpy.ceil((xmax - xo) / float(dx)))
                     nby = int(numpy.ceil((ymax - yo) / float(dy)))
                     nbz = int(numpy.ceil((zmax - zo) / float(dz)))
-                xo -= (dx / 2)
-                yo -= (dy / 2)
-                zo -= (dz / 10) # try to respect zsoil
+                # balance extra-space between both sides of the grid (except z i zsoil has been set)
+                extrax = dx * nbx - (xmax - xo)
+                xo -= (extrax / 2.)
+                extray = dy * nby - (ymax - yo)
+                yo -= (extray / 2.)
+                if self.zsoil is None:
+                    extraz = dz * nbz - (zmax - zo)
+                    zo -= (extraz / 2.) 
 
         # dz for all voxels    
         if self.z_resolution is not None:
