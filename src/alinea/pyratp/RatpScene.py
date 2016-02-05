@@ -377,7 +377,7 @@ class RatpScene(object):
         
         return grid, vox_id, sh_id, s
 
-    def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1):
+    def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1, mu=None):
         """ Run a simulation of light interception for one wavelength
         
             Parameters:            
@@ -392,8 +392,11 @@ class RatpScene(object):
         
         grid, voxel_id, shape_id , areas = self.grid(rsoil=rsoil)
                
-        
-        entities = [{'rf':[rleaf[i]], 'distinc':self.distinc[i], 'mu':self.mu[i]} for i in range(len(rleaf))]
+        print(''.joint(['clumping evaluated:'] + [str(self.mu[i]) for i in range(len(rleaf))]))
+        if mu is None:
+            entities = [{'rf':[rleaf[i]], 'distinc':self.distinc[i], 'mu':self.mu[i]} for i in range(len(rleaf))]
+        else:
+            entities = [{'rf':[rleaf[i]], 'distinc':self.distinc[i], 'mu':mu} for i in range(len(rleaf))]
 
         vegetation = Vegetation.initialise(entities, nblomin=1)
         
