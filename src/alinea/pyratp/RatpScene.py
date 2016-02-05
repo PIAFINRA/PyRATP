@@ -392,7 +392,7 @@ class RatpScene(object):
         
         grid, voxel_id, shape_id , areas = self.grid(rsoil=rsoil)
                
-        print(''.joint(['clumping evaluated:'] + [str(self.mu[i]) for i in range(len(rleaf))]))
+        print(' '.join(['clumping evaluated:'] + [str(self.mu[i]) for i in range(len(rleaf))]))
         if mu is None:
             entities = [{'rf':[rleaf[i]], 'distinc':self.distinc[i], 'mu':self.mu[i]} for i in range(len(rleaf))]
         else:
