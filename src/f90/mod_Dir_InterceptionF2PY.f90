@@ -256,6 +256,7 @@ contains
   do k=1,nveg
   do je=1,nje(k)
    S_detailed(1,je,k)=amax1((riv(k)/xk(k))*leafareadensity(je,k),1.e-08)
+   ! CF 2016: I would have expected S_detailed(1,je,k) = riv(k) * share(je,k)
    S_detailed(0,je,k)=S_vt_vx(je,k)-S_detailed(1,je,k)
    jent=nume(je,k)
    do joe=0,1
