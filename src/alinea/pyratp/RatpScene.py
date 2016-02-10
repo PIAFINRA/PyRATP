@@ -125,7 +125,7 @@ class RatpScene(object):
     timezone = 0 # consider UTC/GMT time for date inputs
     idecaly = 0 
     
-    def __init__(self, scene=None, scene_unit = 'm', toric=False, entity=None, nitrogen=None, area=None, z_soil=None, localisation='Montpellier', grid_shape=None, grid_resolution=None, grid_orientation=0, z_resolution=None, nbincli=9):
+    def __init__(self, scene=None, scene_unit = 'm', toric=False, domain=None, entity=None, nitrogen=None, area=None, z_soil=None, localisation='Montpellier', grid_shape=None, grid_resolution=None, grid_orientation=0, z_resolution=None, nbincli=9):
         """
         Initialise a RatpScene.
         
@@ -133,6 +133,8 @@ class RatpScene(object):
         scene: a PlantGL Scene (list of shapes with ids)
         scene_unit (string): scene length unit ('m', 'cm', ...)
         toric (bool): False (default) if the scene is an isolated canopy, True if the scene is toric, ie simulated as if repeated indefinitvely 
+        domain: a ((xmin, ymin), (xmax, ymax)) tuple of coordinates (in scene units) describing the spatial extent of the toric scene pattern domain.
+                If None (default) the scene bounding box will be taken as the domain
         entity: a {scene_id:entity_key} dict that associate a scene object to an RATP entity. If None (default), all shapes points to entity_code 1.
         nitrogen: a {scene_id:nitrogen_content} dict that associate a scene object to a nitrogen content. If None (default), all got a value of 2
         area: a {scene_id:area} dict that associate a scene object to its 'radiative' (one sided) area (in scene unit). If None (default), object area is used.
@@ -201,6 +203,7 @@ class RatpScene(object):
         #
         self.distinc = []
         self.mu = []
+        self.domain = domain
         
     def fit_grid(self, z_adaptive=False):
         """ Find grid parameters that fit the scene in the RATP grid
@@ -221,36 +224,54 @@ class RatpScene(object):
             if zsoil is None:
                 zsoil = bbox.getZMin() 
             
-            xo = bbox.getXMin() * self.convert # origin    
-            yo = bbox.getYMin() * self.convert 
+            if self.domain is None:
+                xo = bbox.getXMin() * self.convert # origin    
+                yo = bbox.getYMin() * self.convert
+            else:
+                xo = self.domain[0][0] * self.convert
+                yo = self.domain[0][1] * self.convert
             zo = zsoil * self.convert
             
             if self.grid_resolution is not None and self.grid_shape is not None:
                 nbx, nby, nbz = self.grid_shape
                 dx, dy, dz = self.grid_resolution # already in meter
             else:
-                xmax = bbox.getXMax() * self.convert    
-                ymax = bbox.getYMax() * self.convert 
+                if self.domain is None:
+                    xmax = bbox.getXMax() * self.convert    
+                    ymax = bbox.getYMax() * self.convert
+                else:
+                    xmax = self.domain[1][0] * self.convert
+                    ymax = self.domain[1][1] * self.convert
                 zmax = bbox.getZMax() * self.convert
                 if self.grid_resolution is None:
                     nbx, nby, nbz = self.grid_shape
-                    if nbx > 1:
-                        dx = (xmax - xo) / float(nbx - 1)# use nbx -1 to ensure min and max are in the grid 
+                    if self.domain is None:
+                        if nbx > 1:
+                            dx = (xmax - xo) / float(nbx - 1)# use nbx -1 to ensure min and max are in the grid 
+                        else:
+                            dx = (xmax - xo) * 1.01
+                        if nby > 1:
+                            dy = (ymax - yo) / float(nby - 1)
+                        else:
+                            dy = (ymax - yo) * 1.01
                     else:
-                        dx = (xmax - xo) * 1.01
-                    if nby > 1:
-                        dy = (ymax - yo) / float(nby - 1)
-                    else:
-                        dy = (ymax - yo) * 1.01
+                        dx = (xmax - xo) / float(nbx) #toric canopies allows coordinate outside the pattern
+                        dy = (ymax - yo) / float(nby)
                     if nbz > 1:
                         dz = (zmax - zo) / float(nbz - 1)
                     else:
                         dz = (zmax - zo) * 1.01
                 if self.grid_shape is None: 
                     dx, dy, dz = self.grid_resolution
-                    nbx = int(numpy.ceil((xmax - xo) / float(dx)))
-                    nby = int(numpy.ceil((ymax - yo) / float(dy)))
-                    nbz = int(numpy.ceil((zmax - zo) / float(dz)))
+                    if self.domain is None:
+                        nbx = int(numpy.ceil((xmax - xo) / float(dx)))
+                        nby = int(numpy.ceil((ymax - yo) / float(dy)))
+                    else: #dx,dy,dz are adjusted to fit the domain exactly
+                        nbx = int((xmax - xo) / float(dx))
+                        nby = int((ymax - yo) / float(dy))
+                        dx = (xmax - xo) / float(nbx)
+                        dy = (ymax - yo) / float(nby)
+                    nbz = int(numpy.ceil((zmax - zo) / float(dz)))    
                 # balance extra-space between both sides of the grid (except z i zsoil has been set)
                 extrax = dx * nbx - (xmax - xo)
                 xo -= (extrax / 2.)
