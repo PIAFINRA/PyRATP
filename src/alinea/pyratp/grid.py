@@ -135,7 +135,7 @@ class Grid(object):
         grid3d.rs = np.array(rs, dtype=np.float)
 
         # isolated or toric scene ?
-        grid3d.int_isolated_box = int(toric)
+        grid3d.int_isolated_box = int(not toric)
         # definition of aliases
 
         Grid.initParam(grid3d)
@@ -390,7 +390,7 @@ class Grid(object):
             Grid.initParam(grid)
 
             # check that coordinates fit in the grid
-            toric = bool(grid.int_isolated_box)
+            toric = not bool(grid.int_isolated_box)
             Jx, Jy, Jz = grid_index(x, y, z, grid, toric)
             if any(np.in1d(-1, Jx)):
                 raise ValueError('Some x coordinates fail outside the grid boundaries, consider increasing grid size, change grid origin or use toric option')
