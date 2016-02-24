@@ -7,7 +7,7 @@ from alinea.pyratp import micrometeo
 from alinea.pyratp import runratp
 from alinea.pyratp import mtg_extract
 from alinea.pyratp import can2riri
-from alinea.pyratp.RATP2VTK import RATP2VTK 
+from alinea.pyratp.RATP2VTK import RATP2VTK
 from alinea.pyratp.RATP2VTK import RATPVOXELS2VTK
 from alinea.pyratp.RATP2VTK import PlantGL2VTK
 from alinea.pyratp import Nallocate
@@ -68,6 +68,7 @@ class ExtractTime(ExtractColumn):
     Air Temperature
     Photosynthesis
     Transpiration
+    Leaf Surface Area
     """.split('\n')
     header = [x.strip() for x in header]
     index = range(len(header))
