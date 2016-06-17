@@ -23,10 +23,15 @@ def voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True):
     """ return coordinates of points relative to voxel origin
         If normalise = true, coordinates are normalised by voxel dimensions
     """
+    # scene dimensions
+    delta_x = grid.njx * grid.dx
+    delta_y = grid.njy * grid.dy
+    delta_z = grid.dz.sum()
+    #
     kvox = [mapping[str(i)] for i in range(len(x))]
-    xv = numpy.array(x) - grid.xorig - numpy.array([(grid.numx[k] - 1) * grid.dx for k in kvox])
-    yv = numpy.array(y) - grid.yorig - numpy.array([(grid.njy - grid.numy[k]) * grid.dy for k in kvox])
-    zv = numpy.array(z) + grid.zorig - numpy.array([grid.dz.sum() - grid.dz[:grid.numz[k]].sum() for k in kvox])
+    xv = (numpy.array(x) - grid.xorig) % delta_x - numpy.array([(grid.numx[k] - 1) * grid.dx for k in kvox])
+    yv = (numpy.array(y) - grid.yorig) % delta_y - numpy.array([(grid.njy - grid.numy[k]) * grid.dy for k in kvox])
+    zv = (numpy.array(z) + grid.zorig) % delta_z - numpy.array([grid.dz.sum() - grid.dz[:grid.numz[k]].sum() for k in kvox])
     # normalising voxel dimensions
     if normalise:
         xv /= grid.dx
