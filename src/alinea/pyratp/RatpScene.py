@@ -386,19 +386,27 @@ class RatpScene(object):
         df = pandas.DataFrame({'entity':[self.entity[sid] for sid in sh_id], 'inc':orientation})
         self.distinc = df.sort('entity').groupby('entity').apply(_dist).tolist()
 
-        # compute clumping : supperpose all non-empty voxel contents and compute 3D dispersion index
+        # compute clumping : compute 3D dispersion index of all voxels with at least two points
         # (a valider avec marc)
         # coordinates of points within voxels
         xv, yv, zv = voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True)
-        data = pandas.DataFrame({'entity':entity, 'x':xv, 'y':yv, 'z':zv, 's':s})        
+        kvox = [mapping[str(i)] for i in range(len(x))]
+        data = pandas.DataFrame({'entity':entity, 'x':xv, 'y':yv, 'z':zv, 's':s, 'kvox':kvox})        
         mu = []
         grouped = data.groupby('entity')
         for e in range(nent):
-            df = grouped.get_group(e)
-            nvox_e = grid.voxel_canopy[e]
-            min_mu = df['s'].mean() / (df['s'].sum() / nvox_e) # minimal mu in the case of perfect clumping
-            clumping = clark_evans(zip(df['x'], df['y'], df['z']), ((0,0,0),(1,1,1)))
-            mu.append(max(min_mu, clumping))
+            dfe = grouped.get_group(e)
+            gvox = dfe.groupby('kvox')
+            clumps=[]
+            for k, df in gvox: 
+                if len(df) > 0:
+                    min_mu = df['s'].mean() / df['s'].sum() # minimal mu in the case of perfect clumping
+                    if len(df) > 1:
+                        clumping = clark_evans(zip(df['x'], df['y'], df['z']), ((0,0,0),(1,1,1)))
+                        clumps.append(max(min_mu, clumping))
+                    else:
+                        clumps.append(min_mu)
+            mu.append(numpy.mean(clumps))
         self.mu = mu
         
         return grid, vox_id, sh_id, s
