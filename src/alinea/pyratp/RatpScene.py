@@ -39,6 +39,31 @@ def voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True):
         zv /= numpy.array([grid.dz[grid.numz[k] - 1] for k in kvox])
     
     return xv, yv, zv 
+ 
+
+def estimate_clumping(entity, x, y, z, s, mapping, grid, normalise = True)
+    # compute clumping : compute 3D dispersion index of all voxels with at least two points
+    # (a valider avec marc)
+    # coordinates of points within voxels
+    xv, yv, zv = voxel_relative_coordinates(x, y, z, mapping, grid, normalise = normalise)
+    kvox = [mapping[str(i)] for i in range(len(x))]
+    data = pandas.DataFrame({'entity':entity, 'x':xv, 'y':yv, 'z':zv, 's':s, 'kvox':kvox})        
+    mu = []
+    grouped = data.groupby('entity')
+    for e in range(nent):
+        dfe = grouped.get_group(e)
+        gvox = dfe.groupby('kvox')
+        clumps=[]
+        for k, df in gvox: 
+            if len(df) > 0:
+                min_mu = df['s'].mean() / df['s'].sum() # minimal mu in the case of perfect clumping
+                if len(df) > 1:
+                    clumping = clark_evans(zip(df['x'], df['y'], df['z']), ((0,0,0),(1,1,1)))
+                    clumps.append(max(min_mu, clumping))
+                else:
+                    clumps.append(min_mu)
+        mu.append(numpy.mean(clumps))
+    return mu
 
 class ColorMap(object):
     """A RGB color map, between 2 colors defined in HSV code
@@ -385,29 +410,8 @@ class RatpScene(object):
             return dist.astype('float') / dist.sum()
         df = pandas.DataFrame({'entity':[self.entity[sid] for sid in sh_id], 'inc':orientation})
         self.distinc = df.sort('entity').groupby('entity').apply(_dist).tolist()
-
-        # compute clumping : compute 3D dispersion index of all voxels with at least two points
-        # (a valider avec marc)
-        # coordinates of points within voxels
-        xv, yv, zv = voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True)
-        kvox = [mapping[str(i)] for i in range(len(x))]
-        data = pandas.DataFrame({'entity':entity, 'x':xv, 'y':yv, 'z':zv, 's':s, 'kvox':kvox})        
-        mu = []
-        grouped = data.groupby('entity')
-        for e in range(nent):
-            dfe = grouped.get_group(e)
-            gvox = dfe.groupby('kvox')
-            clumps=[]
-            for k, df in gvox: 
-                if len(df) > 0:
-                    min_mu = df['s'].mean() / df['s'].sum() # minimal mu in the case of perfect clumping
-                    if len(df) > 1:
-                        clumping = clark_evans(zip(df['x'], df['y'], df['z']), ((0,0,0),(1,1,1)))
-                        clumps.append(max(min_mu, clumping))
-                    else:
-                        clumps.append(min_mu)
-            mu.append(numpy.mean(clumps))
-        self.mu = mu
+        # estimate clumping
+        self.mu = estimate_clumping(entity, x, y, z, s, mapping, grid)
         
         return grid, vox_id, sh_id, s
 
