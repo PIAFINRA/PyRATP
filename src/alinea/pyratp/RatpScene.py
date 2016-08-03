@@ -411,7 +411,7 @@ class RatpScene(object):
         
         return grid, vox_id, sh_id, s
 
-    def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1, mu=None):
+    def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1, mu=None, sources=None):
         """ Run a simulation of light interception for one wavelength
         
             Parameters:            
@@ -421,6 +421,8 @@ class RatpScene(object):
                 - hour : [list of] decimal hour (0-24) [for the different iterations]
                 - Rglob : [list of] global (direct + diffuse) radiation [for the different iterations] (W.m-2)
                 - Rdif : [list of] direct/diffuse radiation ratio [for the different iterations] (0-1)
+                - sources: a list of sequences giving elevation, azimuth, steradians and weights of sky vault.
+                if None, default RATP soc skyvault is used
 
         """
         
@@ -434,8 +436,12 @@ class RatpScene(object):
 
         vegetation = Vegetation.initialise(entities, nblomin=1)
         
-        sky = Skyvault.initialise()
-        
+        if sources == None:
+            sky = Skyvault.initialise()
+        else:
+            el, az, strd, w = sources
+            sky = Skyvault.initialise(hmoy=el, azmoy=az, omega=strd, pc=w)
+            
         met = MicroMeteo.initialise(doy=doy, hour=hour, Rglob=Rglob, Rdif=Rdif)
 
         res = runRATP.DoIrradiation(grid, vegetation, sky, met)
