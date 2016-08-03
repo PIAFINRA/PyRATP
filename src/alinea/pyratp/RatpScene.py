@@ -41,7 +41,7 @@ def voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True):
     return xv, yv, zv 
  
 
-def estimate_clumping(entity, x, y, z, s, mapping, grid, nent, normalise = True):
+def estimate_clumping(entity, x, y, z, s, mapping, grid, normalise = True):
     # compute clumping : compute 3D dispersion index of all voxels with at least two points
     # (a valider avec marc)
     # coordinates of points within voxels
@@ -50,7 +50,7 @@ def estimate_clumping(entity, x, y, z, s, mapping, grid, nent, normalise = True)
     data = pandas.DataFrame({'entity':entity, 'x':xv, 'y':yv, 'z':zv, 's':s, 'kvox':kvox})        
     mu = []
     grouped = data.groupby('entity')
-    for e in range(nent):
+    for e in range(grid.nent):
         dfe = grouped.get_group(e)
         gvox = dfe.groupby('kvox')
         clumps=[]
@@ -411,7 +411,7 @@ class RatpScene(object):
         df = pandas.DataFrame({'entity':[self.entity[sid] for sid in sh_id], 'inc':orientation})
         self.distinc = df.sort('entity').groupby('entity').apply(_dist).tolist()
         # estimate clumping
-        self.mu = estimate_clumping(entity, x, y, z, s, mapping, grid, nent)
+        self.mu = estimate_clumping(entity, x, y, z, s, mapping, grid)
         
         return grid, vox_id, sh_id, s
 
