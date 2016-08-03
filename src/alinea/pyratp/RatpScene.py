@@ -41,7 +41,7 @@ def voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True):
     return xv, yv, zv 
  
 
-def estimate_clumping(entity, x, y, z, s, mapping, grid, normalise = True)
+def estimate_clumping(entity, x, y, z, s, mapping, grid, normalise = True):
     # compute clumping : compute 3D dispersion index of all voxels with at least two points
     # (a valider avec marc)
     # coordinates of points within voxels
