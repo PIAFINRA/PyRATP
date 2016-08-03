@@ -21,8 +21,8 @@ class runRATP(object):
     def DoAll(*args):
         ratp = pyratp.ratp
         pyratp.dir_interception.scattering = False
-        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*22*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent,22)
-        ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*9*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,9)
+        ratp.out_time_spatial = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*22*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent,22) 
+        ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*8*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,8)
         if platform.system() == 'Windows':
             path = 'c:/tmpRATP'
             if os.path.exists(path):
@@ -52,7 +52,7 @@ class runRATP(object):
         np.savetxt(fspatial,ratp.out_time_spatial,'%.6e')
         fspatial.close()
         ftree = open(path+"/Resul"+'/tree.txt','w')
-        ftree.write('ntime  day   hour  VegetationType  TotalIrradiation  AirTemperature  TreePhotosynthesis  TreeTranspiration  LeafSurfaceArea')
+        ftree.write('ntime  day   hour  VegetationType  TotalIrradiation  AirTemperature  TreePhotosynthesis  TreeTranspiration')
         ftree.write('\n')
         np.savetxt(ftree,ratp.out_time_tree,'%.6e')
         ftree.close()
@@ -142,21 +142,17 @@ class runRATP(object):
     def DoIrradiation(*args):
         ratp = pyratp.ratp
         ratp.out_rayt = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*9*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,9)
-
+        pyratp.ratp.do_interception()
+        
         if platform.system() == 'Windows':
             path = 'c:/tmpRATP'
             if os.path.exists(path):
                 shutil.rmtree(path)
             os.mkdir(path)
-        else :
-            path = tempfile.mkdtemp()
-        os.mkdir(path+"/ResulIrradiation")
-        pyratp.ratp.do_interception()
-
-        fspatial = open(path+"/ResulIrradiation"+'/spatial.txt','w')
-        fspatial.write('VegetationType  Iteration day hour  VoxelId ShadedPAR SunlitPAR ShadedArea  SunlitArea')
-        fspatial.write('\n')
-        np.savetxt(fspatial,ratp.out_rayt,'%.6e')
-        fspatial.close()
+            fspatial = open(path+"/ResulIrradiation"+'/spatial.txt','w')
+            fspatial.write('VegetationType  Iteration day hour  VoxelId ShadedPAR SunlitPAR ShadedArea  SunlitArea')
+            fspatial.write('\n')
+            np.savetxt(fspatial,ratp.out_rayt,'%.6e')
+            fspatial.close()
 
         return ratp.out_rayt
