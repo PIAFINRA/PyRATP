@@ -148,7 +148,7 @@ class runRATP(object):
             path = 'c:/tmpRATP'
             if os.path.exists(path):
                 shutil.rmtree(path)
-                os.mkdir(path)
+            os.mkdir(path)
             os.mkdir(path+"/ResulIrradiation")
             fspatial = open(path+"/ResulIrradiation"+'/spatial.txt','w')
             fspatial.write('VegetationType  Iteration day hour  VoxelId ShadedPAR SunlitPAR ShadedArea  SunlitArea')
