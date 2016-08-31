@@ -28,15 +28,15 @@ def voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True):
     delta_y = grid.njy * grid.dy
     delta_z = grid.dz.sum()
     #
-    kvox = [mapping[str(i)] for i in range(len(x))]
-    xv = (numpy.array(x) - grid.xorig) % delta_x - numpy.array([(grid.numx[k] - 1) * grid.dx for k in kvox])
-    yv = (numpy.array(y) - grid.yorig) % delta_y - numpy.array([(grid.njy - grid.numy[k]) * grid.dy for k in kvox])
-    zv = (numpy.array(z) + grid.zorig) % delta_z - numpy.array([grid.dz.sum() - grid.dz[:grid.numz[k]].sum() for k in kvox])
+    kvox = [int(mapping[str(i)]) for i in range(len(x))]
+    xv = (numpy.array(x) - grid.xorig) % delta_x - numpy.array([int((grid.numx[k] - 1) * grid.dx) for k in kvox])
+    yv = (numpy.array(y) - grid.yorig) % delta_y - numpy.array([int((grid.njy - grid.numy[k]) * grid.dy) for k in kvox])
+    zv = (numpy.array(z) + grid.zorig) % delta_z - numpy.array([int(grid.dz.sum() - grid.dz[:grid.numz[k]].sum()) for k in kvox])
     # normalising voxel dimensions
     if normalise:
         xv /= grid.dx
         yv /= grid.dy
-        zv /= numpy.array([grid.dz[grid.numz[k] - 1] for k in kvox])
+        zv /= numpy.array([grid.dz[int(grid.numz[k] - 1)] for k in kvox])
     
     return xv, yv, zv 
  
@@ -409,7 +409,7 @@ class RatpScene(object):
             dist = numpy.histogram(inc, self.nbincli, (0,90))[0]
             return dist.astype('float') / dist.sum()
         df = pandas.DataFrame({'entity':[self.entity[sid] for sid in sh_id], 'inc':orientation})
-        self.distinc = df.sort('entity').groupby('entity').apply(_dist).tolist()
+        self.distinc = df.sort_values('entity').groupby('entity').apply(_dist).tolist()
         # estimate clumping
         self.mu = estimate_clumping(entity, x, y, z, s, mapping, grid)
         
@@ -469,7 +469,7 @@ class RatpScene(object):
         dfmap = pandas.DataFrame({'primitive_index': index,'shape_id': shape_id, 'VoxelId':voxel_id, 'VegetationType':[self.entity[sh_id] for sh_id in shape_id], 'primitive_area':areas})
     
         output = pandas.merge(dfmap, dfvox)
-        output =  output.sort('primitive_index') # sort is needed to ensure matching with triangulation indices
+        output =  output.sort_values('primitive_index') # sort is needed to ensure matching with triangulation indices
         
         return output
       
