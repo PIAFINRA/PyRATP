@@ -291,6 +291,13 @@ class RatpScene(object):
                         dz = (zmax - zo) / float(nbz - 1)
                     else:
                         dz = (zmax - zo) * 1.01
+                    # try to accomodate flat scene
+                    if dz == 0:
+                        dz = (dx + dy) / 2.
+                    if dx == 0:
+                        dx = (dy + dz) / 2.
+                    if dy == 0:
+                        dy = (dx + dz) / 2.
                 if self.grid_shape is None: 
                     dx, dy, dz = self.grid_resolution
                     if self.domain is None:
