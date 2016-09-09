@@ -419,6 +419,8 @@ class RatpScene(object):
         self.distinc = df.sort_values('entity').groupby('entity').apply(_dist).tolist()
         # estimate clumping
         self.mu = estimate_clumping(entity, x, y, z, s, mapping, grid)
+        if any(map(numpy.isnan, self.mu)):
+            raise ValueError('Cannot estimate mu')
         
         return grid, vox_id, sh_id, s
 
