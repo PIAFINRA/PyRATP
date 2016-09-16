@@ -56,12 +56,13 @@ def estimate_clumping(entity, x, y, z, s, mapping, grid, normalise = True):
         clumps=[]
         for k, df in gvox: 
             if len(df) > 0:
-                min_mu = df['s'].mean() / df['s'].sum() # minimal mu in the case of perfect clumping
-                if len(df) > 1:
-                    clumping = clark_evans(zip(df['x'], df['y'], df['z']), ((0,0,0),(1,1,1)))
-                    clumps.append(max(min_mu, clumping))
-                else:
-                    clumps.append(min_mu)
+                if df['s'].sum() > 0:
+                    min_mu = df['s'].mean() / df['s'].sum() # minimal mu in the case of perfect clumping
+                    if len(df) > 1:
+                        clumping = clark_evans(zip(df['x'], df['y'], df['z']), ((0,0,0),(1,1,1)))
+                        clumps.append(max(min_mu, clumping))
+                    else:
+                        clumps.append(min_mu)
         mu.append(numpy.mean(clumps))
     return mu
 
