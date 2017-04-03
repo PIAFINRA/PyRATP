@@ -77,6 +77,19 @@ def grid_index(x, y, z, grid, toric=True):
     return map(lambda x: x.astype(int).tolist(), [jx, jy, jz])
 
 
+def decode_index(numx, numy, numz, grid):
+    """Compute x,y,z coordinate in input scene coordinate system of voxels centers
+     from fortran indices of a cell in the ratp grid"""
+
+    jx, jy, jz = numx - 1, numy - 1, numz - 1
+    x = grid.xorig + grid.dx * (jx + 0.5)
+    y = grid.yorig + grid.njy * grid.dy - grid.dy * (jy + 0.5)
+    dz = np.array([0.5 * (grid.dz[:(ijz)].sum() + grid.dz[:(ijz + 1)].sum()) for ijz in jz])
+    z = -grid.zorig + grid.dz.sum() - dz
+    return x, y, z
+
+
+
 class Grid(object):
     """A python class interface to pyratp grid3d object
     """

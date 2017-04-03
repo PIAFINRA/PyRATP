@@ -1,4 +1,4 @@
-from alinea.pyratp.grid import Grid, grid_index
+from alinea.pyratp.grid import Grid, grid_index, decode_index
 import numpy
 
 
@@ -32,6 +32,9 @@ def test_grid_index():
     expected = ([0, 1], [1,0], [1,0])
     computed = grid_index(x, y, z, grid, toric=False)
     numpy.testing.assert_array_equal(computed, expected, 'Centers of voxel have not been positioned in the corect RATP voxel')
+    jx, jy, jz = map(numpy.array, computed)
+    decoded = decode_index(jx + 1, jy + 1, jz + 1, grid)
+    numpy.testing.assert_array_equal(decoded, (x, y, z), 'bad decoding')
 
     # test x,y,z cell boundaries, non toric
     boundaries = numpy.arange(0, 1.5, 0.5)

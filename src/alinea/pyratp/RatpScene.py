@@ -8,7 +8,7 @@
 import numpy
 import pandas
 
-from alinea.pyratp.grid import Grid
+from alinea.pyratp.grid import Grid, decode_index
 from alinea.pyratp.skyvault import Skyvault
 from alinea.pyratp.vegetation import Vegetation
 from alinea.pyratp.micrometeo import MicroMeteo
@@ -402,14 +402,22 @@ class RatpScene(object):
         grid_pars.update({'rs':rsoil,'nent':nent})
         
         grid = Grid.initialise(**grid_pars)
-        grid, mapping = Grid.fill_1(entity, x, y, z, s, n, grid) # mapping is a {str(python_x_list_index) : python_k_gridvoxel_index}
-        
-        # in RATP output, VoxelId is for the fortran_k_voxel_index (starts at 1, cf prog_RATP.f90, lines 489 and 500)
+        # store parameters for provenance
+        self.grid_pars = grid_pars
 
+        grid, mapping = Grid.fill_1(entity, x, y, z, s, n, grid) # mapping is a {str(python_x_list_index) : python_k_gridvoxel_index}
+        # in RATP output, VoxelId is for the fortran_k_voxel_index (starts at 1, cf prog_RATP.f90, lines 489 and 500)
         index = range(len(x))
         vox_id = [mapping[str(i)] + 1 for i in index]
         # and one additional map that allows retrieving shape_id from python_x_index
         sh_id = [sh_id[i] for i in index]
+
+        # save coordinates of centers of filled voxels
+        xc, yc, zc = decode_index(grid.numx[:grid.nveg], grid.numy[:grid.nveg],
+                                  grid.numz[:grid.nveg], grid)
+        self.voxel_map = pandas.DataFrame(
+            {'VoxelId': range(1, grid.nveg + 1), 'x': xc, 'y': yc,
+             'z': zc})
         
         # compute distributions of orientation
         orientation = numpy.degrees(numpy.abs(theta)) % 90
@@ -417,13 +425,16 @@ class RatpScene(object):
             dist = numpy.histogram(inc, self.nbincli, (0,90))[0]
             return dist.astype('float') / dist.sum()
         df = pandas.DataFrame({'entity':[self.entity[sid] for sid in sh_id], 'inc':orientation})
+        self.inc_data = df
         self.distinc = df.sort_values('entity').groupby('entity').apply(_dist).tolist()
+
         # estimate clumping
         self.mu = estimate_clumping(entity, x, y, z, s, mapping, grid)
         if any(map(numpy.isnan, self.mu)):
             raise ValueError('Cannot estimate mu')
         
         return grid, vox_id, sh_id, s
+
 
     def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1, mu=None, sources=None):
         """ Run a simulation of light interception for one wavelength
@@ -476,13 +487,24 @@ class RatpScene(object):
                             })
         dfvox = dfvox[dfvox['VegetationType'] > 0]
         index = range(len(voxel_id))
-        dfmap = pandas.DataFrame({'primitive_index': index,'shape_id': shape_id, 'VoxelId':voxel_id, 'VegetationType':[self.entity[sh_id] for sh_id in shape_id], 'primitive_area':areas})
+        dfmap = pandas.DataFrame(
+            {'primitive_index': index, 'shape_id': shape_id,
+             'VoxelId': voxel_id,
+             'VegetationType': [self.entity[sh_id] for sh_id in shape_id],
+             'primitive_area': areas})
     
         output = pandas.merge(dfmap, dfvox)
-        output =  output.sort_values('primitive_index') # sort is needed to ensure matching with triangulation indices
+        output = output.sort_values('primitive_index') # sort is needed to ensure matching with triangulation indices
         
         return output
-      
+
+    def voxel_light_map(self, output):
+        """ Return RATP area and light map"""
+        df = output.loc[:,['VegetationType', 'Iteration', 'day', 'hour', 'VoxelId', 'ShadedPAR',
+        'SunlitPAR', 'ShadedArea', 'SunlitArea', 'Area', 'PAR']].drop_duplicates(subset=('Iteration','VoxelId'))
+        return pandas.merge(df, self.voxel_map)
+
+
     def aggregate_light(self, output, spatial = True, temporal = True):
         """ Aggregate light outputs
         """
