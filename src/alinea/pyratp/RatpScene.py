@@ -8,7 +8,7 @@
 import numpy
 import pandas
 
-from alinea.pyratp.grid import Grid, decode_index
+from alinea.pyratp.grid import Grid, voxel_map
 from alinea.pyratp.skyvault import Skyvault
 from alinea.pyratp.vegetation import Vegetation
 from alinea.pyratp.micrometeo import MicroMeteo
@@ -413,11 +413,7 @@ class RatpScene(object):
         sh_id = [sh_id[i] for i in index]
 
         # save coordinates of centers of filled voxels
-        xc, yc, zc = decode_index(grid.numx[:grid.nveg], grid.numy[:grid.nveg],
-                                  grid.numz[:grid.nveg], grid)
-        self.voxel_map = pandas.DataFrame(
-            {'VoxelId': range(1, grid.nveg + 1), 'x': xc, 'y': yc,
-             'z': zc})
+        self.voxel_map = voxel_map(grid)
         
         # compute distributions of orientation
         orientation = numpy.degrees(numpy.abs(theta)) % 90
@@ -486,29 +482,22 @@ class RatpScene(object):
                             'PAR': (ShadedPAR * ShadedArea + SunlitPAR * SunlitArea) / (ShadedArea + SunlitArea) / 4.6, 
                             })
         dfvox = dfvox[dfvox['VegetationType'] > 0]
+        dfvox = pandas.merge(dfvox, self.voxel_map.loc[:,
+                                    ('VoxelId', 'x', 'y', 'z', 'Volume')])
         index = range(len(voxel_id))
         dfmap = pandas.DataFrame(
             {'primitive_index': index, 'shape_id': shape_id,
              'VoxelId': voxel_id,
              'VegetationType': [self.entity[sh_id] for sh_id in shape_id],
              'primitive_area': areas})
-    
-        output = pandas.merge(dfmap, dfvox)
-        output = output.sort_values('primitive_index') # sort is needed to ensure matching with triangulation indices
-        
-        return output
 
-    def voxel_light_map(self, output):
-        """ Return RATP area and light map"""
-        df = output.loc[:,['VegetationType', 'Iteration', 'day', 'hour', 'VoxelId', 'ShadedPAR',
-        'SunlitPAR', 'ShadedArea', 'SunlitArea', 'Area', 'PAR']].drop_duplicates(subset=('Iteration','VoxelId'))
-        return pandas.merge(df, self.voxel_map)
+        return dfvox, dfmap
 
 
-    def aggregate_light(self, output, spatial = True, temporal = True):
+    def aggregate_light(self, dfvox, dfmap, spatial = True, temporal = True):
         """ Aggregate light outputs
         """
-        
+        output = pandas.merge(dfmap, dfvox)
         res = output
         
         def _process(df):
@@ -539,7 +528,9 @@ class RatpScene(object):
             
         return res
       
-    def plot(self, output, minval=None, maxval=None):
+    def plot(self, dfvox, dfmap, minval=None, maxval=None):
+        output = pandas.merge(dfmap, dfvox)
+        output = output.sort_values('primitive_index') # sort is needed to ensure matching with triangulation indices
         par = output['PAR']
         if minval is None:
             minval = min(par)

@@ -89,6 +89,18 @@ def decode_index(numx, numy, numz, grid):
     return x, y, z
 
 
+def voxel_map(grid):
+    if grid.nveg == 0:
+        return None
+    index = np.arange(1, grid.nveg + 1)
+    xc, yc, zc = decode_index(grid.numx[:grid.nveg], grid.numy[:grid.nveg],
+                              grid.numz[:grid.nveg], grid)
+    lad = grid.leafareadensity[::, :grid.nveg].sum(axis=0)
+    area = grid.s_vx[:grid.nveg]
+    return pandas.DataFrame(
+        {'VoxelId': index, 'x': xc, 'y': yc, 'z': zc, 'Area': area,
+         'Volume': area / lad})
+
 
 class Grid(object):
     """A python class interface to pyratp grid3d object
