@@ -9,9 +9,7 @@ import numpy as np
 import os
 import shutil
 import tempfile
-import sys
 import grid
-import subprocess
 import platform
 
 class runRATP(object):
@@ -25,8 +23,8 @@ class runRATP(object):
         ratp.out_time_tree = np.zeros(pyratp.micrometeo.nbli*8*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nent ,8)
         if platform.system() == 'Windows':
             path = 'c:/tmpRATP'
-            if os.path.exists(path):
-                shutil.rmtree(path)
+            if os.path.exists(os.path.normpath(path)):
+                shutil.rmtree(os.path.normpath(path))
             os.mkdir(path)
         else :
             path = tempfile.mkdtemp()
@@ -146,8 +144,8 @@ class runRATP(object):
         
         if platform.system() == 'Windows':
             path = 'c:/tmpRATP'
-            if os.path.exists(path):
-                shutil.rmtree(path)
+            if os.path.exists(os.path.normpath(path)):
+                shutil.rmtree(os.path.normpath(path))
             os.mkdir(path)
             os.mkdir(path+"/ResulIrradiation")
             fspatial = open(path+"/ResulIrradiation"+'/spatial.txt','w')
