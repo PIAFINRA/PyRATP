@@ -389,7 +389,7 @@ class Grid(object):
 
         else:
             #gridToVGX(grid,"c:/","gridVGX.vgx") #Save grid in VGX format
-           return grid, d_E2V #_importgrid(grid)
+            return grid, {} #_importgrid(grid)
 
 
     @staticmethod
@@ -431,79 +431,92 @@ class Grid(object):
             if s.min() < 0.:
                 raise ValueError('Negative area value is prohibited')
 
-            grid.nemax = 1
-            grid.n_canopy = (n * s).sum()
-            grid.s_canopy = s.sum()
-             # sum the surface of each element of the same entity
-            for i in range(grid.nent):
-                grid.s_vt[i] = s[entity==i].sum()
-            #Relation Voxel2entite
-            d_E2V = {} #entity id to voxel id
-
-
-            dx, dy , dz = grid.dx, grid.dy, grid.dz
-            k = 0
-            for i in range(np.alen(x)):
-                jx, jy, jz = Jx[i], Jy[i], Jz[i]
-             #Cas ou il n'y avait encore rien dans la cellule (jx,jy,jz)
-                if grid.kxyz[jx, jy, jz] == 0 :
-                     grid.kxyz[jx, jy, jz] = k + 1 #ajouter 1 pour utilisation f90
-                     grid.numx[k] = jx + 1 #ajouter 1 pour utilisation f90
-                     grid.numy[k] = jy + 1 #ajouter 1 pour utilisation f90
-                     grid.numz[k] = jz + 1 #ajouter 1 pour utilisation f90
-                     grid.nje[k] = 1
-                     grid.nume[0,k] = entity[i] + 1
-
-                     grid.leafareadensity[0,k] = s[i] / (dx * dy * dz[jz])
-                     grid.s_vt_vx[0,k] = s[i]
-                     grid.s_vx[k] = s[i]
-                     grid.n_detailed[0,k] = n[i]
-                     d_E2V[str(i)] = float(k)
-##                     d_E2V[i] = k
-                     k=k+1
-                else:
-                  #    Cas ou il y avait deja quelque chose dans la cellule [jx,jy,jz]
-
-                    kk = grid.kxyz[jx,jy,jz] - 1 #retirer 1 pour compatiblite python
-                    je = 0
-                    while (grid.nume[je,kk] != (entity[i] + 1) and (je + 1) <= grid.nje[kk]):
-                        je = je + 1
-
-                    grid.leafareadensity[je,kk] = grid.leafareadensity[je,kk] + s[i] / (dx * dy * dz[jz])
-
-                    grid.n_detailed[je,kk] = (grid.n_detailed[je,kk] * grid.s_vt_vx[je,kk] + n[i] * s[i]) / (grid.s_vt_vx[je,kk] + s[i])
-    ##                grid.toto[je,kk]=(grid.n_detailed[je,kk]*grid.s_vt_vx[je,kk]+n[i]*s[i])/(grid.s_vt_vx[je,kk]+s[i])
-                    grid.s_vt_vx[je,kk] = grid.s_vt_vx[je,kk] + s[i]
-                    grid.s_vx[kk] = grid.s_vx[kk] + s[i]
-                    grid.nje[kk] = max(je + 1, grid.nje[kk])
-                    grid.nemax = max(grid.nemax, grid.nje[kk])
-                    grid.nume[je,kk] = entity[i] + 1
-                    d_E2V[str(i)] = float(kk)
-##                    d_E2V[i] = kk
-
-
-            grid.nveg=k
-            grid.nsol=grid.njx*grid.njy   # Numbering soil surface areas
-            for jx in range(grid.njx):
-                for jy in range(grid.njy):
-                    grid.kxyz[jx,jy,grid.njz] = grid.njy * jx + jy + 1
-            grid.n_canopy = grid.n_canopy / grid.s_canopy
-
-            for k in range(grid.nveg):
-                for je in range(grid.nje[k]):
-                    if je == 0:
-                        grid.volume_canopy[grid.nent] = grid.volume_canopy[grid.nent] + dx * dy * dz[grid.numz[k] - 1]  # Incrementing total canopy volume
-                    if  grid.s_vt_vx[je,k] > 0. :
-                        grid.volume_canopy[grid.nume[je,k] - 1] = grid.volume_canopy[grid.nume[je,k] - 1] + dx * dy * dz[grid.numz[k] - 1]
-                        grid.voxel_canopy[grid.nume[je,k] - 1] = grid.voxel_canopy[grid.nume[je,k] - 1] + 1
-
-##            _savegrid(grid,d_E2V,"c:/matGridRATP_Strasbourg.mat") #appel de la procedure savegrid (voir plus bas)
-##            gridToVGX(grid,"C:/Users/msaudreau/Desktop/Weiwei_Work/","gridVGX.vgx") #Save grid in VGX format
-            return grid, d_E2V
+            return Grid.fill_from_index(entity, Jx, Jy, Jz, s, n, grid)
 
         else:
             #gridToVGX(grid,"c:/","gridVGX.vgx") #Save grid in VGX format
-           return grid, d_E2V #_importgrid(grid)
+            return grid, {} #_importgrid(grid)
+
+    @staticmethod
+    def fill_from_index(entity, Jx, Jy, Jz, s, n, grid):
+        """ Filling the 3D Grid with index of cell grid, area and nitrogen.
+        Input::Parameters:
+            - entity: array of vegetation type indices (integer).
+            Indices are expected in python syle: indices 0 to n-1 encode RATP
+            vegetation types 1 to n
+            - Jx,Jy,Jz: arrays of grid cell indices (int)
+            - s: array of leaf area in m2 (real)
+            - n: array of nitrogen content in g/m2    (real)
+            - grid: object grid (see readgrid method)
+
+        Output:Parameters:
+            - grid: object grid updated (i.e. filled with leaves)
+            - D_E2V: connectivity table Leaf -> Voxel
+        """
+
+        grid.nemax = 1
+        grid.n_canopy = (n * s).sum()
+        grid.s_canopy = s.sum()
+         # sum the surface of each element of the same entity
+        for i in range(grid.nent):
+            grid.s_vt[i] = s[entity==i].sum()
+        #Relation Voxel2entite
+        d_E2V = {} # entity id to voxel id
+
+        dx, dy , dz = grid.dx, grid.dy, grid.dz
+        k = 0
+        for i in range(np.alen(Jx)):
+            jx, jy, jz = Jx[i], Jy[i], Jz[i]
+            # Cas ou il n'y avait encore rien dans la cellule (jx,jy,jz)
+            if grid.kxyz[jx, jy, jz] == 0 :
+                 grid.kxyz[jx, jy, jz] = k + 1 # ajouter 1 pour utilisation f90
+                 grid.numx[k] = jx + 1 # ajouter 1 pour utilisation f90
+                 grid.numy[k] = jy + 1 # ajouter 1 pour utilisation f90
+                 grid.numz[k] = jz + 1 # ajouter 1 pour utilisation f90
+                 grid.nje[k] = 1
+                 grid.nume[0,k] = entity[i] + 1
+
+                 grid.leafareadensity[0,k] = s[i] / (dx * dy * dz[jz])
+                 grid.s_vt_vx[0,k] = s[i]
+                 grid.s_vx[k] = s[i]
+                 grid.n_detailed[0,k] = n[i]
+                 d_E2V[str(i)] = float(k)
+                 k=k+1
+            else:
+                # Cas ou il y avait deja quelque chose dans la cellule [jx,jy,jz]
+
+                kk = grid.kxyz[jx,jy,jz] - 1 #retirer 1 pour compatiblite python
+                je = 0
+                while (grid.nume[je,kk] != (entity[i] + 1) and (je + 1) <= grid.nje[kk]):
+                    je = je + 1
+
+                grid.leafareadensity[je,kk] = grid.leafareadensity[je,kk] + s[i] / (dx * dy * dz[jz])
+
+                grid.n_detailed[je,kk] = (grid.n_detailed[je,kk] * grid.s_vt_vx[je,kk] + n[i] * s[i]) / (grid.s_vt_vx[je,kk] + s[i])
+                grid.s_vt_vx[je,kk] = grid.s_vt_vx[je,kk] + s[i]
+                grid.s_vx[kk] = grid.s_vx[kk] + s[i]
+                grid.nje[kk] = max(je + 1, grid.nje[kk])
+                grid.nemax = max(grid.nemax, grid.nje[kk])
+                grid.nume[je,kk] = entity[i] + 1
+                d_E2V[str(i)] = float(kk)
+
+        grid.nveg=k
+        grid.nsol=grid.njx*grid.njy   # Numbering soil surface areas
+        for jx in range(grid.njx):
+            for jy in range(grid.njy):
+                grid.kxyz[jx,jy,grid.njz] = grid.njy * jx + jy + 1
+        grid.n_canopy = grid.n_canopy / grid.s_canopy
+
+        for k in range(grid.nveg):
+            for je in range(grid.nje[k]):
+                if je == 0:
+                    grid.volume_canopy[grid.nent] = grid.volume_canopy[grid.nent] + dx * dy * dz[grid.numz[k] - 1]  # Incrementing total canopy volume
+                if  grid.s_vt_vx[je,k] > 0. :
+                    grid.volume_canopy[grid.nume[je,k] - 1] = grid.volume_canopy[grid.nume[je,k] - 1] + dx * dy * dz[grid.numz[k] - 1]
+                    grid.voxel_canopy[grid.nume[je,k] - 1] = grid.voxel_canopy[grid.nume[je,k] - 1] + 1
+
+        return grid, d_E2V
+
 
     @staticmethod
     def initParam(grid3d):
