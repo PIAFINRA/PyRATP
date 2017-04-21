@@ -1,6 +1,7 @@
 """ Class interface for Z+ oriented / autofit equivalent of RATP grid"""
 import numpy
 import pandas
+from alinea.pyratp.grid import Grid
 
 
 def relative_index(x, dx):
@@ -93,7 +94,7 @@ class SmartGrid(object):
             else:
                 dz = (zmax - zo) * 1.01
             # try to accomodate flat scene
-            if dz == dy == dz == 0:
+            if dx == dy == dz == 0:
                 dx = dy = dz = 0.01
             if dz == 0:
                 dz = (dx + dy) / 2.
@@ -159,7 +160,7 @@ class SmartGrid(object):
 
         return lower, upper
 
-    def grid_index(self, x, y, z):
+    def grid_index(self, x, y, z, check=False):
 
         xo, yo, zo = self.origin
         dx, dy, dz = self.resolution
@@ -183,8 +184,15 @@ class SmartGrid(object):
             dh = numpy.cumsum(dz)
             jz = numpy.searchsorted(dh, z, 'right')
 
-        return jx, jy, jz
+        if check:
+            if any(numpy.logical_or(jx < 0, jx >= nbx)):
+                raise ValueError('some x values are outside the grid')
+            if any(numpy.logical_or(jy < 0, jy >= nby)):
+                raise ValueError('some y values are outside the grid')
+            if any(numpy.logical_or(jz < 0, jz >= nbz)):
+                raise ValueError('some z values are outside the grid')
 
+        return jx, jy, jz
 
     def cell_relative_coordinates(self, x, y, z, normalise = True):
         """ transform x, y, z coordinates in the frame relative to the grid cell
@@ -241,7 +249,7 @@ class SmartGrid(object):
         pars['xorig'], pars['yorig'] = xo, yo
         # zorig is a z offset in grid.py (grid_z = z + zo)
         pars['zorig'] = -zo
-        pars['nbx'], pars['nby'], pars['nbz'] = nbx, nby, nbz
+        pars['njx'], pars['njy'], pars['njz'] = nbx, nby, nbz
         pars['dx'], pars['dy'] = dx, dy
         # dz is from top to base for ratp
         if self.x_dz is None:
@@ -250,25 +258,52 @@ class SmartGrid(object):
             pars['dz'] = dz[::-1]
         return pars
 
-    def ratp_grid_index(self, jx, jy, jz, check=False):
+    def ratp_grid_index(self, jx, jy, jz):
         nbx, nby, nbz = self.shape
         jjx = jx
         jjy = nby - jy - 1
         jjz = nbz - jz - 1
-        if check:
-            if any(numpy.logical_or(jjx < 0, jjx >= nbx)):
-                raise ValueError('some x values are outside the grid')
-            if any(numpy.logical_or(jjy < 0, jjy >= nby)):
-                raise ValueError('some y values are outside the grid')
-            if any(numpy.logical_or(jjz < 0, jjz >= nbz)):
-                raise ValueError('some z values are outside the grid')
-
         return map(lambda x: x.astype(int).tolist(), [jjx, jjy, jjz])
 
+    def ratp_grid(self, surfacic_point_cloud, rsoil=0.2, latitude=43,
+                  longitude=3, orientation=0, timezone=0, idecaly=0):
+        """ Create a (filled) Ratp grid and compute associated grid indices
 
+        Args:
+            surfacic_point_cloud:
+            rsoil:
+            latitude:
+            longitude:
+            orientation:
+            timezone:
+            idecaly:
 
+        Returns:
 
+        """
 
+        spc = surfacic_point_cloud
 
+        if not hasattr(rsoil, '__len__'):
+            rsoil = [rsoil]
 
+        grid_pars = {'latitude': latitude,
+                     'longitude': longitude,
+                     'timezone': timezone,
+                     'idecaly': idecaly,
+                     'orientation': orientation,
+                     'rs': rsoil,
+                     'nent': spc.entities()}
 
+        grid_pars.update(self.ratp_grid_parameters())
+        grid = Grid.initialise(**grid_pars)
+        grid_indices = self.grid_index(spc.x, spc.y, spc.z, check=True)
+        jx, jy, jz = self.ratp_grid_index(*grid_indices)
+        entity = spc.entity - 1  # Grid.fill expect python indices
+        grid, _ = Grid.fill_from_index(entity, jx, jy, jz, spc.area,
+                                       spc.nitrogen, grid)
+        # create smart_grid index dict
+        jx, jy, jz = grid_indices
+        indices = {'jx': jx, 'jy': jy, 'jz': jz}
+
+        return grid, indices

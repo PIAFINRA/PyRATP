@@ -514,7 +514,7 @@ class Grid(object):
                 if  grid.s_vt_vx[je,k] > 0. :
                     grid.volume_canopy[grid.nume[je,k] - 1] = grid.volume_canopy[grid.nume[je,k] - 1] + dx * dy * dz[grid.numz[k] - 1]
                     grid.voxel_canopy[grid.nume[je,k] - 1] = grid.voxel_canopy[grid.nume[je,k] - 1] + 1
-
+        print 'GRILLE REMPLIE'
         return grid, d_E2V
 
 

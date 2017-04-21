@@ -36,7 +36,7 @@ class SurfacicPointCloud(object):
              'km': 1000}
     units_w = {'mg': 0.001, 'g': 1, 'kg': 1000}
 
-    def __init__(self, x, y, z, area, entity=None, nitrogen=None, label=None,
+    def __init__(self, x, y, z, area, entity=None, nitrogen=None, properties=None,
                  unit_length='m', unit_weight='g'):
         """Instantiate a SurfacicPointCloud canopy
 
@@ -50,8 +50,8 @@ class SurfacicPointCloud(object):
              mu and optical properties
             nitrogen: (array-like): nitrogen content. If None (default),
              a value of 2 is used for all points.
-            label: (array-like) identifiers for objects in the canopy (optional,
-             useful for aggregating RATP outputs). If None, entity is used.
+            properties: (name:array-like dict) optional additional
+                named data associated to surfacic points.
             unit_length: (string) the unit used for inputs. Will be used to
             convert to meter all inputs
             unit_weight: (string) the unit used for nitrogen. Will be used to
@@ -80,11 +80,13 @@ class SurfacicPointCloud(object):
         if nitrogen is None:
             nitrogen = [2] * len(x)
 
-        if label is None:
-            label = entity
+        if properties is None:
+            properties = {}
 
         assert len(x) == len(y) == len(z) == len(entity) == len(area) == len(
-            nitrogen) == len(label)
+            nitrogen)
+        for k,v in properties:
+            assert len(v) == len(x)
 
         self.x = numpy.array(x) * self.convert
         self.y = numpy.array(y) * self.convert
@@ -92,7 +94,7 @@ class SurfacicPointCloud(object):
         self.area = numpy.array(area) * self.convert**2
         self.entity = numpy.array(entity)
         self.nitrogen = numpy.array(nitrogen) * self.convert_w / self.convert**2
-        self.label = label
+        self.properties = properties
         self.unit = 'm'
         self.unit_w = 'g'
 
@@ -101,7 +103,7 @@ class SurfacicPointCloud(object):
 
     @staticmethod
     def from_mesh(vertices, faces, entity=None, nitrogen=None,
-                  label=None, unit_length='m', unit_weight='g'):
+                  properies=None, unit_length='m', unit_weight='g'):
         """ Instantiate a SurfacicPointCloud from a mesh
 
         Args:
@@ -111,7 +113,8 @@ class SurfacicPointCloud(object):
             entity 1 is used for all points.
             nitrogen: (array-like): nitrogen content. If None (default),
             a value of 2 is used for all points.
-            label: (array-like) identifiers for objects in the canopy (optional,
+            properties: (name:array-like dict) optional additional
+                named data associated to surfacic points.
             useful for aggregating RATP outputs). If None, entity is used.
             unit_length: (string) the unit used for inputs.
             unit_weight: (string) the unit used for nitrogen.
@@ -121,7 +124,7 @@ class SurfacicPointCloud(object):
         areas = [surface(f, vertices) for f in faces]
         x, y, z = zip(*[centroid(f, vertices) for f in faces])
         return SurfacicPointCloud(x, y, z, areas, entity=entity,
-                                  nitrogen=nitrogen, label=label,
+                                  nitrogen=nitrogen, properties = properties,
                                   unit_length=unit_length,
                                   unit_weight=unit_weight)
 
@@ -130,10 +133,11 @@ class SurfacicPointCloud(object):
         return self.entity.max()
 
     def as_data_frame(self):
-        df = pandas.DataFrame({'label': self.label, 'x': self.x, 'y': self.y,
+        df = pandas.DataFrame({'x': self.x, 'y': self.y,
                                'z': self.z, 'VegetationType': self.entity,
                                'area': self.area, 'nitrogen': self.nitrogen})
-        return df
+        dfp = pandas.DataFrame(self.properties)
+        return pandas.concat((df, dfp), axis=1)
 
     def save(self, path='surfacic_point_cloud.csv'):
         """ Save a csv representation of the object
@@ -146,10 +150,12 @@ class SurfacicPointCloud(object):
     def load(path='surfacic_point_cloud.csv'):
         df = pandas.read_csv(path)
         d = df.to_dict('list')
+        cols = ('x', 'y', 'z', 'area', 'VegetationType', 'nitrogen')
+        properties = {k: v for k, v in d.iteritems() if k not in cols}
         return SurfacicPointCloud(x=d['x'], y=d['y'], z=d['z'], area=d['area'],
                                   entity=d['VegetationType'],
-                                  nitrogen=d['nitrogen'], label=d['label'])
+                                  nitrogen=d['nitrogen'], properties=properties)
 
     def bounding_box(self):
-        return self.x.min(), self.y.min(), self.z.min(), self.x.max(), \
-               self.y.max(), self.z.max()
+        return (self.x.min(), self.y.min(), self.z.min()), (self.x.max(), \
+               self.y.max(), self.z.max())
