@@ -4,7 +4,7 @@
 import numpy as np
 
 import openalea.plantgl.all as pgl
-from alinea.pyratp.RatpScene import RatpScene
+from alinea.pyratp.interface.ratp_scene import RatpScene
 
 
 def test_pommier(display=False):

@@ -14,7 +14,7 @@ from alinea.pyratp.vegetation import Vegetation
 from alinea.pyratp.micrometeo import MicroMeteo
 from alinea.pyratp.runratp import runRATP
 
-from alinea.pyratp.clumping_index import clark_evans
+from alinea.pyratp.interface.clumping_index import clark_evans
 
 from openalea.plantgl import all as pgl
 
