@@ -1,50 +1,22 @@
-import numpy
 import os
 import tempfile
 
-from alinea.pyratp.interface.surfacic_point_cloud import normed, spherical, \
-    cartesian, surface, normal, centroid, random_normals, SurfacicPointCloud
-
-
-def test_spherical():
-    v = normed((1, 0, 1))
-    theta, phi = spherical(v)
-    assert phi == 0
-    numpy.testing.assert_almost_equal(theta, numpy.pi / 4)
-    cart = cartesian(theta, phi)
-    numpy.testing.assert_almost_equal(cart, v)
-
-
-def test_triangle_math():
-    face = range(3)
-    vertices = ((0, 0, 0), (1, 0, 0), (0, 1, 0))
-
-    numpy.testing.assert_almost_equal(surface(face, vertices), 0.5)
-    numpy.testing.assert_almost_equal(normal(face, vertices), (0, 0, 1))
-    numpy.testing.assert_almost_equal(centroid(face, vertices), (1./3, 1./3, 0))
-
-
-def test_random_noromals():
-    n = random_normals(1)
-    assert len(n) == 1
-    assert len(n[0]) == 3
-    n = random_normals(10)
-    assert len(n) == 10
-    assert len(n[0]) == 3
+import numpy
+from alinea.pyratp.interface.surfacic_point_cloud import SurfacicPointCloud
 
 
 def test_spc_instantiation():
     spc = SurfacicPointCloud(0, 0, 0, 1)
-    for w in ('x', 'y', 'z', 'area', 'nitrogen', 'normals', 'properties'):
+    for w in (
+    'x', 'y', 'z', 'area', 'shape_id', 'normals', 'properties', 'size'):
         assert hasattr(spc, w)
-    spc = SurfacicPointCloud(100, 100, 100, 10000, nitrogen=0.2,
-                             unit_length='cm', unit_weight='mg')
+    spc = SurfacicPointCloud(100, 100, 100, 10000, scene_unit='cm')
     assert spc.x == spc.y == spc.z == spc.area == 1  # m2
-    assert spc.nitrogen == 2  # g.m-2
 
     faces = (range(3),)
     vertices = ((0, 0, 0), (1, 0, 0), (0, 1, 0))
-    spc = SurfacicPointCloud.from_mesh(vertices, faces)
+    sc = {'0': (vertices, faces)}
+    spc = SurfacicPointCloud.from_scene_mesh(sc)
     assert spc.area == 0.5
     numpy.testing.assert_array_equal(spc.normals, ((0, 0, 1),))
 
@@ -52,10 +24,19 @@ def test_spc_instantiation():
 def test_data_frame():
     spc = SurfacicPointCloud(0, 0, 0, 1)
     df = spc.as_data_frame()
-    assert df.shape == (1, 9)
-    spc.properties.update({'a_property': (3,)})
+    assert df.shape == (1, 8)
+    spc.properties.update({'a_property': {0: 3}})
     df = spc.as_data_frame()
-    assert df.shape == (1, 10)
+    assert df.shape == (1, 9)
+
+
+def test_as_scene_mesh():
+    spc = SurfacicPointCloud(0, 0, 0, 1)
+    sc = spc.as_scene_mesh()
+    assert 0 in sc
+    v, f, = sc[0]
+    assert len(f) == 1
+    assert len(v) == 3
 
 
 def test_serialisation():
@@ -68,10 +49,14 @@ def test_serialisation():
         assert spc.x == spc2.x
         numpy.testing.assert_almost_equal(spc.normals, spc2.normals)
 
-        spc.properties.update({'a_property': (3,)})
+        spc.properties.update({'a_property': {0: 3}})
         spc.save(path)
         spc2 = SurfacicPointCloud.load(path)
         assert 'a_property' in spc2.properties
+        for k in spc.properties['a_property']:
+            assert k in spc2.properties['a_property']
+    except Exception as e:
+        raise e
     finally:
         os.remove(path)
         os.rmdir(tmpdir)
@@ -80,7 +65,8 @@ def test_serialisation():
 def test_bbox():
     faces = ((0, 1, 2), (0, 2, 0), (0, 1, 3))
     vertices = ((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
-    spc = SurfacicPointCloud.from_mesh(vertices, faces)
+    sc = {'0': (vertices, faces)}
+    spc = SurfacicPointCloud.from_scene_mesh(sc)
     expected = ((0.0, 0.0, 0.0), [1. / 3] * 3)
     numpy.testing.assert_almost_equal(spc.bbox(), expected)
 
@@ -88,7 +74,8 @@ def test_bbox():
 def test_inclinations():
     faces = ((0, 1, 2), (0, 2, 3), (0, 1, 3))
     vertices = ((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
-    entity = (2, 1, 2)
-    spc = SurfacicPointCloud.from_mesh(vertices, faces, entity=entity)
-    inc = spc.entities_inclinations()
-    numpy.testing.assert_array_equal(inc,[[90.0], [0.0, 90.0]])
+    sc = {1: (vertices, (faces[1],)), 2: (vertices, [faces[i] for i in (0, 2)])}
+    spc = SurfacicPointCloud.from_scene_mesh(sc)
+    inc = spc.inclinations()
+    numpy.testing.assert_array_equal(inc[1], [90.0])
+    numpy.testing.assert_array_equal(inc[2], [0.0, 90.0])

@@ -1,181 +1,132 @@
-import pandas
 import numpy
-
-
-def norm(vector):
-    x, y, z = vector
-    return numpy.sqrt(x ** 2 + y ** 2 + z ** 2)
-
-
-def normed(vector):
-    """ normalised coordinates of (0,point) vector
-    """
-    return numpy.array(vector) / norm(vector)
-
-
-def spherical(vector):
-    """ inclination (theta) and azimuth (phi) spherical angles"""
-    x, y, z = normed(vector)
-    theta = numpy.arccos(z)
-    phi = numpy.arctan2(y, x)
-    return theta, phi
-
-
-def cartesian(theta, phi):
-    """ cartesian coordinates of a unit vector with inclination theta and
-    azimuth phi"""
-    x = numpy.sin(theta) * numpy.cos(phi)
-    y = numpy.sin(theta) * numpy.sin(phi)
-    z = numpy.cos(theta)
-    return x, y, z
-
-
-def surface(face, vertices):
-    a, b, c = [numpy.array(vertices[i]) for i in face]
-    return norm(numpy.cross(b - a, c - a)) / 2.0
-
-
-def normal(face, vertices):
-    a, b, c = [numpy.array(vertices[i]) for i in face]
-    return normed(numpy.cross(b - a, c - a))
-
-
-def centroid(face, vertices):
-    points = [numpy.array(vertices[i]) for i in face]
-    x, y, z = zip(*points)
-    return numpy.mean(x), numpy.mean(y), numpy.mean(z)
-
-
-def random_normals(size=1):
-    theta = numpy.pi / 2 * numpy.random.random_sample(size)
-    phi = 2 * numpy.pi * numpy.random.random_sample(size)
-    return zip(*cartesian(theta, phi))
+import pandas
+from alinea.pyratp.interface.geometry import spherical, surface, normal, \
+    centroid, random_normals, equilateral, move_points
 
 
 class SurfacicPointCloud(object):
-    """Python data structure for handling a ratp-suited canopy"""
+    """Python data structure for linking labelled mesh scene to ratp input"""
 
     units = {'mm': 0.001, 'cm': 0.01, 'dm': 0.1, 'm': 1, 'dam': 10, 'hm': 100,
              'km': 1000}
-    units_w = {'mg': 0.001, 'g': 1, 'kg': 1000}
 
-    def __init__(self, x, y, z, area, entity=None, nitrogen=None, normals=None,
-                 properties=None, unit_length='m', unit_weight='g'):
-        """Instantiate a SurfacicPointCloud canopy
+    def __init__(self, x, y, z, area, normals=None, shape_id=None,
+                 properties=None, scene_unit='m'):
+        """Instantiate a SurfacicPointCloud canopy from a list of points
 
         Args:
             x: (array-like) x-coordinate of surfacic elements
             y: (array-like) y-coordinate of surfacic elements
             z: (array-like) z-coordinate of surfacic elements
             area: (array-like) areas of surfacic elements
-            entity: (array-like) RATP entity codes (>=1). If None (default),
-             entity 1 is used for all points. Entities allows varying angles,
-             mu and optical properties
-            nitrogen: (array-like): nitrogen content. If None (default),
-             a value of 2 is used for all points.
             normals: (array of 3-tuples): coordinates of vector normal to
-             surfacic point. If None normals are randomly sampled.
-            properties: (name:array-like dict) optional additional
-                named data associated to surfacic points.
-            unit_length: (string) the unit used for inputs. Will be used to
-            convert to meter all inputs
-            unit_weight: (string) the unit used for nitrogen. Will be used to
-             convert to meter all inputs
+             surfacic point. If None, normals are randomly sampled.
+            shape_id: (array-like) vector of identifiers that allow tagging
+             points as elements of the same scene object. If None (default),
+            shape_id is set to its index in input arrays.
+            properties: (name: {sh_id: value}) optional additional data that
+             allow associating scalar property to points via their shape_id.
+            scene_unit: (string) the length unit used for inputs.
 
         Returns:
-            a surfacic point cloud instance with all data converted to SI units
-            (m,g)
+            a surfacic point cloud instance with all data converted to meter
+            (m)
         """
 
-        x, y, z, area = map(lambda v: numpy.array(v, ndmin=1), (x, y, z, area))
+        x, y, z, area = map(lambda val: numpy.array(val, ndmin=1),
+                            (x, y, z, area))
 
         try:
-            self.convert = self.units[unit_length]
+            self.convert = self.units[scene_unit]
         except KeyError:
-            print 'Warning, unit', unit_length, 'not found, meter assumed'
+            print 'Warning, unit', scene_unit, 'not found, meter assumed'
             self.convert = 1
-
-        try:
-            self.convert_w = self.units_w[unit_weight]
-        except KeyError:
-            print 'Warning, unit', unit_weight, 'not found, meter assumed'
-            self.convert_w = 1
-
-        if entity is None:
-            entity = [1] * len(x)
-
-        if nitrogen is None:
-            nitrogen = [2] * len(x)
-
-        entity, nitrogen = map(lambda v: numpy.array(v, ndmin=1),
-                               (entity, nitrogen))
 
         if normals is None:
             normals = random_normals(len(x))
 
+        if shape_id is None:
+            shape_id = range(len(x))
+
         if properties is None:
             properties = {}
 
-        assert len(x) == len(y) == len(z) == len(entity) == len(area) == len(
-            nitrogen) == len(normals)
+        assert len(x) == len(y) == len(z) == len(area) == len(normals) == len(
+            shape_id)
+
         for k, v in properties.iteritems():
             assert len(v) == len(x)
 
+        self.size = len(x)
         self.x = x * self.convert
         self.y = y * self.convert
         self.z = z * self.convert
         self.area = area * self.convert**2
-        self.entity = entity
-        self.nitrogen = nitrogen * self.convert_w / self.convert**2
+        self.shape_id = shape_id
         self.normals = normals
         self.properties = properties
-        self.unit = 'm'
-        self.unit_w = 'g'
-
-        assert all(self.entity > 0)
-        assert self.entity.max() == len(set(self.entity))
 
     @staticmethod
-    def from_mesh(vertices, faces, entity=None, nitrogen=None,
-                  properties=None, unit_length='m', unit_weight='g'):
-        """ Instantiate a SurfacicPointCloud from a mesh
+    def from_scene_mesh(scene_mesh, properties=None, scene_unit='m'):
+        """ Instantiation from a scene mesh dict
 
         Args:
-            vertices: list of mesh vertices coordinates
-            faces: list of vertex idex defining mesh faces
-            entity: (array-like) RATP entity codes (>=1). If None (default),
-            entity 1 is used for all points.
-            nitrogen: (array-like): nitrogen content. If None (default),
-            a value of 2 is used for all points.
-            properties: (name:array-like dict) optional additional
+            scene_mesh: a {shape_id: (vertices, faces)} dict
+            properties: (name:{shape_id: entity}) optional additional
                 named data associated to surfacic points.
-            useful for aggregating RATP outputs). If None, entity is used.
-            unit_length: (string) the unit used for inputs.
-            unit_weight: (string) the unit used for nitrogen.
-        Returns:
-            a SurfacicPointCloud instance and a list of normals
+            properties: (name: {sh_id: value}) optional additional data that
+             allow associating scalar property to points via their shape_id.
+            scene_unit: (string) the length unit used for inputs.
         """
-        areas = [surface(f, vertices) for f in faces]
-        x, y, z = zip(*[centroid(f, vertices) for f in faces])
-        normals = [normal(f, vertices) for f in faces]
-        return SurfacicPointCloud(x, y, z, areas, entity=entity,
-                                  nitrogen=nitrogen, normals=normals,
-                                  properties=properties,
-                                  unit_length=unit_length,
-                                  unit_weight=unit_weight)
 
-    def n_entities(self):
-        """ return the number of distinct entities in the canopy"""
-        return self.entity.max()
+        areas, x, y, z, normals, shape_id = [[] for _ in range(6)]
+        for sh_id, (vertices, faces) in scene_mesh.iteritems():
+            areas += [surface(f, vertices) for f in faces]
+            xx, yy, zz = zip(*[centroid(f, vertices) for f in faces])
+            x += list(xx)
+            y += list(yy)
+            z += list(zz)
+            normals += [normal(f, vertices) for f in faces]
+            shape_id.extend([sh_id] * len(faces))
+        return SurfacicPointCloud(x=x, y=y, z=z, area=areas, normals=normals,
+                                  shape_id=shape_id,
+                                  properties=properties, scene_unit=scene_unit)
 
-    def as_data_frame(self):
+    def as_data_frame(self, add_properties=True):
         nx, ny, nz = zip(*self.normals)
         df = pandas.DataFrame({'x': self.x, 'y': self.y,
-                               'z': self.z, 'VegetationType': self.entity,
-                               'area': self.area, 'nitrogen': self.nitrogen,
+                               'z': self.z, 'shape_id': self.shape_id,
+                               'area': self.area,
                                'norm_x': nx, 'norm_y': ny, 'norm_z': nz})
-        dfp = pandas.DataFrame(self.properties)
-        return pandas.concat((df, dfp), axis=1)
+
+        if add_properties and len(self.properties) > 0:
+            d = {'shape_id': self.shape_id}
+            for k, v in self.properties.iteritems():
+                d.update({k: [v[sh] for sh in self.shape_id]})
+            df = df.merge(pandas.DataFrame(d))
+
+        return df
+
+    def as_scene_mesh(self):
+        """ A simple mesh representation of the point cloud"""
+
+        scene = {}
+        df = self.as_data_frame(add_properties=False)
+        for sh_id, g in df.groupby('shape_id'):
+            vertices = []
+            faces = []
+            nf = 0
+            for ind, row in g.iterrows():
+                tri = equilateral(row.area)
+                rot = numpy.random.rand() * numpy.pi / 3
+                norm = row.norm_x, row.norm_y, row.norm_z
+                pos = row.x, row.y, row.z
+                pts = move_points(tri, pos, norm, rot)
+                vertices.extend(pts)
+                faces.append((3 * nf, 3 * nf + 1, 3 * nf + 2))
+                nf += 1
+            scene[sh_id] = vertices, faces
+        return scene
 
     def save(self, path='surfacic_point_cloud.csv'):
         """ Save a csv representation of the object
@@ -189,28 +140,33 @@ class SurfacicPointCloud(object):
         df = pandas.read_csv(path)
         d = df.to_dict('list')
         cols = (
-            'x', 'y', 'z', 'area', 'VegetationType', 'nitrogen', 'norm_x',
-            'norm_y', 'norm_z')
-        properties = {k: v for k, v in d.iteritems() if k not in cols}
+            'x', 'y', 'z', 'area', 'shape_id', 'norm_x', 'norm_y', 'norm_z')
+
+        property_cols = [col for col in d if col not in cols]
+        properties = None
+        if len(property_cols) > 0:
+            dfp = df.loc[:,['shape_id'] + property_cols].groupby('shape_id').agg(
+                lambda x: x.iloc[0]).reset_index()
+            dfpd = dfp.to_dict('list')
+            properties = {k: dict(zip(dfpd['shape_id'], dfpd[k])) for k in
+                          property_cols}
+
         normals = zip(d['norm_x'], d['norm_y'], d['norm_z'])
+
         return SurfacicPointCloud(x=d['x'], y=d['y'], z=d['z'], area=d['area'],
-                                  entity=d['VegetationType'],
-                                  nitrogen=d['nitrogen'], normals=normals,
+                                  shape_id=d['shape_id'], normals=normals,
                                   properties=properties)
 
     def bbox(self):
         return (self.x.min(), self.y.min(), self.z.min()), (self.x.max(), \
                self.y.max(), self.z.max())
 
-    def spherical(self):
-        """ return inclination and azimuth angles of scene normals"""
-        return zip(*map(spherical, self.normals))
-
-    def entities_inclinations(self):
-        """ list of inclinations angles of normals (degrees, positive) for the
-        different entities"""
-        theta, phi = self.spherical()
+    def inclinations(self):
+        """ inclinations angles of normals (degrees, positive)"""
+        theta, phi = zip(*map(spherical, self.normals))
         inclin = numpy.degrees(theta)
         inclin = numpy.where(inclin == 90, 90, inclin % 90)
-        df = pandas.DataFrame({'entity': self.entity, 'inc': inclin})
-        return [group['inc'].tolist() for name, group in df.groupby('entity')]
+        df = pandas.DataFrame(
+            {'shape_id': self.shape_id, 'inclination': inclin})
+        return {g: x.to_dict('list')['inclination'] for g, x in
+                df.groupby('shape_id')}
