@@ -6,6 +6,7 @@
 """
 from collections import Iterable
 import alinea.pyratp.interface.pgl_scene as pgls
+from alinea.pyratp.interface.display import display_property
 import numpy
 import pandas
 from alinea.pyratp.grid import Grid
@@ -17,7 +18,6 @@ from alinea.pyratp.micrometeo import MicroMeteo
 from alinea.pyratp.runratp import runRATP
 from alinea.pyratp.skyvault import Skyvault
 from alinea.pyratp.vegetation import Vegetation
-from openalea.plantgl import all as pgl
 
 
 def sample_database():
@@ -56,8 +56,7 @@ class RatpScene(object):
          If None (default), the grid is adjusted to fit the input scene.
         entities: a {shape_id: entity} dict defining entities in the scene. If
          None (default), all shapes are considered as members of the same entity
-        rleaf: leaf reflectance or a list of leaf reflectance in PAR and NIR.
-         Alternatively, a {entity: leaf_reflectance}.
+        rleaf: leaf reflectance or a {entity: leaf_reflectance} property dict.
         rsoil: soil reflectance or a list of soil reflectances in PAR and NIR
         orientation (float): the angle (deg, positive clockwise) from X+ to
          North (default: 0)
@@ -121,8 +120,8 @@ class RatpScene(object):
             [self.entity_map[entities[sh]] for sh in self.scene.shape_id])
 
         if not isinstance(rleaf, dict):
-            if not hasattr(rleaf, '__len__'):
-                rleaf = [rleaf]
+            # if not hasattr(rleaf, '__len__'):
+            #     rleaf = [rleaf]
             rleaf = {'default': rleaf}
         self.rleaf = {self.entity_map[k]: rleaf[k] for k in self.entity_map}
 
@@ -291,7 +290,7 @@ class RatpScene(object):
             if not isinstance(mu, Iterable):
                 mu = [mu] * nent
         inclins = self.inclination_distribution(nbinclin)
-        entities = [{'rf': [self.rleaf[i + 1][0]], 'distinc': inclins[i], 'mu': mu[i]} for i
+        entities = [{'rf': [self.rleaf[i + 1]], 'distinc': inclins[i], 'mu': mu[i]} for i
                     in range(nent)]
         grid = self.grid(rsoil=rsoil)
         vegetation = Vegetation.initialise(entities, nblomin=1)
@@ -325,13 +324,13 @@ class RatpScene(object):
 
         return pandas.merge(dfvox, self.voxel_index())
 
-    def aggregate_light(self, dfvox, spatial='point_id', temporal=True):
+    def scene_lightmap(self, dfvox, spatial='point_id', temporal=True):
         """  Aggregate light outputs along scene inputs
 
         Args:
             dfvox: a pandas data frame with ratp outputs
-            spatial: a string indicating the scene property to use for
-             aggregation. By default, 'point_id' is used
+            spatial: a string indicating the aggregation level: 'point_id' or
+             'shape_id' .
             temporal: should iterations be aggregated ?
 
         Returns:
@@ -346,6 +345,7 @@ class RatpScene(object):
 
         def _process(df):
             w = df['area'] / df['agg_area']
+            a_agg = df['agg_area'].values[0]
             res = pandas.Series(
                 {'VegetationType': df['VegetationType'].values[0],
                  'day': df['day'].values[0],
@@ -354,11 +354,11 @@ class RatpScene(object):
                  # weighted mean of voxel values (weigth = primitive area)
                  'SunlitPAR': numpy.sum(df['SunlitPAR'] * w),
                  'ShadedArea': numpy.sum(
-                     df['ShadedArea'] / df['Area'] * df['agg_area']),
+                     df['ShadedArea'] / df['Area'] * w) * a_agg,
                  # weighted mean of shaded fraction times shape_area
                  'SunlitArea': numpy.sum(
-                     df['SunlitArea'] / df['Area'] * df['agg_area']),
-                 'Area': df['agg_area'].values[0],
+                     df['SunlitArea'] / df['Area'] *w) * a_agg,
+                 'Area': a_agg,
                  'PAR': numpy.sum(df['PAR'] * w)})
             return res
 
@@ -366,7 +366,7 @@ class RatpScene(object):
         res = grouped.apply(_process).reset_index()
 
         if temporal and len(set(res['Iteration'])) > 1:
-            grouped = res.groupby(['shape_id'])
+            grouped = res.groupby(spatial)
             how = {'VegetationType': numpy.mean, 'day': numpy.mean,
                    'hour': numpy.mean,
                    'ShadedPAR': numpy.sum, 'SunlitPAR': numpy.sum,
@@ -374,39 +374,17 @@ class RatpScene(object):
                    'Area': numpy.mean, 'PAR': numpy.sum}
             res = grouped.agg(how).reset_index()
 
+        if spatial == 'point_id':
+            res = res.merge(self.scene.shape_map())
         return res
 
-    def plot(self, dfvox, dfmap, minval=None, maxval=None):
-        output = pandas.merge(dfmap, dfvox)
-        output = output.sort_values(
-            'primitive_index')  # sort is needed to ensure matching with triangulation indices
-        par = output['PAR']
-        if minval is None:
-            minval = min(par)
-        if maxval is None:
-            maxval = max(par)
-        cmap = ColorMap()
-
-        scene = pgl.Scene()
-        discretizer = pgl.Discretizer()
-
-        for sh in self.scene:
-            discretizer.process(sh)
-            mesh = discretizer.result
-            mesh.colorList = []
-            mesh.colorPerVertex = False
-            colors = map(lambda x: cmap(x, minval, maxval, 250., 20.),
-                         par[output['shape_id'] == sh.id])
-            for color in colors:
-                r, g, b = color
-                mesh.colorList.append(pgl.Color4(r, g, b, 0))
-
-            scene.add(mesh)
-
-        pgl.Viewer.display(scene)
-
-        return scene
-
-
-
-            
+    def plot(self, dfvox, by='point_id', minval=None, maxval=None):
+        lmap = self.scene_lightmap(dfvox, spatial=by)
+        if by == 'shape_id':
+            df = lmap.loc[:, ('shape_id', 'PAR')].set_index('shape_id')
+            prop = {k: df['PAR'][k] for k in df.index}
+        else:
+            prop = {sh_id: df.to_dict('list')['PAR'] for sh_id, df in
+                    lmap.groupby('shape_id')}
+        return display_property(self.scene_mesh, prop, minval=minval,
+                                maxval=maxval)

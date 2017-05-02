@@ -4,7 +4,7 @@ import numpy
 if pgls.pgl_imported:
 
     def test_bbox():
-        scene = pgls.pgl.Scene([pgls.pgl.Sphere()])
+        scene = pgls.unit_sphere_scene()
         box = pgls.bbox(scene)
         numpy.testing.assert_array_equal(box,
                                          ((-0.5, -0.5, -0.5), (0.5, 0.5, 0.5)))

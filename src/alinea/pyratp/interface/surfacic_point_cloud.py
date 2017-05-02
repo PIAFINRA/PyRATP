@@ -92,7 +92,7 @@ class SurfacicPointCloud(object):
 
     def as_data_frame(self, add_properties=True):
         nx, ny, nz = zip(*self.normals)
-        df = pandas.DataFrame({'x': self.x, 'y': self.y,
+        df = pandas.DataFrame({'point_id': self.point_id, 'x': self.x, 'y': self.y,
                                'z': self.z, 'shape_id': self.shape_id,
                                'area': self.area,
                                'norm_x': nx, 'norm_y': ny, 'norm_z': nz})
@@ -104,6 +104,11 @@ class SurfacicPointCloud(object):
             df = df.merge(pandas.DataFrame(d))
 
         return df
+
+    def shape_map(self):
+        return pandas.DataFrame(
+            {'point_id': self.point_id, 'shape_id': self.shape_id
+             })
 
     def as_scene_mesh(self):
         """ A simple mesh representation of the point cloud"""
@@ -138,7 +143,8 @@ class SurfacicPointCloud(object):
         df = pandas.read_csv(path)
         d = df.to_dict('list')
         cols = (
-            'x', 'y', 'z', 'area', 'shape_id', 'norm_x', 'norm_y', 'norm_z')
+            'x', 'y', 'z', 'area', 'shape_id', 'point_id', 'norm_x', 'norm_y',
+            'norm_z')
 
         property_cols = [col for col in d if col not in cols]
         properties = None

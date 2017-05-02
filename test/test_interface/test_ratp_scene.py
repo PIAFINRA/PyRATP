@@ -54,7 +54,17 @@ def test_inclination_distribution():
                                      [1., 0., 0., 0., 0., 0., 0., 0., 0.])
 
 
-def test_do_irradiation():
+def test_light():
     ratp = RatpScene(resolution=(1, 1, 1))
-    df = ratp.do_irradiation()
+    dfvox = ratp.do_irradiation()
+    dfpoints = ratp.scene_lightmap(dfvox, 'point_id')
+    dfshape = ratp.scene_lightmap(dfvox, 'shape_id')
+    if pgls.pgl_imported:
+        ratp.plot(dfvox)
+        ratp.plot(dfvox, 'shape_id')
+        ratp = RatpScene(pgls.unit_sphere_scene())
+        dfvox = ratp.do_irradiation()
+        ratp.plot(dfvox)
+
+
 

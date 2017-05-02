@@ -67,7 +67,7 @@ def from_scene_mesh(scene_mesh, colors=None):
         shape = pgl.TriangleSet(vertices, faces)
         shape.colorList = color_list
         shape.colorPerVertex = False
-        shape.id = int(sh_id)
+        shape.id = sh_id
         scene += shape
 
     return scene
@@ -79,3 +79,5 @@ def display(scene):
     return scene
 
 
+def unit_sphere_scene():
+    return pgl.Scene([pgl.Sphere()])

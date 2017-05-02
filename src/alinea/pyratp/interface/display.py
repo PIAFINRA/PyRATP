@@ -55,10 +55,11 @@ def property_as_colors(a_property, minval=None, maxval=None, gamma=None):
 
 
 def display_property(scene_mesh, property, minval=None, maxval=None):
+    colors = property_as_colors(property, minval=minval, maxval=maxval)
     if pgls.pgl_imported:
-        colors = property_as_colors(property, minval=minval, maxval=maxval)
         scene = pgls.from_scene_mesh(scene_mesh, colors)
         return pgls.display(scene)
     else:
         warnings.warn('PlanGL not found, no display available!!')
         return scene_mesh
+
