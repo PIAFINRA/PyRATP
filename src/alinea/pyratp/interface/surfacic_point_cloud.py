@@ -54,14 +54,12 @@ class SurfacicPointCloud(object):
         assert len(x) == len(y) == len(z) == len(area) == len(normals) == len(
             shape_id)
 
-        for k, v in properties.iteritems():
-            assert len(v) == len(x)
-
         self.size = len(x)
         self.x = x * self.convert
         self.y = y * self.convert
         self.z = z * self.convert
         self.area = area * self.convert**2
+        self.point_id = range(len(x))
         self.shape_id = shape_id
         self.normals = normals
         self.properties = properties
@@ -167,6 +165,5 @@ class SurfacicPointCloud(object):
         inclin = numpy.degrees(theta)
         inclin = numpy.where(inclin == 90, 90, inclin % 90)
         df = pandas.DataFrame(
-            {'shape_id': self.shape_id, 'inclination': inclin})
-        return {g: x.to_dict('list')['inclination'] for g, x in
-                df.groupby('shape_id')}
+            {'point_id': self.point_id, 'shape_id': self.shape_id, 'inclination': inclin})
+        return df

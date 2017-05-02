@@ -1,7 +1,6 @@
 """ Class interface for Z+ oriented / autofit equivalent of RATP grid"""
 import numpy
 import pandas
-from alinea.pyratp.grid import Grid
 
 
 def relative_index(x, dx):
@@ -27,7 +26,7 @@ class SmartGrid(object):
 
         Arguments:
         scene_box: a ((xmin, ymin, zmin), (xmax, ymax, zmax)) scene bounding
-         box tuple. If None, a default grid is set-up
+         box tuple (m). If None, a default grid is set-up
         shape: dimensions of the grid (voxel number per axis: [nx, ny, nz]).
          If None, shape will adapt to scene, using grid_resolution.
         resolution: size (m) of voxels in x,y and z direction :[dx, dy, dz].
@@ -194,7 +193,7 @@ class SmartGrid(object):
 
         return jx, jy, jz
 
-    def cell_relative_coordinates(self, x, y, z, normalise = True):
+    def within_cell_position(self, x, y, z, normalise = True):
         """ transform x, y, z coordinates in the frame relative to the grid cell
         the points belong
 
@@ -259,51 +258,35 @@ class SmartGrid(object):
         return pars
 
     def ratp_grid_index(self, jx, jy, jz):
+        """
+        Details
+
+        jx, jy, jz are grid indices in an orthonormal grid with Z+ pointing
+         upward, hence with Y+ pointing to West when X+ points to North
+        returned jx, jy, jz are grid indices that refer to an RATP grid with Z+
+         pointing downward, hence with Y+ pointing to East when X+ points to
+         North.
+        RATP conventions are required for RATP sky and sun beam to be corrrectly
+         oriented (cf mod_Dir_InterceptionF2PY.f90, lines 199-200)
+        To satisfy RATP convention:
+            - RATP grid origin defined at (xo, yo + nby * dy, zo + sum(dz))
+            - RATP X+ is oriented as scene X+, RATP Y+ is oriented as scene Y-
+             and RATP Z+ is oriented as scene Z-
+        As a result, when scene X+ points to North:
+            - jx increases from South to North (0 <= jx < grid.nbx) along RATP X+ (scene X+)
+            - jy increases from West to East(0 <= jy < grid.nby) along RATP Y+ (scene Y-)
+            - jz increases from top to soil (0 <= jz < grid.nbz) along RATP Z+ (scene Z-)"""
         nbx, nby, nbz = self.shape
         jjx = jx
         jjy = nby - jy - 1
         jjz = nbz - jz - 1
         return map(lambda x: x.astype(int).tolist(), [jjx, jjy, jjz])
 
-    def ratp_grid(self, surfacic_point_cloud, rsoil=0.2, latitude=43,
-                  longitude=3, orientation=0, timezone=0, idecaly=0):
-        """ Create a (filled) Ratp grid and compute associated grid indices
+    def decode_ratp_indices(self, jjx, jjy, jjz):
+        """ Return smart_grid indices associated to RATP grid indices"""
+        nbx, nby, nbz = self.shape
+        jx = jjx
+        jy = nby - jjy - 1
+        jz = nbz - jjz - 1
 
-        Args:
-            surfacic_point_cloud:
-            rsoil:
-            latitude:
-            longitude:
-            orientation:
-            timezone:
-            idecaly:
-
-        Returns:
-
-        """
-
-        spc = surfacic_point_cloud
-
-        if not hasattr(rsoil, '__len__'):
-            rsoil = [rsoil]
-
-        grid_pars = {'latitude': latitude,
-                     'longitude': longitude,
-                     'timezone': timezone,
-                     'idecaly': idecaly,
-                     'orientation': orientation,
-                     'rs': rsoil,
-                     'nent': spc.entities()}
-
-        grid_pars.update(self.ratp_grid_parameters())
-        grid = Grid.initialise(**grid_pars)
-        grid_indices = self.grid_index(spc.x, spc.y, spc.z, check=True)
-        jx, jy, jz = self.ratp_grid_index(*grid_indices)
-        entity = spc.entity - 1  # Grid.fill expect python indices
-        grid, _ = Grid.fill_from_index(entity, jx, jy, jz, spc.area,
-                                       spc.nitrogen, grid)
-        # create smart_grid index dict
-        jx, jy, jz = grid_indices
-        indices = {'jx': jx, 'jy': jy, 'jz': jz}
-
-        return grid, indices
+        return jx, jy, jz

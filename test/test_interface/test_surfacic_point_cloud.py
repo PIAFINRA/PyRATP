@@ -76,6 +76,8 @@ def test_inclinations():
     vertices = ((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
     sc = {1: (vertices, (faces[1],)), 2: (vertices, [faces[i] for i in (0, 2)])}
     spc = SurfacicPointCloud.from_scene_mesh(sc)
-    inc = spc.inclinations()
+    df = spc.inclinations()
+    inc = {g: x.to_dict('list')['inclination'] for g, x in
+     df.groupby('shape_id')}
     numpy.testing.assert_array_equal(inc[1], [90.0])
     numpy.testing.assert_array_equal(inc[2], [0.0, 90.0])

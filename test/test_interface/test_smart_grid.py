@@ -143,7 +143,3 @@ def test_ratp_parameters():
     pars = grid.ratp_grid_parameters()
     return pars
 
-def test_ratp_grid():
-    scene = SurfacicPointCloud(x=range(1,6), y = [0] * 5, z = [0.5] * 5, area=[0.1] * 5)
-    sgrid = SmartGrid(scene_box = scene.bounding_box())
-    grid, indices = sgrid.ratp_grid(scene)
