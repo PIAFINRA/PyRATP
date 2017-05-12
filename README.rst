@@ -1,55 +1,54 @@
-====== Alinea.PyRATP ======
+=============== 
+Alinea.PyRATP
+=============== 
 
-**Authors** : XXX
+**Authors** : H. Sinoquet, B. Adam, J. Ngao, C. Pradal (Python), C. Fournier (Python)
 
-**Institutes** : INRIA / CIRAD 
+**Contributors** : C. Pradal (Python, Packaging), C. Fournier (Python)
 
-**Status** : Python package 
+**Institutes** : INRA
+
+**Status** : Fortran 90 and Python package 
 
 **License** : Cecill-C
 
-**URL** : http://openalea.gforge.inria.fr
+About
+------
 
-===== About =====
-
-=== Description ===
+Description
+============
 
 Alinea.PyRATP is a XXX
 
 
 
-=== Content ===
+Content
+========
 
 The Alinea.PyRATP package contains :
 
 
-===== Installation =====
+Installation
+=============
 
-=== Download ===
+  conda install -c openalea alinea.pyratp
+  
+or form sources:
 
-Go to http://gforge.inria.fr/frs/?group_id=79
+  python setup.py install
+  
+Requirements
+============
 
-=== Requirements ===
-
-* Scons >= 0.96.93
-* SconsX
+* SCons
+* OpenAlea.SconsX
 * OpenAlea.Deploy
-* Boost.Python
-
-
-=== Installation ===
-
-
-=== Utilisation ===
-
-
-<code>
-python setup.py install
-</code>
+* NumPy
+* fortran compiler
 
 
 
-===== Documentation =====
-
-http://openalea.gforge.inria.fr/doc/alinea/pyratp/doc/_build/html/contents.html
+Documentation
+==================
+TODO
 
