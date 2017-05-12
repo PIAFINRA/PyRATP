@@ -2,7 +2,7 @@
 Alinea.PyRATP
 =============== 
 
-**Authors** : H. Sinoquet, B. Adam, J. Ngao, C. Pradal (Python), C. Fournier (Python)
+**Authors** : H. Sinoquet, B. Adam, J. Ngao, M. Saudreau
 
 **Contributors** : C. Pradal (Python, Packaging), C. Fournier (Python)
 
