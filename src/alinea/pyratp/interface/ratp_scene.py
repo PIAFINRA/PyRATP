@@ -265,7 +265,6 @@ class RatpScene(object):
         """ Run a simulation of light interception for one wavelength
 
             Parameters:
-                - rleaf : list of leaf refectance per entity
                 - rsoil : soil reflectance
                 - doy : [list of] day of year [for the different iterations]
                 - hour : [list of] decimal hour (0-24) [for the different
@@ -274,9 +273,9 @@ class RatpScene(object):
                  the different iterations] (W.m-2)
                 - Rdif : [list of] direct/diffuse radiation ratio [for the
                  different iterations] (0-1)
-                - sources: a list of sequences giving elevation, azimuth,
-                 steradians and weights of sky vault.
-                if None, default RATP soc skyvault is used
+                - mu: if not None, force mu for all species to be set to this value
+                - sources: a list of sequences giving elevation, azimuth and weight associated to sky vault sectors.
+                if None, default RATP soc-weighted skyvault is used
 
         """
 
@@ -297,8 +296,17 @@ class RatpScene(object):
         if sources == None:
             sky = Skyvault.initialise()
         else:
-            el, az, strd, w = sources
-            sky = Skyvault.initialise(hmoy=el, azmoy=az, omega=strd, pc=w)
+            el, az, w = sources
+            # omega (sr, sum=2pi) is used by ratp to weight Gfuntion in k
+            # computation (mod_dir_interception.f90, line 112)
+            # pc is used elsewhere (mod_Hemi_Interception), line 124) to weight
+            # fraction intercepted
+            # to me, both should be consistent, ie giving same weighting system
+            w = numpy.array(w)
+            # force normalisation
+            w /= w.sum()
+            omega = w * 2 * numpy.pi
+            sky = Skyvault.initialise(hmoy=el, azmoy=az, omega=omega, pc=w)
         met = MicroMeteo.initialise(doy=doy, hour=hour, Rglob=Rglob, Rdif=Rdif)
         res = runRATP.DoIrradiation(grid, vegetation, sky, met)
 
