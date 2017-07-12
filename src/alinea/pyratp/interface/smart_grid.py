@@ -290,3 +290,22 @@ class SmartGrid(object):
         jz = nbz - jjz - 1
 
         return jx, jy, jz
+
+    def voxel_centers(self, jx, jy, jz):
+        """Coordinates of voxel centers identified by their indices"""
+
+        xo, yo, zo = self.origin
+        dx, dy, dz = self.resolution
+
+        xc = dx / 2. + numpy.array(jx) * dx
+        yc = dy / 2. + numpy.array(jy) * dy
+
+        if self.x_dz is None:
+            zc = dz / 2. + numpy.array(jz) * dz
+        else:
+            # dh is for the upper boundary of cells from base to top
+            xdz = numpy.array(self.x_dz)
+            dh = xdz.cumsum() - xdz / 2.
+            zc = numpy.array([dh[j] for j in jz])
+
+        return xo + xc, yo + yc, zo + zc

@@ -143,3 +143,19 @@ def test_ratp_parameters():
     pars = grid.ratp_grid_parameters()
     return pars
 
+def test_voxel_centers():
+    grid = SmartGrid(shape=(2, 2, 2), resolution=(0.5, 0.5, 0.5))
+    centers = grid.voxel_centers([0,1],[0,1],[0,1])
+    expected = ([ 0.25,  0.75], [ 0.25,  0.75], [ 0.25,  0.75])
+    numpy.testing.assert_array_equal(centers, expected)
+
+    scene_box = ((0.25, 0.25, 0.25), (1.25, 1.25, 1.25))
+    grid = SmartGrid(scene_box, shape=(2, 2, 2), resolution=(0.5, 0.5, 0.5))
+    centers = grid.voxel_centers([0,1],[0,1],[0,1])
+    expected = ([ 0.5,  1], [ 0.5,  1], [ 0.5,  1])
+    numpy.testing.assert_array_equal(centers, expected)
+
+    grid = SmartGrid(shape=(2, 2, 2), resolution=(0.5, 0.5, 0.5),x_dz=[0.1, 0.3])
+    centers = grid.voxel_centers([0,1],[0,1],[0,1])
+    expected = ([ 0.25,  0.75], [ 0.25,  0.75], [ 0.05,  0.25])
+    numpy.testing.assert_array_equal(centers, expected)
