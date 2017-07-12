@@ -257,8 +257,11 @@ class RatpScene(object):
         # associated smart_grid indices
         jx, jy, jz = self.smart_grid.decode_ratp_indices(numx - 1, numy - 1,
                                                          numz - 1)
+        xc, yc, zc = self.smart_grid.voxel_centers(jx, jy, jz)
 
-        return pandas.DataFrame({'VoxelId': index, 'jx': jx, 'jy': jy, 'jz': jz})
+        return pandas.DataFrame(
+            {'VoxelId': index, 'jx': jx, 'jy': jy, 'jz': jz, 'xc': xc, 'yc': yc,
+             'zc': zc})
 
     def do_irradiation(self, rsoil=0.20, doy=1, hour=12, Rglob=1,
                        Rdif=1, mu=None, sources=None, nbinclin=9):

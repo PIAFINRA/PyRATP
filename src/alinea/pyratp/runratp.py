@@ -142,16 +142,16 @@ class runRATP(object):
         ratp.out_rayt = np.zeros(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*9*pyratp.grid3d.nent).reshape(pyratp.micrometeo.nbli*pyratp.grid3d.nveg*pyratp.grid3d.nent ,9)
         pyratp.ratp.do_interception()
         
-        if platform.system() == 'Windows':
-            path = 'c:/tmpRATP'
-            if os.path.exists(os.path.normpath(path)):
-                shutil.rmtree(os.path.normpath(path))
-            os.mkdir(path)
-            os.mkdir(path+"/ResulIrradiation")
-            fspatial = open(path+"/ResulIrradiation"+'/spatial.txt','w')
-            fspatial.write('VegetationType  Iteration day hour  VoxelId ShadedPAR SunlitPAR ShadedArea  SunlitArea')
-            fspatial.write('\n')
-            np.savetxt(fspatial,ratp.out_rayt,'%.6e')
-            fspatial.close()
+        # if platform.system() == 'Windows':
+        #     path = 'c:/tmpRATP'
+        #     if os.path.exists(os.path.normpath(path)):
+        #         shutil.rmtree(os.path.normpath(path))
+        #     os.mkdir(path)
+        #     os.mkdir(path+"/ResulIrradiation")
+        #     fspatial = open(path+"/ResulIrradiation"+'/spatial.txt','w')
+        #     fspatial.write('VegetationType  Iteration day hour  VoxelId ShadedPAR SunlitPAR ShadedArea  SunlitArea')
+        #     fspatial.write('\n')
+        #     np.savetxt(fspatial,ratp.out_rayt,'%.6e')
+        #     fspatial.close()
 
         return ratp.out_rayt
