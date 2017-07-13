@@ -110,6 +110,11 @@ class SurfacicPointCloud(object):
             {'point_id': self.point_id, 'shape_id': self.shape_id
              })
 
+    def area_map(self):
+        return pandas.DataFrame(
+            {'point_id': self.point_id, 'area': self.area
+             })
+
     def as_scene_mesh(self):
         """ A simple mesh representation of the point cloud"""
 

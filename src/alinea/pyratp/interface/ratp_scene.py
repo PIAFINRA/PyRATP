@@ -18,6 +18,7 @@ from alinea.pyratp.interface.clumping_index import get_clumping
 from alinea.pyratp.interface.geometry import unit_square_mesh
 from alinea.pyratp.interface.smart_grid import SmartGrid
 from alinea.pyratp.interface.surfacic_point_cloud import SurfacicPointCloud
+from alinea.pyratp.interface.post_processing import aggregate_light
 from alinea.pyratp.interface.display import display_property
 import alinea.pyratp.interface.pgl_scene as pgls
 
@@ -342,7 +343,7 @@ class RatpScene(object):
         return pandas.merge(dfvox, self.voxel_index())
 
     def scene_lightmap(self, dfvox, spatial='point_id', temporal=True):
-        """  Aggregate light outputs along scene inputs
+        """  Aggregate light outputs along spatial domain of scene input
 
         Args:
             dfvox: a pandas data frame with ratp outputs
@@ -354,46 +355,14 @@ class RatpScene(object):
             a pandas dataframe with aggregated outputs
 
         """
-        dfmap = pandas.merge(self.scene.as_data_frame(), self.grid_indices)
-        aggregated_area = dfmap.loc[:, (spatial, 'area')].groupby(spatial).agg(
-            'sum').reset_index()
-        aggregated_area = aggregated_area.rename(columns={'area': 'agg_area'})
-        output = pandas.merge(pandas.merge(dfmap, aggregated_area), dfvox)
-
-        def _process(df):
-            w = df['area'] / df['agg_area']
-            a_agg = df['agg_area'].values[0]
-            res = pandas.Series(
-                {'VegetationType': df['VegetationType'].values[0],
-                 'day': df['day'].values[0],
-                 'hour': df['hour'].values[0],
-                 'ShadedPAR': numpy.sum(df['ShadedPAR'] * w),
-                 # weighted mean of voxel values (weigth = primitive area)
-                 'SunlitPAR': numpy.sum(df['SunlitPAR'] * w),
-                 'ShadedArea': numpy.sum(
-                     df['ShadedArea'] / df['Area'] * w) * a_agg,
-                 # weighted mean of shaded fraction times shape_area
-                 'SunlitArea': numpy.sum(
-                     df['SunlitArea'] / df['Area'] *w) * a_agg,
-                 'Area': a_agg,
-                 'PAR': numpy.sum(df['PAR'] * w)})
-            return res
-
-        grouped = output.groupby(['Iteration', spatial])
-        res = grouped.apply(_process).reset_index()
-
-        if temporal and len(set(res['Iteration'])) > 1:
-            grouped = res.groupby(spatial)
-            how = {'VegetationType': numpy.mean, 'day': numpy.mean,
-                   'hour': numpy.mean,
-                   'ShadedPAR': numpy.sum, 'SunlitPAR': numpy.sum,
-                   'ShadedArea': numpy.mean, 'SunlitArea': numpy.mean,
-                   'Area': numpy.mean, 'PAR': numpy.sum}
-            res = grouped.agg(how).reset_index()
-
         if spatial == 'point_id':
-            res = res.merge(self.scene.shape_map())
-        return res
+            scene_map = self.scene.area_map()
+        else:
+            scene_map = self.scene.shape_map().merge(self.scene.area_map())
+        grid_map = self.grid_indices
+
+        return aggregate_light(dfvox, scene_map=scene_map, grid_map=grid_map,
+                               temporal=temporal)
 
     def plot(self, dfvox, by='point_id', minval=None, maxval=None):
         lmap = self.scene_lightmap(dfvox, spatial=by)
@@ -401,6 +370,9 @@ class RatpScene(object):
             df = lmap.loc[:, ('shape_id', 'PAR')].set_index('shape_id')
             prop = {k: df['PAR'][k] for k in df.index}
         else:
+            # add shape_id
+            lmap = lmap.merge(self.scene.shape_map())
+            lmap = lmap.sort_values('point_id')
             prop = {sh_id: df.to_dict('list')['PAR'] for sh_id, df in
                     lmap.groupby('shape_id')}
         return display_property(self.scene_mesh, prop, minval=minval,
