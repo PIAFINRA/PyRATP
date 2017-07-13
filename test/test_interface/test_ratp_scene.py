@@ -37,6 +37,8 @@ def test_parameters():
     pars = ratp.parameters()
     assert 'grid' in pars
     assert isinstance(pars['grid'], dict)
+    ratp = RatpScene(mu = pars['mu'], distinc=pars['distinc'])
+    dfvox = ratp.do_irradiation()
 
 
 def test_light():

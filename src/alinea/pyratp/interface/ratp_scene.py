@@ -416,7 +416,7 @@ class RatpScene(object):
         d = {'grid': self.smart_grid.as_dict(), 'entities': ent, 'rleaf': rl,
              'rsoil': self.rsoil, 'nbinclin': self.nbinclin,
              'orientation': self.orientation, 'localisation': self.localisation,
-             'mu': self.mu, 'dinstinc':self.distinc}
+             'mu': self.mu, 'distinc':self.distinc}
         return d
 
 
