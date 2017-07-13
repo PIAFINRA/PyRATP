@@ -1,6 +1,8 @@
-from alinea.pyratp.interface.smart_grid import SmartGrid
-from alinea.pyratp.interface.surfacic_point_cloud import SurfacicPointCloud
+import os
+import tempfile
 import numpy
+
+from alinea.pyratp.interface.smart_grid import SmartGrid
 
 
 def test_instantiate():
@@ -64,6 +66,35 @@ def test_auto_fit():
     flat_zscene = ((0, 0, 0), (1, 1, 0))
     grid = SmartGrid(flat_zscene)
     assert grid.resolution[2] == grid.resolution[0]
+
+
+def test_serialisation():
+    scene_box = ((-numpy.pi, 0, 0), (1, 1, 1))
+    grid = SmartGrid(scene_box, resolution=[0.1, 0.1, 0.1], toric=True,
+                     z_soil=-1)
+
+    assert grid.z_soil == -1
+    numpy.testing.assert_array_equal(grid.shape, [42, 10, 21])
+    numpy.testing.assert_array_almost_equal(grid.origin,
+                                            (-3.1707963267948966, 0.0, -1),
+                                            decimal=6)
+
+    try:
+        tmpdir = tempfile.mkdtemp()
+        path = os.path.join(tmpdir, 'test.json')
+        grid.save(path)
+        grid = SmartGrid.load(path)
+
+        assert grid.z_soil == -1
+        numpy.testing.assert_array_equal(grid.shape, [42, 10, 21])
+        numpy.testing.assert_array_almost_equal(grid.origin,
+                                                (-3.1707963267948966, 0.0, -1),
+                                                decimal=6)
+    except Exception as e:
+        raise e
+    finally:
+        os.remove(path)
+        os.rmdir(tmpdir)
 
 
 def test_grid_index():
