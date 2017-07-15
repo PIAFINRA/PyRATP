@@ -7,6 +7,7 @@
 from collections import Iterable
 import numpy
 import pandas
+import json
 
 from alinea.pyratp.grid import Grid
 from alinea.pyratp.micrometeo import MicroMeteo
@@ -142,12 +143,13 @@ class RatpScene(object):
 
         if not isinstance(localisation, dict):
             try:
-                self.localisation = RatpScene.localisation_db[localisation]
+                localisation = RatpScene.localisation_db[localisation]
             except KeyError:
                 print 'Warning : localisation', localisation, \
                     'not found in database, using default localisation', \
                     RatpScene.localisation_db.iter().next()
-                self.localisation = RatpScene.localisation_db.itervalues().next()
+                localisation = RatpScene.localisation_db.itervalues().next()
+        self.localisation = localisation
 
         if mu is None:
             mu = self.clumping()
@@ -385,10 +387,27 @@ class RatpScene(object):
         if self.n_entities() == 1:
             ent = ent.itervalues().next()
             rl = rl.itervalues().next()
+            if ent == 'default':
+                ent = None
         d = {'grid': self.smart_grid.as_dict(), 'entities': ent, 'rleaf': rl,
              'rsoil': self.rsoil, 'nbinclin': self.nbinclin,
              'orientation': self.orientation, 'localisation': self.localisation,
              'mu': self.mu, 'distinc':self.distinc}
         return d
 
+    @staticmethod
+    def read_parameters(file_path):
+        with open(file_path, 'r') as input_file:
+            pars = json.load(input_file)
+        return pars
 
+    def save_parameters(self, file_path):
+        saved = self.parameters()
+        with open(file_path, 'w') as output_file:
+            json.dump(saved, output_file, sort_keys=True, indent=4,
+                      separators=(',', ': '))
+
+    @staticmethod
+    def load_ratp_scene(scene, parameters):
+        grid = SmartGrid.from_dict(parameters.pop('grid'))
+        return RatpScene(scene, grid=grid, **parameters)
