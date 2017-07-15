@@ -252,7 +252,7 @@ class RatpScene(object):
 
         def _dist(inc):
             dist = numpy.histogram(inc, nbinclin, (0, 90))[0]
-            return dist.astype('float') / dist.sum()
+            return (dist.astype('float') / dist.sum()).tolist()
         inclinations = self.inclinations()
         distinc = map(_dist, inclinations)
 
