@@ -287,7 +287,9 @@ class RatpScene(object):
         """ Run a simulation of light interception for one wavelength
 
             Parameters:
-                - sources: a list of sequences giving elevation, azimuth and weight associated to sky vault sectors.
+                - sources: a list of sequences giving elevation, azimuth (from
+                X+, positive clockwise) and weight associated to sky vault
+                sectors.
                 if None, default RATP soc-weighted skyvault is used
                 - mu: if not None, force mu for all species to be set to this value
         """
