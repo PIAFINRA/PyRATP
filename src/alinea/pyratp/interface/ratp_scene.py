@@ -19,7 +19,7 @@ from alinea.pyratp.interface.clumping_index import get_clumping
 from alinea.pyratp.interface.geometry import unit_square_mesh
 from alinea.pyratp.interface.smart_grid import SmartGrid
 from alinea.pyratp.interface.surfacic_point_cloud import SurfacicPointCloud
-from alinea.pyratp.interface.post_processing import aggregate_light
+from alinea.pyratp.interface.post_processing import aggregate_light, aggregate_grid
 from alinea.pyratp.interface.display import display_property
 import alinea.pyratp.interface.pgl_scene as pgls
 
@@ -367,6 +367,12 @@ class RatpScene(object):
 
         return aggregate_light(dfvox, scene_map=scene_map, grid_map=grid_map,
                                temporal=temporal)
+
+    def xy_lightmap(self, dfvox):
+        """ Aggregate light outputs along x y cells"""
+        grid_map = self.grid_indices
+        area_map = self.scene.area_map()
+        return aggregate_grid(dfvox, grid_map, area_map)
 
     def plot(self, dfvox, by='point_id', minval=None, maxval=None):
         lmap = self.scene_lightmap(dfvox, spatial=by)

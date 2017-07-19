@@ -72,3 +72,39 @@ def aggregate_light(dfvox, grid_map, scene_map, temporal=True):
         res = grouped.agg(how).reset_index()
 
     return res
+
+
+def aggregate_grid(dfvox, grid_map, area_map, by=('jx', 'jy'), temporal=True):
+    """  Aggregate ratp light outputs along scene inputs
+
+    Args:
+        dfvox: a pandas data frame with ratp.do_irradiation outputs
+        grid_map: a 4-columns pandas dataframe mapping scene point_id to grid
+         indices (jx, jy, jz)
+        area_map: a 2 columns pandas dataframe mapping scene point_id to
+         point area
+        by: a tuple naming cell dimension to aggregate on.
+        temporal: should iterations be aggregated ?
+
+    Returns:
+        a pandas dataframe with aggregated outputs
+
+    """
+    dfmap = pandas.merge(area_map, grid_map)
+    cols = [w for w in by] + ['area']
+    aggregated_area = dfmap.loc[:,cols].groupby(
+        by).agg('sum').reset_index().rename(columns={'area': 'agg_area'})
+    output = pandas.merge(pandas.merge(dfmap, aggregated_area), dfvox)
+    on = [w for w in by] + ['Iteration']
+    grouped = output.groupby(on)
+    res = grouped.apply(_process_light).reset_index()
+    if temporal and len(set(res['Iteration'])) > 1:
+        grouped = res.groupby(by)
+        how = {'VegetationType': numpy.mean, 'day': numpy.mean,
+               'hour': numpy.mean,
+               'ShadedPAR': numpy.sum, 'SunlitPAR': numpy.sum,
+               'ShadedArea': numpy.mean, 'SunlitArea': numpy.mean,
+               'Area': numpy.mean, 'PAR': numpy.sum}
+        res = grouped.agg(how).reset_index()
+
+    return res

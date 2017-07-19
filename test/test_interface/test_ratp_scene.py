@@ -51,6 +51,7 @@ def test_light():
     dfvox = ratp.do_irradiation()
     dfpoints = ratp.scene_lightmap(dfvox, 'point_id')
     dfshape = ratp.scene_lightmap(dfvox, 'shape_id')
+    dfxy = ratp.xy_lightmap(dfvox)
     if pgls.pgl_imported:
         ratp.plot(dfvox)
         ratp.plot(dfvox, 'shape_id')
