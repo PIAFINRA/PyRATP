@@ -24,10 +24,10 @@ def test_spc_instantiation():
 def test_data_frame():
     spc = SurfacicPointCloud(0, 0, 0, 1)
     df = spc.as_data_frame()
-    assert df.shape == (1, 8)
+    assert df.shape == (1, 9)
     spc.properties.update({'a_property': {0: 3}})
     df = spc.as_data_frame()
-    assert df.shape == (1, 9)
+    assert df.shape == (1, 10)
 
 
 def test_as_scene_mesh():
