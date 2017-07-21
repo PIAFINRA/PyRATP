@@ -320,6 +320,9 @@ class RatpScene(object):
             # force normalisation
             w /= w.sum()
             omega = w * 2 * numpy.pi
+            # RATP sources azimuths are from South, positive clockwise
+            # scene sources are from X+, positive clockwise
+            az = az - 180 + self.orientation
             sky = Skyvault.initialise(hmoy=el, azmoy=az, omega=omega, pc=w)
         met = MicroMeteo.initialise(doy=1, hour=12, Rglob=1, Rdif=1)
         res = runRATP.DoIrradiation(self.ratp_grid, vegetation, sky, met)
