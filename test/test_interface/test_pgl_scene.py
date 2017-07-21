@@ -8,7 +8,7 @@ if pgls.pgl_imported:
         box = pgls.bbox(scene)
         numpy.testing.assert_array_equal(box,
                                          ((-0.5, -0.5, -0.5), (0.5, 0.5, 0.5)))
-        pgls.bbox(scene, scene_unit='dam')
+        box = pgls.bbox(scene, scene_unit='dam')
         numpy.testing.assert_array_equal(box, ((-5, -5, -5), (5, 5, 5)))
 
 

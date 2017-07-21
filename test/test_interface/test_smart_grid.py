@@ -1,6 +1,8 @@
-from alinea.pyratp.interface.smart_grid import SmartGrid
-from alinea.pyratp.interface.surfacic_point_cloud import SurfacicPointCloud
+import os
+import tempfile
 import numpy
+
+from alinea.pyratp.interface.smart_grid import SmartGrid
 
 
 def test_instantiate():
@@ -64,6 +66,35 @@ def test_auto_fit():
     flat_zscene = ((0, 0, 0), (1, 1, 0))
     grid = SmartGrid(flat_zscene)
     assert grid.resolution[2] == grid.resolution[0]
+
+
+def test_serialisation():
+    scene_box = ((-numpy.pi, 0, 0), (1, 1, 1))
+    grid = SmartGrid(scene_box, resolution=[0.1, 0.1, 0.1], toric=True,
+                     z_soil=-1)
+
+    assert grid.z_soil == -1
+    numpy.testing.assert_array_equal(grid.shape, [42, 10, 21])
+    numpy.testing.assert_array_almost_equal(grid.origin,
+                                            (-3.1707963267948966, 0.0, -1),
+                                            decimal=6)
+
+    try:
+        tmpdir = tempfile.mkdtemp()
+        path = os.path.join(tmpdir, 'test.json')
+        grid.save(path)
+        grid = SmartGrid.load(path)
+
+        assert grid.z_soil == -1
+        numpy.testing.assert_array_equal(grid.shape, [42, 10, 21])
+        numpy.testing.assert_array_almost_equal(grid.origin,
+                                                (-3.1707963267948966, 0.0, -1),
+                                                decimal=6)
+    except Exception as e:
+        raise e
+    finally:
+        os.remove(path)
+        os.rmdir(tmpdir)
 
 
 def test_grid_index():
@@ -143,3 +174,19 @@ def test_ratp_parameters():
     pars = grid.ratp_grid_parameters()
     return pars
 
+def test_voxel_centers():
+    grid = SmartGrid(shape=(2, 2, 2), resolution=(0.5, 0.5, 0.5))
+    centers = grid.voxel_centers([0,1],[0,1],[0,1])
+    expected = ([ 0.25,  0.75], [ 0.25,  0.75], [ 0.25,  0.75])
+    numpy.testing.assert_array_equal(centers, expected)
+
+    scene_box = ((0.25, 0.25, 0.25), (1.25, 1.25, 1.25))
+    grid = SmartGrid(scene_box, shape=(2, 2, 2), resolution=(0.5, 0.5, 0.5))
+    centers = grid.voxel_centers([0,1],[0,1],[0,1])
+    expected = ([ 0.5,  1], [ 0.5,  1], [ 0.5,  1])
+    numpy.testing.assert_array_equal(centers, expected)
+
+    grid = SmartGrid(shape=(2, 2, 2), resolution=(0.5, 0.5, 0.5),x_dz=[0.1, 0.3])
+    centers = grid.voxel_centers([0,1],[0,1],[0,1])
+    expected = ([ 0.25,  0.75], [ 0.25,  0.75], [ 0.05,  0.25])
+    numpy.testing.assert_array_equal(centers, expected)

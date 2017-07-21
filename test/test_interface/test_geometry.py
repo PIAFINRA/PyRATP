@@ -33,4 +33,4 @@ def test_random_normals():
 def test_move_points():
     vertices, faces = unit_square_mesh()
     x, y, z = zip(*vertices)
-    nx, nzy, nz = move_points(zip(x, y))
+    newpoints = move_points(zip(x, y))
