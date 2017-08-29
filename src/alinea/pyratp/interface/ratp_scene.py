@@ -12,7 +12,7 @@ import json
 from alinea.pyratp.grid import Grid
 from alinea.pyratp.micrometeo import MicroMeteo
 from alinea.pyratp.runratp import runRATP
-from alinea.pyratp.skyvault import Skyvault
+from alinea.pyratp.skyvault import Skyvault, elevations46, azimuths46, omegas_46
 from alinea.pyratp.vegetation import Vegetation
 
 from alinea.pyratp.interface.clumping_index import get_clumping
@@ -283,15 +283,29 @@ class RatpScene(object):
             {'VoxelId': index, 'jx': jx, 'jy': jy, 'jz': jz, 'xc': xc, 'yc': yc,
              'zc': zc})
 
-    def do_irradiation(self, sources=None, mu=None, distinc=None):
+    def do_irradiation(self, sun_sources=None, sky_sources=None,
+                       scattering_indicatrix=None, mu=None, distinc=None):
         """ Run a simulation of light interception for one wavelength
 
             Parameters:
-                - sources: a list of sequences giving elevation, azimuth (from
-                X+, positive clockwise) and weight associated to sky vault
-                sectors.
-                if None, default RATP soc-weighted skyvault is used
-                - mu: if not None, force mu for all species to be set to this value
+                sun_sources: elevation (degrees), azimuth (degrees, from North
+                    positive clockwise), horizontal irradiance of sources
+                    representing the sun.
+                sky_sources: elevation (degrees), azimuth (degrees, from North
+                    positive clockwise), horizontal irradiance of sources
+                    representing the sky.
+                    If both sun_sources and sky_sources are None, a 46
+                    directions, normalised soc sky is used
+                scattering_indicatrix: relative weights associated to sky_sources
+                    directions used to compute interception coefficient of scattered
+                    light. If None uniform contribution is used if sky_sources
+                    is not None or default RATP turtle 46 if sky_sources is None
+                mu: clumping index of vegetation. If None, clumping index is
+                    estimated after modified clark evans index
+                distinc: a list of list giving the frequency of the nbinclin
+                    leaf angles classes (from horizontal to vertical) per entity
+                    in the canopy.If None (default), distinc is computed
+                    automatically from the scene
         """
 
         nent = self.n_entities()
@@ -305,26 +319,54 @@ class RatpScene(object):
         entities = [{'rf': [self.rleaf[i + 1]], 'distinc': self.distinc[i],
                      'mu': self.mu[i]} for i
                     in range(nent)]
-
         vegetation = Vegetation.initialise(entities, nblomin=1)
-        if sources is None:
+
+        if sun_sources is None and sky_sources is None:
             sky = Skyvault.initialise()
+            ghi = 1
         else:
-            el, az, w = sources
-            # omega (sr, sum=2pi) is used by ratp to weight Gfuntion in k
-            # computation (mod_dir_interception.f90, line 112)
-            # pc is used elsewhere (mod_Hemi_Interception), line 124) to weight
-            # fraction intercepted
-            # to me, both should be consistent, ie giving same weighting system
-            w = numpy.array(w)
-            # force normalisation
-            w /= w.sum()
-            omega = w * 2 * numpy.pi
+            hmoy, azmoy, omega, pc = [], [], [], []
+            if sun_sources is not None:
+                el, az, irr = sun_sources
+                hmoy.extend(el)
+                azmoy.extend(az)
+                pc.extend(irr)
+                # sun directions are not used to estimate interception coeff of
+                # scattered light 'rka' (mod_Shortwave_Balance.f90, line 142 +
+                # mod_dir_interception.f90, line 112)
+                omega.extend([0] * len(irr))
+            if sky_sources is not None:
+                el, az, irr = sky_sources
+                hmoy.extend(el)
+                azmoy.extend(az)
+                pc.extend(irr)
+                if scattering_indicatrix is None:
+                    omega.extend([1] * len(irr))
+                else:
+                    omega.extend(scattering_indicatrix)
+            else:
+                hmoy.extend(elevations46)
+                azmoy.extend(azimuths46)
+                omega.extend(omegas_46)
+                # only use for omega / rediff, not fo lighting
+                pc.extend([0] * len(omegas_46))
+
+            # pc is used (mod_Hemi_Interception, line 124) to weight Rdif
+            ghi = sum(pc)
+            if ghi == 0:
+                raise ValueError('Irradiance of sources is null!!!')
+            pc = numpy.array(pc) / ghi
+            # omega are Sr solid angles (mod_dir_interception.f90, line 112)
+            omega = numpy.array(omega)
+            omega /= omega.sum()
+            omega *= 2 * numpy.pi
             # RATP sources azimuths are from South, positive clockwise
-            # scene sources are from X+, positive clockwise
-            az = numpy.array(az) - 180 + self.orientation
-            sky = Skyvault.initialise(hmoy=el, azmoy=az, omega=omega, pc=w)
-        met = MicroMeteo.initialise(doy=1, hour=12, Rglob=1, Rdif=1)
+            # (mod_Shortwave_Balance, line 83) and orientation is not taken into
+            # account for diffuse sources, unike RATP native sun sources
+            # (mod_Shortwave_Balance.f90, line 136)
+            azmoy = numpy.array(azmoy) - 180 + self.orientation
+            sky = Skyvault.initialise(hmoy=hmoy, azmoy=azmoy, omega=omega, pc=pc)
+        met = MicroMeteo.initialise(doy=1, hour=12, Rglob=ghi, Rdif=ghi)
         res = runRATP.DoIrradiation(self.ratp_grid, vegetation, sky, met)
 
         VegetationType, Iteration, day, hour, VoxelId, ShadedPAR, SunlitPAR, \
