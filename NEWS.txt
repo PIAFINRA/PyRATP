@@ -1,1 +1,7 @@
 This file is used to document modifications from the last release at the user level (functional)
+
+
+version 0.11:
+- make pyratp.interface compatible with astk 0.3 azimuth conventions
+- Correct positioning of sources in pyratp.interface has been tested for the
+  first time
