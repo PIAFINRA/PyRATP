@@ -183,7 +183,7 @@ class RatpScene(object):
         self.distinc = distinc
         self.nbinclin = nbinclin
 
-    def clumping(self):
+    def clumping(self, expand=True):
         spc = self.scene
         grid = self.smart_grid
         x, y, z = spc.x, spc.y, spc.z
@@ -202,10 +202,11 @@ class RatpScene(object):
             clumps = []
             for k, df in gvox:
                 clumping = get_clumping(df['x'], df['y'], df['z'], df['s'],
-                                        df['n'], domain=domain)
+                                        df['n'], domain=domain, expand=expand)
                 min_mu = df['s'].mean() / df[
                     's'].sum()  # minimal mu in the case of perfect clumping
-                clumps.append(max(min_mu, clumping))
+                if numpy.isfinite(clumping):
+                    clumps.append(max(min_mu, clumping))
             mu.append(numpy.mean(clumps))
 
         return mu
