@@ -335,14 +335,14 @@ class RatpScene(object):
                 # sun directions are not used to estimate interception coeff of
                 # scattered light 'rka' (mod_Shortwave_Balance.f90, line 142 +
                 # mod_dir_interception.f90, line 112)
-                omega.extend([0] * len(irr))
+                omega.extend([0.] * len(irr))
             if sky_sources is not None:
                 el, az, irr = sky_sources
                 hmoy.extend(el)
                 azmoy.extend(az)
                 pc.extend(irr)
                 if scattering_indicatrix is None:
-                    omega.extend([1] * len(irr))
+                    omega.extend([1.] * len(irr))
                 else:
                     omega.extend(scattering_indicatrix)
             else:
