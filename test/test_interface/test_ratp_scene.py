@@ -61,6 +61,21 @@ def test_light():
         ratp.plot(dfvox)
 
 
+def test_sky_source_type():
+    # small Horizontal surface in  big voxel
+    spc = SurfacicPointCloud(0.5, 0.5, 0.5, area=0.1, normals=[(0, 0, 1)])
+    # sun_source
+    ratp = RatpScene(spc, resolution=(1, 1, 1), rsoil=0, nbinclin=90)
+    dfsun = ratp.do_irradiation(sun_sources=([90], [0], [1]))
+    dfsky = ratp.do_irradiation(sky_sources=([90], [0], [1]))
+    assert dfsky.PAR.values > dfsun.PAR.values
+    dfscat = ratp.do_irradiation(sun_sources=([90], [0], [1]),
+                                 sky_sources=([90], [0], [0]),
+                                 scattering_indicatrix=[1])
+    numpy.testing.assert_almost_equal(dfsky.PAR.values, dfscat.PAR.values,
+                                      decimal=2)
+
+
 def test_sources():
     # small Horizontal surface in  big voxel
     spc = SurfacicPointCloud(0.5, 0.5, 0.5, area=0.1, normals=[(0, 0, 1)])
