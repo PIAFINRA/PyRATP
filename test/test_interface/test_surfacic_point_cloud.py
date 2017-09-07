@@ -63,7 +63,7 @@ def test_serialisation():
 
 
 def test_bbox():
-    faces = ((0, 1, 2), (0, 2, 0), (0, 1, 3))
+    faces = ((0, 1, 2), (0, 2, 3), (0, 1, 3))
     vertices = ((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
     sc = {'0': (vertices, faces)}
     spc = SurfacicPointCloud.from_scene_mesh(sc)
@@ -81,3 +81,16 @@ def test_inclinations():
      df.groupby('shape_id')}
     numpy.testing.assert_array_equal(inc[1], [90.0])
     numpy.testing.assert_array_equal(inc[2], [0.0, 90.0])
+
+
+def test_subset():
+    faces = ((0, 1, 2), (0, 2, 3), (0, 1, 3))
+    vertices = ((0, 0, 0), (1, 0, 0), (0, 1, 0), (0, 0, 1))
+    sc = {1: (vertices, (faces[1],)), 2: (vertices, [faces[i] for i in (0, 2)])}
+    spc = SurfacicPointCloud.from_scene_mesh(sc)
+    sub = spc.subset(point_id=1)
+    assert len(sub.as_data_frame()==1)
+    sub = spc.subset(shape_id=2)
+    assert len(sub.as_data_frame()==2)
+
+
