@@ -463,5 +463,7 @@ class RatpScene(object):
 
     @staticmethod
     def load_ratp_scene(scene, parameters):
-        grid = SmartGrid.from_dict(parameters.pop('grid'))
-        return RatpScene(scene, grid=grid, **parameters)
+        # copy to avoid altering parameters
+        pars = {k:v for k,v in parameters.iteritems()}
+        grid = SmartGrid.from_dict(pars.pop('grid'))
+        return RatpScene(scene, grid=grid, **pars)
