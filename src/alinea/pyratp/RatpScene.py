@@ -431,7 +431,6 @@ class RatpScene(object):
         
         return grid, vox_id, sh_id, s
 
-
     def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1, mu=None, sources=None):
         """ Run a simulation of light interception for one wavelength
         
@@ -442,8 +441,9 @@ class RatpScene(object):
                 - hour : [list of] decimal hour (0-24) [for the different iterations]
                 - Rglob : [list of] global (direct + diffuse) radiation [for the different iterations] (W.m-2)
                 - Rdif : [list of] direct/diffuse radiation ratio [for the different iterations] (0-1)
-                - sources: a list of sequences giving elevation, azimuth, steradians and weights of sky vault.
-                if None, default RATP soc skyvault is used
+                - mu: if not None, force mu for all species to be set to this value
+                - sources: a list of sequences giving elevation, azimuth and weight associated to sky vault sectors.
+                if None, default RATP soc-weighted skyvault is used
 
         """
         
@@ -460,8 +460,17 @@ class RatpScene(object):
         if sources == None:
             sky = Skyvault.initialise()
         else:
-            el, az, strd, w = sources
-            sky = Skyvault.initialise(hmoy=el, azmoy=az, omega=strd, pc=w)
+            el, az, w = sources
+            # omega (sr, sum=2pi) is used by ratp to weight Gfuntion in k
+            # computation (mod_dir_interception.f90, line 112)
+            # pc is used elsewhere (mod_Hemi_Interception), line 124) to compute
+            # fraction intercepted in a given direction
+            # to me, both should be consistent, ie giving same weighting system
+            w = numpy.array(w)
+            # force normalisation
+            w /= w.sum()
+            omega = w * 2 * numpy.pi
+            sky = Skyvault.initialise(hmoy=el, azmoy=az, omega=omega, pc=w)
             
         met = MicroMeteo.initialise(doy=doy, hour=hour, Rglob=Rglob, Rdif=Rdif)
 
