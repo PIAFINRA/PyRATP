@@ -39,6 +39,17 @@ def test_as_scene_mesh():
     assert len(v) == 3
 
 
+def test_as_triangle_scene():
+    spc = SurfacicPointCloud(0, 0, 0, 1)
+    sc = spc.as_triangle_scene()
+    assert 0 in sc
+    triangles = sc[0]
+    assert len(triangles) == 1
+    pts = triangles[0]
+    assert len(pts) == 3
+    assert len(pts[0]) == 3
+
+
 def test_serialisation():
     spc = SurfacicPointCloud(0, 0, 0, 1)
     try:

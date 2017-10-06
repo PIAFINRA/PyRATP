@@ -163,6 +163,22 @@ class SurfacicPointCloud(object):
             scene[sh_id] = vertices, faces
         return scene
 
+    def as_triangle_scene(self):
+        """ A {id: [triangles,..] representation of the point cloud"""
+        scene = {}
+        df = self.as_data_frame(add_properties=False)
+        for sh_id, g in df.groupby('shape_id'):
+            triangles=[]
+            for ind, row in g.iterrows():
+                tri = equilateral(row.area)
+                rot = numpy.random.rand() * numpy.pi / 3
+                norm = row.norm_x, row.norm_y, row.norm_z
+                pos = row.x, row.y, row.z
+                pts = move_points(tri, pos, norm, rot)
+                triangles.append(pts)
+            scene[sh_id] = triangles
+        return scene
+
     def save(self, path='surfacic_point_cloud.csv'):
         """ Save a csv representation of the object
         """
