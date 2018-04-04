@@ -13,16 +13,18 @@ requirements:
         - setuptools
         - openalea.sconsx
         - numpy
-        - {{ compiler('c') }}
+        - mingwpy  # [win and py2k]
+        - gcc  # [osx]
+        - libgfortran  # [linux]
     run:
         - python
         - path.py
-        - libgfortran
-        - numpy x.x
+        - libgfortran  # [linux or osx]
+        - numpy
         - scipy
         - pandas
-        - openalea.mtg
-        - openalea.visualea
+        #- openalea.mtg
+        #- openalea.visualea
 test:
     imports:
         - alinea.pyratp
