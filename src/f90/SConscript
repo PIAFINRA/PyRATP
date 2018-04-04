@@ -8,8 +8,6 @@ abspath = os.path.abspath
 
 Import( "env" )
 
-CONDA = True
-
 lib_env = env.Clone(F90PATH='#/build-scons/src/f90',
                     FORTRAN='gfortran', LINK='gfortran',
                     FORTRANMODDIR = '${TARGET.dir}',
@@ -93,10 +91,9 @@ lib_env.Append(BUILDERS={'MyF2py':bld})
 bld = lib_env.MyF2py('pyratp',sources)
 Alias('build', bld)
 
-if CONDA:
-    lib = lib_env.Install("#/src/alinea/pyratp", bld)
-    Alias("install_lib", lib)
-    Alias("install", lib)
+lib = lib_env.Install("#/src/alinea/pyratp", bld)
+Alias("install_lib", lib)
+Alias("install", lib)
 
 
 #Alias('build',lib_env.Install('#/src/alinea/pyratp',bld))
