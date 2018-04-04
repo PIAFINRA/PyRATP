@@ -13,7 +13,6 @@ requirements:
         - setuptools
         - openalea.sconsx
         - numpy
-        - {{ compiler('fortran') }}
         - {{ compiler('c') }}
     run:
         - python
