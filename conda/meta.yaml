@@ -1,0 +1,37 @@
+package:
+  name: alinea.pyratp
+  version: 2.0.0
+
+source:
+    path: ..
+build:
+    number: '2'
+    script: python setup.py install
+requirements:
+    build:
+        - python
+        - setuptools
+        - openalea.sconsx
+        - numpy
+        - {{ compiler('fortran') }}
+        - {{ compiler('c') }}
+    run:
+        - python
+        - path.py
+        - libgfortran
+        - numpy x.x
+        - scipy
+        - pandas
+        - openalea.mtg
+        - openalea.visualea
+test:
+    imports:
+        - alinea.pyratp
+        - alinea.pyratp.pyratp
+about:
+    home: http://github.com/openalea-incubator/PyRATP
+    license: Cecill-C
+    summary: RATP is a model to compute Radiation Absorption, Transpiration and Photosynthesis.
+extra:
+    recipe-maintainers:
+        - pradal
