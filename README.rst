@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/openalea-incubator/PyRATP.svg?branch=master
+    :target: https://travis-ci.org/openalea-incubator/PyRATP
+
 =============== 
 Alinea.PyRATP
 =============== 
