@@ -13,14 +13,15 @@ env:
  - CONDA_RECIPE=conda
    CONDA_VERSION=2
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - gfortran-6
+# addons:
+#   apt:
+#     sources:
+#       - ubuntu-toolchain-r-test
+#     packages:
+#       - gfortran-6
 
 install:
+  - sudo apt-get install gfortran
   - git clone https://github.com/OpenAlea/travis-ci.git
   - cd travis-ci
   - source install.sh
