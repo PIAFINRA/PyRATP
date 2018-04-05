@@ -1,6 +1,10 @@
 .. image:: https://travis-ci.org/openalea-incubator/PyRATP.svg?branch=master
     :target: https://travis-ci.org/openalea-incubator/PyRATP
 
+
+.. image:: https://ci.appveyor.com/api/projects/status/1h8hfpjln68in4wa?svg=true
+   :target: https://ci.appveyor.com/project/pradal/pyratp
+   
 =============== 
 Alinea.PyRATP
 =============== 
