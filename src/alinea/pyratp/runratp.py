@@ -8,6 +8,38 @@ import numpy as np
 import grid
 from alinea.pyratp import pyratp
 
+columns = ('VegetationType',
+           'ntime',
+           'day',
+           'hour',
+           'AirTemperature',
+           'VoxelId',
+           'ShadedTemp',
+           'SunlitTemp',
+           'STARDirect',
+           'STARSky',
+           'ShadedPhoto',
+           'SunlitPhoto',
+           'ShadedTranspi',
+           'SunlitTranspi',
+           'ShadedArea',
+           'SunlitArea',
+           'ShadedGs',
+           'SunlitGs',
+           'ShadedAbsorbedPAR',
+           'SunlitAbsorbedPAR',
+           'ShadedAbsorbedNIR',
+           'SunlitAbsorbedNIR')
+
+columns_tree = ('ntime',
+                'day',
+                'hour',
+                'VegetationType',
+                'TotalIrradiation',
+                'AirTemperature',
+                'TreePhotosynthesis',
+                'TreeTranspiration')
+
 
 class runRATP(object):
     """
@@ -42,16 +74,13 @@ class runRATP(object):
 
         # print 'dz,', pyratp.grid3d.dz
         fspatial = open(path + "/Resul" + '/spatial.txt', 'w')
-        fspatial.write(
-            'VegetationType  ntime  day   hour  AirTemperature  VoxelId  ShadedTemp  SunlitTemp  STARDirect STARSky ShadedPhoto SunlitPhoto  ShadedTranspi SunlitTranspi')
-        fspatial.write(
-            '  ShadedArea SunlitArea ShadedGs  SunlitGs ShadedAbsorbedPAR SunlitAbsorbedPAR ShadedAbsorbedNIR SunlitAbsorbedNIR')
+        fspatial.write(" ".join(columns))
         fspatial.write('\n')
         np.savetxt(fspatial, ratp.out_time_spatial, '%.6e')
         fspatial.close()
+
         ftree = open(path + "/Resul" + '/tree.txt', 'w')
-        ftree.write(
-            'ntime  day   hour  VegetationType  TotalIrradiation  AirTemperature  TreePhotosynthesis  TreeTranspiration')
+        ftree.write(" ".join(columns_tree))
         ftree.write('\n')
         np.savetxt(ftree, ratp.out_time_tree, '%.6e')
         ftree.close()
@@ -133,6 +162,8 @@ class runRATP(object):
             fichier.write('\n')
 
         fichier.close()
+
+        # convert matrices to dataframes
 
         return ratp.out_time_spatial, ratp.out_time_tree
 
