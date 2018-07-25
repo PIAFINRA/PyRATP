@@ -12,7 +12,7 @@ SConsignFile()
 
 options = Variables(['../options.py', 'options.py'], ARGUMENTS)
 #tools = ['f2py']
-tools = ['']
+tools = ['install']
 
 env = ALEASolution(options, tools)
 
@@ -21,6 +21,5 @@ prefix = env['build_prefix']
 
 # Build stage
 SConscript(pj(prefix,"src/f90/SConscript"), exports="env")
-SConscript(pj(prefix,"src/wrapper/SConscript"), exports="env")
 
 Default("build")
