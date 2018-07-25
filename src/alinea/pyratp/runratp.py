@@ -4,6 +4,7 @@ import shutil
 import tempfile
 
 import numpy as np
+import pandas as pd
 
 import grid
 from alinea.pyratp import pyratp
@@ -164,8 +165,24 @@ class runRATP(object):
         fichier.close()
 
         # convert matrices to dataframes
+        df = pd.DataFrame(ratp.out_time_spatial, columns=columns)
 
-        return ratp.out_time_spatial, ratp.out_time_tree
+        df['vtyp'] = [int(t) for t in df['VegetationType']]
+        df['ntime'] = [int(t) for t in df['ntime']]
+        df['day'] = [int(t) for t in df['day']]
+        df['vid'] = [int(t) - 1 for t in df['VoxelId']]
+
+        df_spatial = df.set_index(['vtyp', 'ntime', 'vid'])
+
+        df = pd.DataFrame(ratp.out_time_tree, columns=columns_tree)
+
+        df['vtyp'] = [int(t) for t in df['VegetationType']]
+        df['ntime'] = [int(t) for t in df['ntime']]
+        df['day'] = [int(t) for t in df['day']]
+
+        df_tree = df.set_index(['vtyp', 'ntime'])
+
+        return df_spatial, df_tree
 
     @staticmethod
     def DoIrradiation(*args):
