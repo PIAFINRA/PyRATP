@@ -38,13 +38,11 @@ def test_grid():
 def test_irradiation():
     sc = scene()    
     s = RatpScene(sc)
-    dfvox, dfmap = s.do_irradiation()
-    s.aggregate_light(dfvox, dfmap)
-
+    return s.do_irradiation()
     
 def test_plot(**args):
     sc = scene()
     s = RatpScene(sc,**args)
-    dfvox, dfmap = s.do_irradiation()
-    s.plot(dfvox[dfvox['Iteration'] == 1], dfmap)
+    res = s.do_irradiation()
+    s.plot(res[res['Iteration'] == 1])
     

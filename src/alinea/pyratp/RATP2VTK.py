@@ -180,10 +180,8 @@ def RATPVOXELS2VTK(grid, variable,varname="Variable",nomfich="C:\tmpRATP\RATPOUT
            Outputs: ... a VTK file
     '''
         # Writes the output file following VTK file format for 3D view with Paraview
-        # Works only with triangles P1 i.e. defined with 3 points
         #
         #... Input:
-            #... Triangles - self attribute
             #... Variable[0] is the value of the variable to be plotted
             #... Variable[1] is the entity corresponding to the variable
             #... Variable[2] is the Voxel id associated to the entity

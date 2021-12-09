@@ -56,7 +56,7 @@ contains
 
  real, allocatable :: xka(:)
 
- ! write(*,*) 'di_doall debut'
+  !write(*,*) 'di_doall debut'
 
   hmoy0=hmoy0*pi/180.    ! Conversion to radians
   azmoy0=azmoy0*pi/180.
@@ -89,7 +89,7 @@ contains
 
 
   allocate(xka(nent))
-  allocate(rka(nent))
+  allocate(rka(nent)) 
   xka=0.
   rka=0.
 !  write(*,*) 'nbincli',nbincli,'nent',nent
@@ -126,7 +126,8 @@ contains
 
 ! Calcul des coeff d'extinction de chaque voxel k: xk(k), pour chaque direction k
 !        du partage du rayonnement entre composantes: share(je,k)
-
+  
+     
   allocate(xk(0:nveg))
   allocate(share(nemax,nveg))
   xk=0.
@@ -158,14 +159,13 @@ contains
 !  Allocation et Initialisation des tableaux de STAR et facteurs de forme
 
 !  1- STAR at different scales
-
   allocate(STAR_vt_vx(nemax,nveg))  ! STAR at voxel and vegetation type scale
   allocate(STAR_vx(nveg))     ! STAR at voxel and vegetation type scale
   allocate(STAR_vt(nent))     ! STAR at voxel and vegetation type scale
   STAR_vt_vx = 0.
   STAR_vx = 0.
   STAR_vt = 0.
-  STAR_canopy = 0.
+  STAR_canopy = 0.   
 
 !  2- Facteurs de forme pour le rayonnement incident
 
@@ -177,14 +177,14 @@ contains
 !  3- Facteurs de forme pour le rayonnement rediffuse
 !             Source = vegetation voxels
 
-  if (scattering) then        ! allocation of exchange coeff arrays only if scattering must be computed
-   allocate(ffvvb(0:nveg,0:nveg)) ! Exchange coeff between vegetated voxels and vegetated voxels
+  if (scattering) then        ! allocation of exchange coeff arrays only if scattering must be computed 
+   allocate(ffvvb(0:nveg,0:nveg)) ! Exchange coeff between vegetated voxels and vegetated voxels 
    allocate(ffsvb(nsol,0:nveg))  ! Exchange coeff between vegetated voxels and soil surface
    allocate(ffcvb(0:nveg))    ! Exchange coeff between vegetated voxels and sky
    ffvvb=0.
    ffsvb=0.
    ffcvb=0.
-!             Source = soil surface areas
+!             Source = soil surface areas 
    allocate(ffvsb(0:nveg,nsol))  ! Exchange coeff between soil surface and vegetated voxels
    allocate(ffcsb(nsol))    ! Exchange coeff between soil surface and sky
    ffvsb=0.
@@ -247,12 +247,14 @@ contains
 !  S_detailed(1,je,k) : sunlit leaf area (m²) of vegetation type je in voxel k
 !  NOTE:  Due to random leaf dispersion within voxel,
 !     the fraction of sunlit area is the same for all vegetation types included in the voxel
-
+                         
+!  write(*,*) ' ... allocate S_detailed ... '
   allocate(S_detailed(0:1,nemax,nveg)) ! Shaded/sunlit area per vegetation type and voxel
   allocate(S_ss_vt(0:1,nent))    ! Shaded/sunlit area per vegetation type
   S_ss_vt=0.
   S_ss=0.
-
+!  write(*,*) ' ... allocate S_detailed OK '
+  
   do k=1,nveg
   do je=1,nje(k)
    S_detailed(1,je,k)=amax1((riv(k)/xk(k))*leafareadensity(je,k),1.e-08)
@@ -266,12 +268,13 @@ contains
   end do
   end do
 
-  !write(*,*) 'STAR_canopy=', STAR_canopy
-  !write(*,*) 'Sunlit / total leaf area at canopy scale: ', S_ss(1)/S_canopy
+!  write(*,*) 'STAR_canopy=', STAR_canopy
+!  write(*,*) 'Sunlit / total leaf area at canopy scale: ', S_ss(1)/S_canopy
 
   hmoy0=hmoy0/pi*180.    ! Conversion to degrees
   azmoy0=azmoy0/pi*180.
 
+  !write(*,*) 'di_doall fin'
  end subroutine di_doall
 
  subroutine beampath(oax, oay, oaz, x0, y0, z0, omega0)

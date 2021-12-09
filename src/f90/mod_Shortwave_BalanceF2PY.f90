@@ -65,7 +65,7 @@ contains
 
   call DirectBeam_Interception(day, hour)
 
-  if (hdeg.gt.1.) then
+  if (hdeg.gt.2.) then      !MARC  pb with hdeg ->0 
    do iblo=1,nblomin
     if (glob(iblo).gt.0.) then
      call Spectral_Radiation_Balance(iblo)
@@ -132,16 +132,17 @@ contains
   write(*,*) 'Computing interception of direct radiation ...'
 
   call sundirection(hdeg,azdeg,latitude,longitude,timezone,day,hour)
+!  write(*,*) "day,hour,hdeg,azdeg",day,hour,hdeg,azdeg
 
   azdeg=azdeg-orientation  ! azimuth with regard to 3Dgrid X-axis
 
 !  Direct beam interception (includes computation of extinction coefficient, beam sampling, and exchange coefficients)
 
-  if (hdeg.gt.1.) then
+  if (hdeg.gt.5.) then      !MARC  pb with hdeg ->0 
    scattering=.FALSE.   ! only computation of incident direct radiation
    call di_doall(hdeg, azdeg, 0., dpx, dpy,scattering, isolated_box)  ! rem: sun angles in degrees
   else
-   riv=0.  ! If hdeg < 2°, interception of direct radiation is assumed to be zero
+   riv=0.  ! If hdeg < 5°, interception of direct radiation is assumed to be zero
    ris=0.
   endif
 
@@ -169,6 +170,7 @@ contains
   allocate(xintbv(nemax,nveg))
   allocate(xintbs(nsol))
 
+   !write(*,*) 'Spectral_Radiation_Balance debut'     
 !  Premiere interception : direct + diffus incidents
 !
 !  - Pour la vegetation:
@@ -338,7 +340,7 @@ contains
   deallocate(xintbv)
   deallocate(xintbs)
 
-
+  !write(*,*) 'Spectral_Radiation_Balance fin'
  end subroutine Spectral_Radiation_Balance
 
  subroutine swrb_destroy

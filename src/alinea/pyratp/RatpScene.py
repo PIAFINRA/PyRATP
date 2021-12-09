@@ -8,13 +8,13 @@
 import numpy
 import pandas
 
-from alinea.pyratp.grid import Grid, voxel_map
+from alinea.pyratp.grid import Grid
 from alinea.pyratp.skyvault import Skyvault
 from alinea.pyratp.vegetation import Vegetation
 from alinea.pyratp.micrometeo import MicroMeteo
 from alinea.pyratp.runratp import runRATP
 
-from alinea.pyratp.interface.clumping_index import clark_evans
+from alinea.pyratp.clumping_index import clark_evans
 
 from openalea.plantgl import all as pgl
 
@@ -23,48 +23,17 @@ def voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True):
     """ return coordinates of points relative to voxel origin
         If normalise = true, coordinates are normalised by voxel dimensions
     """
-    # scene dimensions
-    delta_x = grid.njx * grid.dx
-    delta_y = grid.njy * grid.dy
-    delta_z = grid.dz.sum()
-    #
-    kvox = [int(mapping[str(i)]) for i in range(len(x))]
-    xv = (numpy.array(x) - grid.xorig) % delta_x - numpy.array([int((grid.numx[k] - 1) * grid.dx) for k in kvox])
-    yv = (numpy.array(y) - grid.yorig) % delta_y - numpy.array([int((grid.njy - grid.numy[k]) * grid.dy) for k in kvox])
-    zv = (numpy.array(z) + grid.zorig) % delta_z - numpy.array([int(grid.dz.sum() - grid.dz[:grid.numz[k]].sum()) for k in kvox])
+    kvox = [mapping[str(i)] for i in range(len(x))]
+    xv = numpy.array(x) - grid.xorig - numpy.array([(grid.numx[k] - 1) * grid.dx for k in kvox])
+    yv = numpy.array(y) - grid.yorig - numpy.array([(grid.njy - grid.numy[k]) * grid.dy for k in kvox])
+    zv = numpy.array(z) + grid.zorig - numpy.array([grid.dz.sum() - grid.dz[:grid.numz[k]].sum() for k in kvox])
     # normalising voxel dimensions
     if normalise:
         xv /= grid.dx
         yv /= grid.dy
-        zv /= numpy.array([grid.dz[int(grid.numz[k] - 1)] for k in kvox])
+        zv /= numpy.array([grid.dz[grid.numz[k] - 1] for k in kvox])
     
     return xv, yv, zv 
- 
-
-def estimate_clumping(entity, x, y, z, s, mapping, grid, normalise = True):
-    # compute clumping : compute 3D dispersion index of all voxels with at least two points
-    # (a valider avec marc)
-    # coordinates of points within voxels
-    xv, yv, zv = voxel_relative_coordinates(x, y, z, mapping, grid, normalise = normalise)
-    kvox = [mapping[str(i)] for i in range(len(x))]
-    data = pandas.DataFrame({'entity':entity, 'x':xv, 'y':yv, 'z':zv, 's':s, 'kvox':kvox})        
-    mu = []
-    grouped = data.groupby('entity')
-    for e in range(grid.nent):
-        dfe = grouped.get_group(e)
-        gvox = dfe.groupby('kvox')
-        clumps=[]
-        for k, df in gvox: 
-            if len(df) > 0:
-                if df['s'].sum() > 0:
-                    min_mu = df['s'].mean() / df['s'].sum() # minimal mu in the case of perfect clumping
-                    if len(df) > 1:
-                        clumping = clark_evans(zip(df['x'], df['y'], df['z']), ((0,0,0),(1,1,1)))
-                        clumps.append(max(min_mu, clumping))
-                    else:
-                        clumps.append(min_mu)
-        mu.append(numpy.mean(clumps))
-    return mu
 
 class ColorMap(object):
     """A RGB color map, between 2 colors defined in HSV code
@@ -292,13 +261,6 @@ class RatpScene(object):
                         dz = (zmax - zo) / float(nbz - 1)
                     else:
                         dz = (zmax - zo) * 1.01
-                    # try to accomodate flat scene
-                    if dz == 0:
-                        dz = (dx + dy) / 2.
-                    if dx == 0:
-                        dx = (dy + dz) / 2.
-                    if dy == 0:
-                        dy = (dx + dz) / 2.
                 if self.grid_shape is None: 
                     dx, dy, dz = self.grid_resolution
                     if self.domain is None:
@@ -402,18 +364,14 @@ class RatpScene(object):
         grid_pars.update({'rs':rsoil,'nent':nent})
         
         grid = Grid.initialise(**grid_pars)
-        # store parameters for provenance
-        self.grid_pars = grid_pars
-
         grid, mapping = Grid.fill_1(entity, x, y, z, s, n, grid) # mapping is a {str(python_x_list_index) : python_k_gridvoxel_index}
+        
         # in RATP output, VoxelId is for the fortran_k_voxel_index (starts at 1, cf prog_RATP.f90, lines 489 and 500)
+
         index = range(len(x))
         vox_id = [mapping[str(i)] + 1 for i in index]
         # and one additional map that allows retrieving shape_id from python_x_index
         sh_id = [sh_id[i] for i in index]
-
-        # save coordinates of centers of filled voxels
-        self.voxel_map = voxel_map(grid)
         
         # compute distributions of orientation
         orientation = numpy.degrees(numpy.abs(theta)) % 90
@@ -421,18 +379,26 @@ class RatpScene(object):
             dist = numpy.histogram(inc, self.nbincli, (0,90))[0]
             return dist.astype('float') / dist.sum()
         df = pandas.DataFrame({'entity':[self.entity[sid] for sid in sh_id], 'inc':orientation})
-        self.inc_data = df
-        self.distinc = df.sort_values('entity').groupby('entity').apply(_dist).tolist()
+        self.distinc = df.sort('entity').groupby('entity').apply(_dist).tolist()
 
-        # estimate clumping
-        self.mu = estimate_clumping(entity, x, y, z, s, mapping, grid)
-        if any(map(numpy.isnan, self.mu)):
-            raise ValueError('Cannot estimate mu')
+        # compute clumping : supperpose all non-empty voxel contents and compute 3D dispersion index
+        # (a valider avec marc)
+        # coordinates of points within voxels
+        xv, yv, zv = voxel_relative_coordinates(x, y, z, mapping, grid, normalise = True)
+        data = pandas.DataFrame({'entity':entity, 'x':xv, 'y':yv, 'z':zv, 's':s})        
+        mu = []
+        grouped = data.groupby('entity')
+        for e in range(nent):
+            df = grouped.get_group(e)
+            nvox_e = grid.voxel_canopy[e]
+            min_mu = df['s'].mean() / (df['s'].sum() / nvox_e) # minimal mu in the case of perfect clumping
+            clumping = clark_evans(zip(df['x'], df['y'], df['z']), ((0,0,0),(1,1,1)))
+            mu.append(max(min_mu, clumping))
+        self.mu = mu
         
         return grid, vox_id, sh_id, s
 
-
-    def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1, mu=None, sources=None):
+    def do_irradiation(self, rleaf=[0.1], rsoil=0.20, doy=1, hour=12, Rglob=1, Rdif=1, mu=None):
         """ Run a simulation of light interception for one wavelength
         
             Parameters:            
@@ -442,8 +408,6 @@ class RatpScene(object):
                 - hour : [list of] decimal hour (0-24) [for the different iterations]
                 - Rglob : [list of] global (direct + diffuse) radiation [for the different iterations] (W.m-2)
                 - Rdif : [list of] direct/diffuse radiation ratio [for the different iterations] (0-1)
-                - sources: a list of sequences giving elevation, azimuth, steradians and weights of sky vault.
-                if None, default RATP soc skyvault is used
 
         """
         
@@ -457,12 +421,8 @@ class RatpScene(object):
 
         vegetation = Vegetation.initialise(entities, nblomin=1)
         
-        if sources == None:
-            sky = Skyvault.initialise()
-        else:
-            el, az, strd, w = sources
-            sky = Skyvault.initialise(hmoy=el, azmoy=az, omega=strd, pc=w)
-            
+        sky = Skyvault.initialise()
+        
         met = MicroMeteo.initialise(doy=doy, hour=hour, Rglob=Rglob, Rdif=Rdif)
 
         res = runRATP.DoIrradiation(grid, vegetation, sky, met)
@@ -482,22 +442,18 @@ class RatpScene(object):
                             'PAR': (ShadedPAR * ShadedArea + SunlitPAR * SunlitArea) / (ShadedArea + SunlitArea) / 4.6, 
                             })
         dfvox = dfvox[dfvox['VegetationType'] > 0]
-        dfvox = pandas.merge(dfvox, self.voxel_map.loc[:,
-                                    ('VoxelId', 'x', 'y', 'z', 'Volume')])
         index = range(len(voxel_id))
-        dfmap = pandas.DataFrame(
-            {'primitive_index': index, 'shape_id': shape_id,
-             'VoxelId': voxel_id,
-             'VegetationType': [self.entity[sh_id] for sh_id in shape_id],
-             'primitive_area': areas})
-
-        return dfvox, dfmap
-
-
-    def aggregate_light(self, dfvox, dfmap, spatial = True, temporal = True):
+        dfmap = pandas.DataFrame({'primitive_index': index,'shape_id': shape_id, 'VoxelId':voxel_id, 'VegetationType':[self.entity[sh_id] for sh_id in shape_id], 'primitive_area':areas})
+    
+        output = pandas.merge(dfmap, dfvox)
+        output =  output.sort('primitive_index') # sort is needed to ensure matching with triangulation indices
+        
+        return output
+      
+    def aggregate_light(self, output, spatial = True, temporal = True):
         """ Aggregate light outputs
         """
-        output = pandas.merge(dfmap, dfvox)
+        
         res = output
         
         def _process(df):
@@ -528,9 +484,7 @@ class RatpScene(object):
             
         return res
       
-    def plot(self, dfvox, dfmap, minval=None, maxval=None):
-        output = pandas.merge(dfmap, dfvox)
-        output = output.sort_values('primitive_index') # sort is needed to ensure matching with triangulation indices
+    def plot(self, output, minval=None, maxval=None):
         par = output['PAR']
         if minval is None:
             minval = min(par)

@@ -14,18 +14,18 @@ class Nallocate(object):
 
         """
     @staticmethod
-    def N_distrib(grid,tabRay,aNa,bNa): 
+    def N_distrib(grid,tabRay,aNa,bNa):
         """ Set the amount of Nitrogen per voxel according to the PAR absorbed ...
         ... input data:
             ... grid: RATP grid variable
             ... taRay: PAR received by each voxel computed from the do_irradiation() method
-            ... aNa: slope of the linear relationship between Nitrogen content (g/m2) and PAR absorbed 
-            ... bNa: intercept of the linear relationship between Nitrogen content (g/m2) and PAR absorbed 
+            ... aNa: slope of the linear relationship between Nitrogen content (g/m2) and PAR absorbed
+            ... bNa: intercept of the linear relationship between Nitrogen content (g/m2) and PAR absorbed
         ... output data:
             ... grid: updated RATP grid variable
         """
 
-        path = 'c:/tmpRATP2' #if platform.system() == 'Windows' else '/tmp/tmpRATP'
+        path = 'c:/tmpRATP' #if platform.system() == 'Windows' else '/tmp/tmpRATP'
 ##        if os.path.isdir(path):
 ##            shutil.rmtree(path)
 ##        os.mkdir(path)
@@ -88,7 +88,7 @@ class Nallocate(object):
 
         final = np.append(grid.n_detailed[0],PAR_voxmean, axis=1)
 ##        np.savetxt(path+"/Resul_N"+'/n_detailed.txt',grid.n_detailed[0],'%.6e')
-        np.savetxt(path+"/Resul_N"+'/final.txt',final,'%.6e')
+        np.savetxt(path+'/final_N.txt',final,'%.6e')
 ##         print 'grid.n_detailed', grid.n_detailed
         print 'N ALLOCATION OK'
         return grid

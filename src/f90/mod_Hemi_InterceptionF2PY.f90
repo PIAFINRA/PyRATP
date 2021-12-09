@@ -39,27 +39,25 @@ contains
 
 !
 !  Allocation et initialisation des tableaux de facteurs de forme
-
   call hi_destroy
-
   !write(*,*) 'Destroy memory pass'
 !
 !  1- Sky_integrated STAR at different scales
-
+                                       
   allocate(STARsky_vt_vx(nemax,nveg))
   allocate(STARsky_vx(nveg))
   allocate(STARsky_vt(nent))
   STARsky_vt_vx = 0.
   STARsky_vx = 0.
   STARsky_vt = 0.
-  STARsky_canopy = 0.
+  STARsky_canopy = 0.  
 
 !  2- Facteurs de forme pour le rayonnement diffus incident
-
+                                                       
   allocate(rdiv(nemax,nveg))
   allocate(rdis(nsol))
   rdiv=0.
-  rdis=0.
+  rdis=0.       
 
 !  3- Facteurs de forme pour le rayonnement rediffuse
 !             Source = vegetation
@@ -115,8 +113,8 @@ contains
    !write(*,*) 'DEBUG: ARGS',hmoy(jdir)*180./pi 
    !write(*,*) 'DEBUG: ARGS', azmoy(jdir)*180./pi 
    !write(*,*) 'DEBUG: ARGS', omega(jdir),dpx0,dpy0,scattering,isolated_box
-
-   call di_doall(hmoy(jdir)*180./pi, azmoy(jdir)*180./pi, omega(jdir),dpx0,dpy0,scattering,isolated_box)
+  
+   call di_doall(hmoy(jdir)*180./pi, azmoy(jdir)*180./pi, omega(jdir),dpx0,dpy0,scattering,isolated_box) 
 
 
 !   Sky-vault integration of incident diffuse radiation interception

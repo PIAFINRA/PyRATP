@@ -64,19 +64,27 @@ contains
     do iblo=1,nblomin
         ii = ii+1
         glob(iblo)=tabMeteo(ntime,ii)
+!        write(*,*) 'ii,tabMeteo(ntime,ii) =',ii,tabMeteo(ntime,ii)
         ii = ii+1
         diff(iblo)=tabMeteo(ntime,ii)
     end do
     ii = ii+1
     ratmos=tabMeteo(ntime,ii)
+!    write(*,*) '**********'
+!    write(*,*) 'ii,tabMeteo(ntime,ii) =',ii,tabMeteo(ntime,ii)
+!    write(*,*) 'ratmos =',ratmos
     ii = ii+1
     tsol=tabMeteo(ntime,ii)
     ii = ii+1
     taref=tabMeteo(ntime,ii)
-    !write(*,*) 'ii,tabMeteo(ntime,ii) =',ii,tabMeteo(ntime,ii)
-    !write(*,*) 'taref =',taref
+!    write(*,*) '**********'
+!    write(*,*) 'ii,tabMeteo(ntime,ii) =',ii,tabMeteo(ntime,ii)
+!    write(*,*) 'taref =',taref
     ii = ii+1
-    earef=tabMeteo(ntime,ii)
+    earef=tabMeteo(ntime,ii) 
+!    write(*,*) '**********'
+!    write(*,*) 'ii,tabMeteo(ntime,ii) =',ii,tabMeteo(ntime,ii)
+!    write(*,*) 'earef =',earef
     ii = ii+1
     caref=tabMeteo(ntime,ii)
     ii = ii+1
@@ -84,7 +92,7 @@ contains
     ii = ii+1                       !Relative Soil Humidity   Ngao 02/2012 
     HRsol=tabMeteo(ntime,ii)        !Relative Soil Humidity   Ngao 02/2012  set to 1 by default (no stress)
 
-  ! write(*,*) 'day,hour =',day,hour ,(glob(iblo),diff(iblo),iblo=1,nblomin), ratmos,tsol,taref,earef,caref,urefref
+    write(*,*) 'day,hour =',day,hour ,(glob(iblo),diff(iblo),iblo=1,nblomin), ratmos,tsol,taref,earef,caref,urefref
 
 !   Rem: L'azimut 0 est défini pour la direction SUD,
 !      i.e. un rayon avancant vers le NORD, donc les X > 0

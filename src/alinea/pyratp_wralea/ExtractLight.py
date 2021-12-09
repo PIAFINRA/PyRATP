@@ -45,11 +45,11 @@ def ExtractLightNew(d_e2v, data, day, hour,col):
     '''
     # Works fine for 1 entity only. When we have several entities the column contains more than nb Voxels
 #    ls_id = [1,2] for one entity
-    ls_id = [2,3]               #Column number for day and hour in the output file - ANY CHANGE IN THE OUTPUT FILE SHOULD BE ALSO DONE THERE
+    ls_id = [1,2]#[2,3]               #Column number for day and hour in the output file - ANY CHANGE IN THE OUTPUT FILE SHOULD BE ALSO DONE THERE
     ls_vals = [day, hour]
     dat = extract_list(data, ls_id, ls_vals)
     dat = t_list(dat)
-    colVoxel = 5;           #VOXEL_ID SHOULD BE STORED IN THIS COLUMN IN THE OUTPUT FILE i.e. voxel_id = dat[:][colVoxel]
+    colVoxel = 3;#5;           #VOXEL_ID SHOULD BE STORED IN THIS COLUMN IN THE OUTPUT FILE i.e. voxel_id = dat[:][colVoxel]
     colEntity = 0;          #ENTITY ID SHOULD BE STORED IN THIS COLUMN IN THE OUTPUT FILE i.e. Entity = dat[:][colEntity]
 
     extractedvar = []
@@ -80,12 +80,12 @@ def ExtractVoxels(data, day, hour,col):
     '''
     # Works fine for 1 entity only. When we have several entities the column contains more than nb Voxels
 #    ls_id = [1,2] for one entity
-    ls_id = [2,3]               #Column number for day and hour in the output file - ANY CHANGE IN THE OUTPUT FILE SHOULD BE ALSO DONE THERE
+    ls_id = [2,3]#   [1,2]#[2,3]#               #Column number for day and hour in the output file - ANY CHANGE IN THE OUTPUT FILE SHOULD BE ALSO DONE THERE
     ls_vals = [day, hour]
     dat = extract_list(data, ls_id, ls_vals) # dat contains only data for the targeted day and hour
     dat = t_list(dat)
     nmax = len(dat[col])
-    colVoxel = 5;           #VOXEL_ID SHOULD BE STORED IN THIS COLUMN IN THE OUTPU FILE
+    colVoxel = 5;#3;#5;#           #VOXEL_ID SHOULD BE STORED IN THIS COLUMN IN THE OUTPU FILE
     colEntity = 0;          #ENTITY ID SHOULD BE STORED IN THIS COLUMN IN THE OUTPU FILE
     extractedvar = []
     entity=[]
