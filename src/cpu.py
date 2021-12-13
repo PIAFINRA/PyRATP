@@ -6,9 +6,9 @@
 import os
 import sys
 
-from PyQt4 import Qt
-import PyQt4.Qwt5 as Qwt
-from PyQt4.Qwt5.anynumpy import *
+from PyQt5 import Qt
+import PyQt5.Qwt5 as Qwt
+from PyQt5.Qwt5.anynumpy import *
 
 
 #-- cpustat.cpp --#

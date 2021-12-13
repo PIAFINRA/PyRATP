@@ -7,9 +7,9 @@
 
 
 import sys
-from PyQt4.Qt import *
-from PyQt4.Qwt5 import *
-import PyQt4.Qwt5.anynumpy as np
+from PyQt5.Qt import *
+from PyQt5.Qwt5 import *
+import PyQt5.Qwt5.anynumpy as np
 
 import sip; sip.settracemask(0xff)
 

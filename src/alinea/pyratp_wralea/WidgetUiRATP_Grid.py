@@ -1,7 +1,7 @@
 from alinea.pyratp import *
 from alinea.pyratp import grid
 from alinea.pyratp import pyratp
-from PyQt4 import QtCore, QtGui
+from PyQt5 import QtCore, QtGui
 from openalea.core.interface import * #IGNORE:W0614,W0401
 from openalea.core.observer import lock_notify
 from openalea.visualea.node_widget import NodeWidget
